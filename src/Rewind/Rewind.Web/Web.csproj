@@ -1,13 +1,14 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <RootNamespace>Rewind.Web</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Rewind.ServiceDefaults\Rewind.ServiceDefaults.csproj" />
+    <ProjectReference Include="..\Rewind.ServiceDefaults\ServiceDefaults.csproj" />
   </ItemGroup>
 
 </Project>

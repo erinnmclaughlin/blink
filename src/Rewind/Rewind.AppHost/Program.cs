@@ -1,8 +1,8 @@
 var builder = DistributedApplication.CreateBuilder(args);
 
-var apiService = builder.AddProject<Projects.Rewind_ApiService>("apiservice");
+var apiService = builder.AddProject<Projects.ApiService>("apiservice");
 
-builder.AddProject<Projects.Rewind_Web>("webfrontend")
+builder.AddProject<Projects.Web>("webfrontend")
     .WithExternalHttpEndpoints()
     .WithReference(apiService)
     .WaitFor(apiService);

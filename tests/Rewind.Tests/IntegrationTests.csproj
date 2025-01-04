@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
@@ -6,6 +6,7 @@
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
+    <RootNamespace>Rewind.IntegrationTests</RootNamespace>
   </PropertyGroup>
 
 
@@ -18,7 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Rewind.AppHost\Rewind.AppHost.csproj" />
+    <ProjectReference Include="..\..\src\Rewind\Rewind.AppHost\AppHost.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,4 +1,4 @@
-namespace Rewind.Tests;
+namespace Rewind.IntegrationTests;
 
 public class WebTests
 {
@@ -6,7 +6,7 @@ public class WebTests
     public async Task GetWebResourceRootReturnsOkStatusCode()
     {
         // Arrange
-        var appHost = await DistributedApplicationTestingBuilder.CreateAsync<Projects.Rewind_AppHost>();
+        var appHost = await DistributedApplicationTestingBuilder.CreateAsync<Projects.AppHost>();
         appHost.Services.ConfigureHttpClientDefaults(clientBuilder =>
         {
             clientBuilder.AddStandardResilienceHandler();

@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <Sdk Name="Aspire.AppHost.Sdk" Version="9.0.0" />
 
@@ -8,12 +8,13 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <IsAspireHost>true</IsAspireHost>
+    <RootNamespace>Rewind.AppHost</RootNamespace>
     <UserSecretsId>b8870a10-ec98-401d-8fed-48ede55ecf70</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Rewind.ApiService\Rewind.ApiService.csproj" />
-    <ProjectReference Include="..\Rewind.Web\Rewind.Web.csproj" />
+    <ProjectReference Include="..\Rewind.ApiService\ApiService.csproj" />
+    <ProjectReference Include="..\Rewind.Web\Web.csproj" />
   </ItemGroup>
 
   <ItemGroup>
