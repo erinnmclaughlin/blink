@@ -1,0 +1,60 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.12.35527.113 d17.12
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{F9771D25-2C40-4DEA-8C5E-A2C1A57CE7A4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rewind.AppHost", "src\Rewind\Rewind.AppHost\Rewind.AppHost.csproj", "{F78BFF6A-2472-4AAF-9B45-717D9E43E7CE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rewind.ServiceDefaults", "src\Rewind\Rewind.ServiceDefaults\Rewind.ServiceDefaults.csproj", "{DD629C22-2BB4-40E0-85A9-B59C97D94E48}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rewind.ApiService", "src\Rewind\Rewind.ApiService\Rewind.ApiService.csproj", "{6089BBE1-4000-48FB-84DE-CBB1C1E5D9EF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rewind.Web", "src\Rewind\Rewind.Web\Rewind.Web.csproj", "{24030717-53FA-45A2-B99D-2537D90FE7AD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rewind.Tests", "src\Rewind\Rewind.Tests\Rewind.Tests.csproj", "{1F036F0F-8F63-4CC7-9FC1-9033450341E4}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{5A9251CA-26F6-441C-9E91-3856E479D8A2}"
+	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F78BFF6A-2472-4AAF-9B45-717D9E43E7CE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F78BFF6A-2472-4AAF-9B45-717D9E43E7CE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F78BFF6A-2472-4AAF-9B45-717D9E43E7CE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F78BFF6A-2472-4AAF-9B45-717D9E43E7CE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DD629C22-2BB4-40E0-85A9-B59C97D94E48}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DD629C22-2BB4-40E0-85A9-B59C97D94E48}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DD629C22-2BB4-40E0-85A9-B59C97D94E48}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DD629C22-2BB4-40E0-85A9-B59C97D94E48}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6089BBE1-4000-48FB-84DE-CBB1C1E5D9EF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6089BBE1-4000-48FB-84DE-CBB1C1E5D9EF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6089BBE1-4000-48FB-84DE-CBB1C1E5D9EF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6089BBE1-4000-48FB-84DE-CBB1C1E5D9EF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{24030717-53FA-45A2-B99D-2537D90FE7AD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{24030717-53FA-45A2-B99D-2537D90FE7AD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{24030717-53FA-45A2-B99D-2537D90FE7AD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{24030717-53FA-45A2-B99D-2537D90FE7AD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1F036F0F-8F63-4CC7-9FC1-9033450341E4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1F036F0F-8F63-4CC7-9FC1-9033450341E4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1F036F0F-8F63-4CC7-9FC1-9033450341E4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1F036F0F-8F63-4CC7-9FC1-9033450341E4}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{F78BFF6A-2472-4AAF-9B45-717D9E43E7CE} = {F9771D25-2C40-4DEA-8C5E-A2C1A57CE7A4}
+		{DD629C22-2BB4-40E0-85A9-B59C97D94E48} = {F9771D25-2C40-4DEA-8C5E-A2C1A57CE7A4}
+		{6089BBE1-4000-48FB-84DE-CBB1C1E5D9EF} = {F9771D25-2C40-4DEA-8C5E-A2C1A57CE7A4}
+		{24030717-53FA-45A2-B99D-2537D90FE7AD} = {F9771D25-2C40-4DEA-8C5E-A2C1A57CE7A4}
+		{1F036F0F-8F63-4CC7-9FC1-9033450341E4} = {F9771D25-2C40-4DEA-8C5E-A2C1A57CE7A4}
+	EndGlobalSection
+EndGlobal
