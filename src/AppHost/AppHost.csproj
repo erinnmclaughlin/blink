@@ -13,8 +13,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Rewind.ApiService\ApiService.csproj" />
-    <ProjectReference Include="..\Rewind.Web\Web.csproj" />
+    <ProjectReference Include="..\ApiService\ApiService.csproj" />
+    <ProjectReference Include="..\Web\Web.csproj" />
   </ItemGroup>
 
   <ItemGroup>
