@@ -1,4 +1,4 @@
-namespace Rewind.IntegrationTests;
+namespace Blink.IntegrationTests;
 
 public class WebTests
 {

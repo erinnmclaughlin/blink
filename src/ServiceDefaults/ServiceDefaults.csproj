@@ -5,7 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <IsAspireSharedProject>true</IsAspireSharedProject>
-    <RootNamespace>Rewind.ServiceDefaults</RootNamespace>
+    <RootNamespace>Blink.ServiceDefaults</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

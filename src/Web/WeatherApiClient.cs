@@ -1,4 +1,4 @@
-namespace Rewind.Web;
+namespace Blink.Web;
 
 public class WeatherApiClient(HttpClient httpClient)
 {

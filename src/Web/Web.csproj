@@ -4,7 +4,7 @@
     <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <RootNamespace>Rewind.Web</RootNamespace>
+    <RootNamespace>Blink.Web</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

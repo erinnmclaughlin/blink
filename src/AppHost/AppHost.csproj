@@ -8,7 +8,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <IsAspireHost>true</IsAspireHost>
-    <RootNamespace>Rewind.AppHost</RootNamespace>
+    <RootNamespace>Blink.AppHost</RootNamespace>
     <UserSecretsId>b8870a10-ec98-401d-8fed-48ede55ecf70</UserSecretsId>
   </PropertyGroup>
 

@@ -1,5 +1,5 @@
-using Rewind.Web;
-using Rewind.Web.Components;
+using Blink.Web;
+using Blink.Web.Components;
 
 var builder = WebApplication.CreateBuilder(args);
 
