@@ -1,0 +1,21 @@
+.page {
+  display: flex;
+  flex-direction: column;
+}
+
+.page > * {
+  padding: 1.5rem 3rem;
+}
+
+.page > header {
+  background-color: white;
+  border-bottom-width: 1px;
+}
+
+.page > section {
+  flex-grow: 1;
+}
+
+table {
+  width: 100%;
+}

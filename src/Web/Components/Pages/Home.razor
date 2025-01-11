@@ -1,49 +1,68 @@
 ﻿@page "/"
-@attribute [StreamRendering(true)]
+@attribute [StreamRendering]
 @attribute [OutputCache(Duration = 5)]
 
-@inject WeatherApiClient WeatherApi
+@inject UsersApiClient UsersApi
 
-<PageTitle>Weather</PageTitle>
+<PageTitle>Users</PageTitle>
 
-<h1>Weather</h1>
-
-<p>This component demonstrates showing data loaded from a backend API service.</p>
-
-@if (forecasts == null)
-{
-    <p><em>Loading...</em></p>
-}
-else
-{
-    <table>
-        <thead>
-            <tr>
-                <th>Date</th>
-                <th aria-label="Temperature in Celsius">Temp. (C)</th>
-                <th aria-label="Temperature in Farenheit">Temp. (F)</th>
-                <th>Summary</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var forecast in forecasts)
-            {
-                <tr>
-                    <td>@forecast.Date.ToShortDateString()</td>
-                    <td>@forecast.TemperatureC</td>
-                    <td>@forecast.TemperatureF</td>
-                    <td>@forecast.Summary</td>
-                </tr>
-            }
-        </tbody>
-    </table>
-}
+<div class="page">
+    <header>
+        <h1 class="h1">Users</h1>
+        <p>This component demonstrates showing data loaded from a backend API service.</p>
+    </header>
+    <section>
+        @if (Users is null)
+        {
+            <p><em>Loading...</em></p>
+        }
+        else
+        {
+            <Paper>
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th scope="col">Id</th>
+                        <th scope="col">Email</th>
+                        <th scope="col">Display Name</th>
+                        <th scope="col">First Name</th>
+                        <th scope="col">Last Name</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @if (Users.Count == 0)
+                    {
+                        <tr>
+                            <td colspan="100">
+                                <em class="text-gray-400">No users found.</em>
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        foreach (var user in Users)
+                        {
+                            <tr>
+                                <td>@user.Id</td>
+                                <td>@user.EmailAddress</td>
+                                <td>@user.DisplayName</td>
+                                <td>@user.FirstName</td>
+                                <td>@user.LastName</td>
+                            </tr>
+                        }
+                    }
+                    </tbody>
+                </table>
+            </Paper>
+        }
+    </section>
+</div>
 
 @code {
-    private WeatherForecast[]? forecasts;
+    private List<UserSummary>? Users { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
-        forecasts = await WeatherApi.GetWeatherAsync();
+        Users = await UsersApi.ListUsersAsync();
     }
 }
