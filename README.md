@@ -1,1 +1,3 @@
-# Rewind
+# blink
+
+A home video sharing platform
