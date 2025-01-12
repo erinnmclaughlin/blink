@@ -1,3 +1,3 @@
 # Blink
 
-A home video sharing platform!
+A home video sharing platform
