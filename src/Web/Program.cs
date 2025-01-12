@@ -1,22 +1,46 @@
 using Blink.Web;
-using Blink.Web.Components;
+using Microsoft.AspNetCore.Components.Web;
+using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
+using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 
-var builder = WebApplication.CreateBuilder(args);
+var builder = WebAssemblyHostBuilder.CreateDefault(args);
+builder.RootComponents.Add<App>("#app");
+builder.RootComponents.Add<HeadOutlet>("head::after");
 
-builder.AddServiceDefaults();
+//builder.AddServiceDefaults();
 
-builder.Services.AddRazorComponents().AddInteractiveServerComponents();
+//builder.Services.AddRazorComponents().AddInteractiveServerComponents();
 
-builder.Services.AddOutputCache();
+//builder.Services.AddOutputCache();
 
-builder.Services.AddHttpClient<UsersApiClient>(client =>
+builder.Services
+    .AddHttpClient<UsersApiClient>(client =>
+    {
+        client.BaseAddress = new Uri("https+http://blink-api");
+    })
+    .AddHttpMessageHandler(sp =>
+    {
+        var handler = sp.GetRequiredService<AuthorizationMessageHandler>();
+        handler.ConfigureHandler(["https+http://blink-api"], scopes: ["https://blinkapp.onmicrosoft.com/blinkapi/access_as_user"]);
+        return handler;
+    });
+
+builder.Services.AddMsalAuthentication(options =>
 {
-    client.BaseAddress = new Uri("https+http://blink-api");
+    builder.Configuration.Bind("AzureAd", options.ProviderOptions.Authentication);
+    
+    options.ProviderOptions.DefaultAccessTokenScopes.Add("openid");
+    options.ProviderOptions.DefaultAccessTokenScopes.Add("offline_access");
+    options.ProviderOptions.DefaultAccessTokenScopes.Add("https://blinkapp.onmicrosoft.com/blinkapi/access_as_user");
+    
+    // Optional: Use redirect instead of popup for login UI.
+    options.ProviderOptions.LoginMode = "redirect";
 });
 
 var app = builder.Build();
 
-if (!app.Environment.IsDevelopment())
+/*
+if (!builder.HostEnvironment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error", createScopeForErrors: true); 
     app.UseHsts();
@@ -36,3 +60,6 @@ app.MapRazorComponents<App>()
 app.MapDefaultEndpoints();
 
 app.Run();
+*/
+
+await app.RunAsync();

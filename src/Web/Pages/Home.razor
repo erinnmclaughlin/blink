@@ -1,15 +1,29 @@
 ﻿@page "/"
-@attribute [StreamRendering]
-@attribute [OutputCache(Duration = 5)]
-
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@attribute [Authorize]
+@inject NavigationManager NavigationManager
 @inject UsersApiClient UsersApi
 
 <PageTitle>Users</PageTitle>
 
 <div class="page">
     <header>
-        <h1 class="h1">Users</h1>
-        <p>This component demonstrates showing data loaded from a backend API service.</p>
+        <div>
+            <h1 class="h1">Users</h1>
+            <p>This component demonstrates showing data loaded from a backend API service.</p>
+        </div>
+        <div class="auth-container">
+            <AuthorizeView>
+                <Authorized>
+                    <a href="account">@context.User.Identity?.Name</a>
+                </Authorized>
+                <NotAuthorized>
+                    <button type="button" @onclick="@(() => NavigationManager.NavigateToLogin("authentication/login"))">
+                        Log in
+                    </button>
+                </NotAuthorized>
+            </AuthorizeView>
+        </div>
     </header>
     <section>
         @if (Users is null)

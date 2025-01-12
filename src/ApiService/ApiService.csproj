@@ -5,6 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <RootNamespace>Blink.ApiService</RootNamespace>
+    <UserSecretsId>1d474fe7-d859-4efd-b563-ef864e08c1ff</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>

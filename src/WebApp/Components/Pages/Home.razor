@@ -1,0 +1,23 @@
+﻿@page "/"
+@using Blink.WebApp.Data
+@using Microsoft.EntityFrameworkCore
+
+@inject BlinkDbContext DbContext
+
+<PageTitle>Home</PageTitle>
+
+<h1>Hello, world!</h1>
+
+Welcome to your new app.
+
+<EditForm FormName="ResetDatabaseForm" Model="this" OnSubmit="ResetDatabase">
+    <button type="submit">Reset Database</button>
+</EditForm>
+
+@code {
+    private async Task ResetDatabase()
+    {
+        await DbContext.Database.EnsureDeletedAsync();
+        await DbContext.Database.MigrateAsync();
+    }
+}
