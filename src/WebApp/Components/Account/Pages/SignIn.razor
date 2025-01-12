@@ -1,0 +1,75 @@
+﻿@page "/account/login"
+@layout Blink.WebApp.Components.Layout.EmptyLayout
+
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.AspNetCore.Authentication
+@using Microsoft.AspNetCore.Identity
+@using Blink.WebApp.Data
+
+<PageTitle>Sign in</PageTitle>
+
+<div class="page">
+
+    <h2 class="page-title">Sign in to your account</h2>
+
+    <Paper>
+        <div class="paper-content">
+            <EditForm Model="Input" method="post" OnValidSubmit="LoginUser" FormName="login">
+
+                <DataAnnotationsValidator />
+
+                <BlinkFormField FieldId="Input.Email" Label="Email address">
+                    <BlinkInputText @bind-Value="Input.Email" autocomplete="username" aria-required="true" placeholder="name@example.com" type="email" />
+                </BlinkFormField>
+
+                <BlinkFormField FieldId="Input.Password" Label="Password">
+                    <BlinkInputText @bind-Value="Input.Password" autocomplete="current-password" aria-required="true" placeholder="password" type="password" />
+                </BlinkFormField>
+
+                <div class="form-groups">
+                    <div class="form-group">
+                        <label class="form-label">
+                            <InputCheckbox @bind-Value="Input.RememberMe" />
+                            Remember me
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <a class="bold" href="Account/ForgotPassword">Forgot password?</a>
+                    </div>
+                </div>
+
+                <div>
+                    <BlinkButton ButtonTheme="BlinkButtonTheme.Primary" ButtonType="BlinkButtonType.Submit" Id="loginButton">Sign in</BlinkButton>
+                </div>
+            </EditForm>
+            <section id="socialLogins">
+
+                <div class="relative">
+                    <div class="absolute inset-0 flex items-center" aria-hidden="true">
+                        <div class="w-full border-top border-gray-200"></div>
+                    </div>
+                    <div class="relative flex justify-center text-sm/6 font-medium">
+                        <span class="bg-white" style="padding: 0 1.5rem;">Or continue with</span>
+                    </div>
+                </div>
+
+                <form action="account/performExternalLogin" method="post" style="margin-top: 1.5rem;">
+                    <div>
+                        <AntiforgeryToken />
+                        <input type="hidden" name="ReturnUrl" value="@ReturnUrl" />
+                        <p>
+                            <BlinkButton ButtonType="BlinkButtonType.Submit" 
+                                         ClassNames="external-login-button"
+                                         Name="provider"
+                                         Title="Sign in using your Microsoft account"
+                                         Value="Microsoft">
+                                <MicrosoftLogo />
+                                <span>Microsoft</span>
+                            </BlinkButton>
+                        </p>
+                    </div>
+                </form>
+            </section>
+        </div>
+    </Paper>
+</div>

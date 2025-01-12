@@ -1,0 +1,146 @@
+﻿@if (ShouldRenderAsAnchor())
+{
+    <a href="@Href" @attributes="@GetAttributes()">
+        @ChildContent
+    </a>
+}
+else
+{
+    <button type="@ButtonType" @attributes="@GetAttributes()">
+        @ChildContent
+    </button>
+}
+
+@code {
+
+    /// <summary>
+    /// Additional class names to apply to the button.
+    /// </summary>
+    [Parameter]
+    public string? ClassNames { get; set; }
+
+    /// <summary>
+    /// The button type. Not applicable if the button is rendered as an anchor element.
+    /// Default value is <see cref="BlinkButtonType.Button"/>.
+    /// </summary>
+    [Parameter]
+    public BlinkButtonType ButtonType { get; set; } = BlinkButtonType.Button;
+
+    /// <summary>
+    /// The button style.
+    /// </summary>
+    [Parameter]
+    public BlinkButtonTheme ButtonTheme { get; set; } = BlinkButtonTheme.Default;
+
+    /// <summary>
+    /// The content to render inside the button.
+    /// </summary>
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    /// <summary>
+    /// If <see langword="true" />, the button's width will be set to 100%. 
+    /// Default value is <see langword="true" />.
+    /// </summary>
+    [Parameter]
+    public bool FullWidth { get; set; } = true;
+
+    /// <summary>
+    /// If an href value is set, the button will be rendered as an anchor element.
+    /// </summary>
+    [Parameter]
+    public string? Href { get; set; }
+
+    /// <summary>
+    /// The button's element id.
+    /// </summary>
+    [Parameter]
+    public string? Id { get; set; }
+
+    /// <summary>
+    /// The name of the button.
+    /// </summary>
+    [Parameter]
+    public string? Name { get; set; }
+
+    /// <summary>
+    /// Indicates if the button should be rendered as an anchor element.
+    /// If not specified, the button will be rendered as an anchor when <see cref="Href"/> is set.
+    /// </summary>
+    [Parameter]
+    public bool? RenderAsAnchor { get; set; }
+
+    /// <summary>
+    /// Additional styles to apply to the button.
+    /// </summary>
+    [Parameter]
+    public string? Style { get; set; }
+
+    /// <summary>
+    /// The button's title.
+    /// </summary>
+    [Parameter]
+    public string? Title { get; set; }
+
+    /// <summary>
+    /// The value of the button.
+    /// </summary>
+    [Parameter]
+    public string? Value { get; set; }
+
+    private Dictionary<string, object> GetAttributes()
+    {
+        var attributes = new Dictionary<string, object>();
+
+        attributes.Add("class", string.Join(' ', EnumerateClassNames()));
+
+        if (!string.IsNullOrWhiteSpace(Id))
+        {
+            attributes.Add("id", Id);
+        }
+
+        if (!string.IsNullOrWhiteSpace(Name))
+        {
+            attributes.Add("name", Name);
+        }
+
+        if (!string.IsNullOrWhiteSpace(Title))
+        {
+            attributes.Add("title", Title);
+        }
+
+        if (!string.IsNullOrWhiteSpace(Style))
+        {
+            attributes.Add("style", Style);
+        }
+
+        if (!string.IsNullOrWhiteSpace(Value))
+        {
+            attributes.Add("value", Value);
+        }
+
+        return attributes;
+    }
+
+    private IEnumerable<string> EnumerateClassNames()
+    {
+        yield return "blink-button";
+
+        if (ButtonTheme != BlinkButtonTheme.Default)
+        {
+            yield return $"blink-button-theme-{ButtonTheme}";
+        }
+
+        if (FullWidth)
+        {
+            yield return "w-100";
+        }
+
+        if (!string.IsNullOrWhiteSpace(ClassNames))
+        {
+            yield return ClassNames;
+        }
+    }
+
+    private bool ShouldRenderAsAnchor() => RenderAsAnchor ?? !string.IsNullOrWhiteSpace(Href);
+}

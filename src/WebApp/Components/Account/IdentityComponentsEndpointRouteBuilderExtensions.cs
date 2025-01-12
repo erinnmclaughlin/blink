@@ -1,7 +1,7 @@
 using System.Security.Claims;
 using System.Text.Json;
-using Blink.WebApp.Components.Account.Pages;
-using Blink.WebApp.Components.Account.Pages.Manage;
+using Blink.WebApp.Components.Account.TempPages;
+using Blink.WebApp.Components.Account.TempPages.Manage;
 using Blink.WebApp.Data;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Components.Authorization;

@@ -3,7 +3,3 @@ root = true
 [*.csproj]
 indent_style = space
 indent_size = 2
-
-[*.css]
-indent_style = space
-indent_size = 2

@@ -28,7 +28,7 @@ builder.Services
 
 builder.Services.AddAuthorization();
 
-builder.AddNpgsqlDbContext<BlinkDbContext>("blink-db2");
+builder.AddNpgsqlDbContext<BlinkDbContext>("blink-pg-db");
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddIdentityCore<BlinkUser>(options => options.SignIn.RequireConfirmedAccount = true)
@@ -53,7 +53,6 @@ else
 }
 
 app.UseHttpsRedirection();
-
 
 app.UseAntiforgery();
 

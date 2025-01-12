@@ -1,58 +1,103 @@
 /* Heavily inspired by (copied from) Tailwind */
 
 :root {
-  --colors-gray-50-rgb: 249 250 251;
-  --colors-gray-100-rgb: 243 244 246;
-  --colors-gray-200-rgb: 229 231 235;
-  --colors-gray-300-rgb: 209 213 219;
-  --colors-gray-400-rgb: 156 163 175;
-  --colors-gray-500-rgb: 107 114 128;
-  --colors-gray-600-rgb: 75 85 99;
-  --colors-gray-700-rgb: 55 65 81;
-  --colors-gray-800-rgb: 31 41 55;
-  --colors-gray-900-rgb: 17 24 39;
-  --colors-gray-950-rgb: 3 7 18;
+    /*Gray*/
+    --colors-gray-50-rgb: 249 250 251;
+    --colors-gray-100-rgb: 243 244 246;
+    --colors-gray-200-rgb: 229 231 235;
+    --colors-gray-300-rgb: 209 213 219;
+    --colors-gray-400-rgb: 156 163 175;
+    --colors-gray-500-rgb: 107 114 128;
+    --colors-gray-600-rgb: 75 85 99;
+    --colors-gray-700-rgb: 55 65 81;
+    --colors-gray-800-rgb: 31 41 55;
+    --colors-gray-900-rgb: 17 24 39;
+    --colors-gray-950-rgb: 3 7 18;
+    /* Red */
+    --colors-red-50-rgb: 254 242 242;
+    --colors-red-100-rgb: 254 226 226;
+    --colors-red-200-rgb: 254 202 202;
+    --colors-red-300-rgb: 252 165 165;
+    --colors-red-400-rgb: 248 113 113;
+    --colors-red-500-rgb: 239 68 68;
+    --colors-red-600-rgb: 220 38 38;
+    --colors-red-700-rgb: 185 28 28;
+    --colors-red-800-rgb: 153 27 27;
+    --colors-red-900-rgb: 127 29 29;
+    /* Orange */
+    --colors-orange-50-rgb: 255 247 237;
+    --colors-orange-100-rgb: 255 237 213;
+    --colors-orange-200-rgb: 254 215 170;
+    --colors-orange-300-rgb: 253 186 116;
+    --colors-orange-400-rgb: 251 146 60;
+    --colors-orange-500-rgb: 249 115 22;
+    --colors-orange-600-rgb: 234 88 12;
+    --colors-orange-700-rgb: 194 65 12;
+    --colors-orange-800-rgb: 154 52 18;
+    --colors-orange-900-rgb: 124 45 18;
+}
 
-  --background-color-rgb: var(--colors-gray-50-rgb);
-  --background-opacity: 1;
-  
-  --border-color-rgb: var(--colors-gray-300-rgb);
-  --border-opacity: 1;
-
-  --text-color-rgb: var(--colors-gray-900-rgb);
-  --text-opacity: 1;
+/* Theme */
+:root {
+    /* Background color */
+    --background-color-rgb: var(--colors-gray-50-rgb);
+    --background-opacity: 1;
+    /* Border color */
+    --border-color-rgb: var(--colors-gray-300-rgb);
+    --border-opacity: 1;
+    /* Primary color */
+    --theme-colors-primary: rgb(var(--colors-orange-700-rgb));
+    --theme-colors-primary-hover: rgb(var(--colors-orange-600-rgb));
+    --theme-colors-primary-background-text: white;
+    /* Text color */
+    --text-color-rgb: var(--colors-gray-900-rgb);
+    --text-opacity: 1;
 }
 
 *, ::before, ::after {
-  border-color: rgb(var(--border-color-rgb) / var(--border-opacity));
-  color: rgb(var(--text-color-rgb) / var(--text-opacity));
+    border-color: rgb(var(--border-color-rgb) / var(--border-opacity));
+    color: rgb(var(--text-color-rgb) / var(--text-opacity));
 }
 
 body {
-  background-color: rgb(var(--background-color-rgb) / var(--background-opacity));
+    background-color: rgb(var(--background-color-rgb) / var(--background-opacity));
+}
+
+a {
+    text-decoration-color: transparent;
+    color: rgb(var(--colors-orange-600-rgb));
+    transition: text-decoration 0.2s ease-in-out;
+}
+
+    a:hover {
+        text-decoration-color: currentColor;
+    }
+
+.bg-white {
+    background-color: white;
 }
 
 .border-gray-200 {
-  --border-color-rgb: var(--colors-gray-200-rgb);
-  --border-opacity: 1;
+    --border-color-rgb: var(--colors-gray-200-rgb);
+    --border-opacity: 1;
 }
 
 .border-gray-300 {
-  --border-color-rgb: var(--colors-gray-300-rgb);
-  --border-opacity: 1;
+    --border-color-rgb: var(--colors-gray-300-rgb);
+    --border-opacity: 1;
 }
 
 .text-gray-200 {
-  --text-color-rgb: var(--colors-gray-200-rgb);
-  --text-opacity: 1;
+    --text-color-rgb: var(--colors-gray-200-rgb);
+    --text-opacity: 1;
 }
 
 .text-gray-300 {
-  --text-color-rgb: var(--colors-gray-300-rgb);
-  --text-opacity: 1;
+    --text-color-rgb: var(--colors-gray-300-rgb);
+    --text-opacity: 1;
 }
 
 .text-gray-400 {
-  --text-color-rgb: var(--colors-gray-400-rgb);
-  --text-opacity: 1;
+    --text-color-rgb: var(--colors-gray-400-rgb);
+    --text-opacity: 1;
 }

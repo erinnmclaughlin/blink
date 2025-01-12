@@ -1,4 +1,10 @@
-﻿h1:focus {
+﻿#app {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+h1:focus {
     outline: none;
 }
 

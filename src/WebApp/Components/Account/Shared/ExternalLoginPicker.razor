@@ -5,25 +5,18 @@
 @inject SignInManager<BlinkUser> SignInManager
 @inject IdentityRedirectManager RedirectManager
 
-@if (externalLogins.Length == 0)
-{
-    <div>
-        <p>
-            There are no external authentication services configured. See this <a href="https://go.microsoft.com/fwlink/?LinkID=532715">article
-            about setting up this ASP.NET application to support logging in via external services</a>.
-        </p>
-    </div>
-}
-else
+@if (ExternalLogins.Length != 0)
 {
     <form class="form-horizontal" action="Account/PerformExternalLogin" method="post">
         <div>
             <AntiforgeryToken />
             <input type="hidden" name="ReturnUrl" value="@ReturnUrl" />
             <p>
-                @foreach (var provider in externalLogins)
+                @foreach (var provider in ExternalLogins)
                 {
-                    <button type="submit" class="btn btn-primary" name="provider" value="@provider.Name" title="Log in using your @provider.DisplayName account">@provider.DisplayName</button>
+                    <button type="submit" name="provider" value="@provider.Name" title="Log in using your @provider.DisplayName account">
+                        @provider.DisplayName
+                    </button>
                 }
             </p>
         </div>
@@ -31,13 +24,14 @@ else
 }
 
 @code {
-    private AuthenticationScheme[] externalLogins = [];
+    private AuthenticationScheme[] ExternalLogins { get; set; } = [];
 
     [SupplyParameterFromQuery]
     private string? ReturnUrl { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
-        externalLogins = (await SignInManager.GetExternalAuthenticationSchemesAsync()).ToArray();
+        var externalLogins = await SignInManager.GetExternalAuthenticationSchemesAsync();
+        ExternalLogins = externalLogins.ToArray();
     }
 }
