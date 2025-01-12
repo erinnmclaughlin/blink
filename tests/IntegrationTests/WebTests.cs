@@ -18,8 +18,8 @@ public class WebTests
         await app.StartAsync();
 
         // Act
-        var httpClient = app.CreateHttpClient("blink-ui");
-        await resourceNotificationService.WaitForResourceAsync("blink-ui", KnownResourceStates.Running).WaitAsync(TimeSpan.FromSeconds(30));
+        var httpClient = app.CreateHttpClient("blink-webapp");
+        await resourceNotificationService.WaitForResourceAsync("blink-webapp", KnownResourceStates.Running).WaitAsync(TimeSpan.FromSeconds(30));
         var response = await httpClient.GetAsync("/");
 
         // Assert

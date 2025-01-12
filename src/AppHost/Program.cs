@@ -6,7 +6,7 @@ var postgresServer = builder.AddDefaultPostgresServer();
 var pgDatabase = postgresServer.AddDatabase("blink-db2");
 
 builder
-    .AddProject<Projects.WebApp>("webapp")
+    .AddProject<Projects.WebApp>("blink-webapp")
     .WithReference(pgDatabase)
     .WaitFor(pgDatabase);
 
