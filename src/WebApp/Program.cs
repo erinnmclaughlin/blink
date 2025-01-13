@@ -1,5 +1,6 @@
 using Blink.WebApp.Components;
 using Blink.WebApp.Components.Account;
+using Blink.WebApp.Configuration.Pipeline;
 using Blink.WebApp.Data;
 using FluentValidation;
 using Microsoft.AspNetCore.Identity;
@@ -19,6 +20,7 @@ builder.Services.AddScoped<IdentityRedirectManager>();
 builder.Services.AddMediatR(options =>
 {
     options.RegisterServicesFromAssemblyContaining<Program>();
+    options.AddOpenBehavior(typeof(RequestValidationPipelineBehavior<,>));
 });
 
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();

@@ -5,20 +5,20 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Blink.WebApp.Authentication.SignIn;
 
-internal sealed class SignInCommandHandler : IRequestHandler<SignInCommand>
+internal sealed class LocalSignInCommandHandler : IRequestHandler<LocalSignInCommand>
 {
-    private readonly ILogger<SignInCommandHandler> _logger;
+    private readonly ILogger<LocalSignInCommandHandler> _logger;
     private readonly IMediator _mediator;
     private readonly SignInManager<BlinkUser> _signInManager;
 
-    public SignInCommandHandler(ILogger<SignInCommandHandler> logger, IMediator mediator, SignInManager<BlinkUser> signInManager)
+    public LocalSignInCommandHandler(ILogger<LocalSignInCommandHandler> logger, IMediator mediator, SignInManager<BlinkUser> signInManager)
     {
         _logger = logger;
         _mediator = mediator;
         _signInManager = signInManager;
     }
 
-    public async Task Handle(SignInCommand request, CancellationToken cancellationToken)
+    public async Task Handle(LocalSignInCommand request, CancellationToken cancellationToken)
     {
         var result = await _signInManager.PasswordSignInAsync(
             request.Email, 

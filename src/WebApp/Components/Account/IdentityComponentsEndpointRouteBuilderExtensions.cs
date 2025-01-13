@@ -1,14 +1,14 @@
 using System.Security.Claims;
 using System.Text.Json;
-using Blink.WebApp.Components.Account.TempPages;
+using Blink.WebApp.Authentication.SignIn;
 using Blink.WebApp.Components.Account.TempPages.Manage;
 using Blink.WebApp.Data;
+using MediatR;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Primitives;
 
 namespace Blink.WebApp.Components.Account;
 
@@ -17,27 +17,11 @@ internal static class IdentityComponentsEndpointRouteBuilderExtensions
     // These endpoints are required by the Identity Razor components defined in the /Components/Account/Pages directory of this project.
     public static IEndpointConventionBuilder MapAdditionalIdentityEndpoints(this IEndpointRouteBuilder endpoints)
     {
-        ArgumentNullException.ThrowIfNull(endpoints);
-
         var accountGroup = endpoints.MapGroup("/Account");
 
-        accountGroup.MapPost("/PerformExternalLogin", (
-            HttpContext context,
-            [FromServices] SignInManager<BlinkUser> signInManager,
-            [FromForm] string provider,
-            [FromForm] string returnUrl) =>
+        accountGroup.MapPost("/PerformExternalLogin", (IMediator mediator, [FromForm] ExternalSignInCommand request) =>
         {
-            IEnumerable<KeyValuePair<string, StringValues>> query = [
-                new("ReturnUrl", returnUrl),
-                new("Action", ExternalLogin.LoginCallbackAction)];
-
-            var redirectUrl = UriHelper.BuildRelative(
-                context.Request.PathBase,
-                "/Account/ExternalLogin",
-                QueryString.Create(query));
-
-            var properties = signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
-            return TypedResults.Challenge(properties, [provider]);
+            mediator.Send(request);
         });
 
         accountGroup.MapPost("/Logout", async (

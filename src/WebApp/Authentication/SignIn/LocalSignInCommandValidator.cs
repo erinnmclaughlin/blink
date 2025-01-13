@@ -2,9 +2,9 @@
 
 namespace Blink.WebApp.Authentication.SignIn;
 
-public sealed class SignInCommandValidator : AbstractValidator<SignInCommand>
+public sealed class LocalSignInCommandValidator : AbstractValidator<LocalSignInCommand>
 {
-    public SignInCommandValidator()
+    public LocalSignInCommandValidator()
     {
         RuleFor(x => x.Email)
             .NotEmpty().WithMessage("Email address is required.")

@@ -14,7 +14,7 @@ public sealed partial class SignIn
     private HttpContext HttpContext { get; set; } = default!;
 
     [SupplyParameterFromForm]
-    private SignInCommand Input { get; set; } = new();
+    private LocalSignInCommand Input { get; set; } = new();
 
     [SupplyParameterFromQuery]
     private string? ReturnUrl { get; set; }
@@ -39,7 +39,7 @@ public sealed partial class SignIn
 
     public sealed class FormValidator : AbstractValidator<SignIn>
     {
-        public FormValidator(IValidator<SignInCommand> commandValidator)
+        public FormValidator(IValidator<LocalSignInCommand> commandValidator)
         {
             RuleFor(x => x.Input).SetValidator(commandValidator);
         }
