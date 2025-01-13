@@ -1,24 +1,20 @@
-using Blink.WebApp.Data;
+using Blink.WebApp.Authentication.SignIn;
+using FluentValidation;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Identity;
-using System.ComponentModel.DataAnnotations;
 
 namespace Blink.WebApp.Components.Account.Pages;
 
 public sealed partial class SignIn
 {
-    [Inject]
-    private SignInManager<BlinkUser> SignInManager { get; set; } = default!;
-
-    [Inject]
-    private IdentityRedirectManager RedirectManager { get; set; } = default!;
+    private RequestStatus RequestStatus { get; set; }
 
     [CascadingParameter]
     private HttpContext HttpContext { get; set; } = default!;
 
     [SupplyParameterFromForm]
-    private InputModel Input { get; set; } = new();
+    private SignInCommand Input { get; set; } = new();
 
     [SupplyParameterFromQuery]
     private string? ReturnUrl { get; set; }
@@ -34,29 +30,18 @@ public sealed partial class SignIn
 
     public async Task LoginUser()
     {
-        var signInResult = await SignInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);
+        RequestStatus = RequestStatus.Sending;
+        StateHasChanged();
 
-        if (signInResult.Succeeded)
-        {
-            RedirectManager.RedirectTo(ReturnUrl);
-        }
-        else if (signInResult.IsLockedOut)
-        {
-            RedirectManager.RedirectTo("account/lockout");
-        }
+        await Mediator.Send(Input);
+        RequestStatus = RequestStatus.Sent;
     }
 
-    private sealed class InputModel
+    public sealed class FormValidator : AbstractValidator<SignIn>
     {
-        [Required(ErrorMessage = "Email address is required.")]
-        [EmailAddress]
-        public string Email { get; set; } = "";
-
-        [Required(ErrorMessage = "Password is required.")]
-        [DataType(DataType.Password)]
-        public string Password { get; set; } = "";
-
-        [Display(Name = "Remember me?")]
-        public bool RememberMe { get; set; }
+        public FormValidator(IValidator<SignInCommand> commandValidator)
+        {
+            RuleFor(x => x.Input).SetValidator(commandValidator);
+        }
     }
 }

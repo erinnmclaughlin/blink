@@ -33,6 +33,12 @@ else
     public BlinkButtonTheme ButtonTheme { get; set; } = BlinkButtonTheme.Default;
 
     /// <summary>
+    /// Whether or not the button is disabled.
+    /// </summary>
+    [Parameter]
+    public bool Disabled { get; set; }
+
+    /// <summary>
     /// The content to render inside the button.
     /// </summary>
     [Parameter]
@@ -97,6 +103,11 @@ else
         if (!string.IsNullOrWhiteSpace(Id))
         {
             attributes.Add("id", Id);
+        }
+
+        if (Disabled)
+        {
+            attributes.Add("disabled", "disabled");
         }
 
         if (!string.IsNullOrWhiteSpace(Name))

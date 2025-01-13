@@ -1,4 +1,5 @@
 ﻿@page "/account/login"
+@attribute [StreamRendering]
 @layout Blink.WebApp.Components.Layout.EmptyLayout
 
 @using System.ComponentModel.DataAnnotations
@@ -8,15 +9,21 @@
 
 <PageTitle>Sign in</PageTitle>
 
-<div class="page">
+<AntiforgeryToken />
 
+<div class="page">
     <h2 class="page-title">Sign in to your account</h2>
 
     <Paper>
         <div class="paper-content">
-            <EditForm Model="Input" method="post" OnValidSubmit="LoginUser" FormName="login">
+            <EditForm Model="Input" method="post" Enhance="true" OnValidSubmit="LoginUser" FormName="login">
 
-                <DataAnnotationsValidator />
+                @if (RequestStatus is RequestStatus.Sent)
+                {
+                    <p class="validation-error-summary" role="alert">Failed to log in user.</p>
+                }
+
+                <FluentValidationValidator />
 
                 <BlinkFormField FieldId="Input.Email" Label="Email address">
                     <BlinkInputText @bind-Value="Input.Email" autocomplete="username" aria-required="true" placeholder="name@example.com" type="email" />
@@ -36,7 +43,9 @@
                 </div>
 
                 <div>
-                    <BlinkButton ButtonTheme="BlinkButtonTheme.Primary" ButtonType="BlinkButtonType.Submit" Id="loginButton">Sign in</BlinkButton>
+                    <BlinkButton ButtonTheme="BlinkButtonTheme.Primary" ButtonType="BlinkButtonType.Submit" Disabled="@(RequestStatus is RequestStatus.Sending)" Id="loginButton">
+                        Sign in
+                    </BlinkButton>
                 </div>
             </EditForm>
             <section id="socialLogins">

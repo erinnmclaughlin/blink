@@ -1,6 +1,7 @@
 using Blink.WebApp.Components;
 using Blink.WebApp.Components.Account;
 using Blink.WebApp.Data;
+using FluentValidation;
 using Microsoft.AspNetCore.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -9,9 +10,18 @@ builder.AddServiceDefaults();
 
 builder.Services.AddRazorComponents();
 
+builder.Services.AddHttpContextAccessor();
+
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddScoped<IdentityUserAccessor>();
 builder.Services.AddScoped<IdentityRedirectManager>();
+
+builder.Services.AddMediatR(options =>
+{
+    options.RegisterServicesFromAssemblyContaining<Program>();
+});
+
+builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
 builder.Services
     .AddAuthentication(options =>
