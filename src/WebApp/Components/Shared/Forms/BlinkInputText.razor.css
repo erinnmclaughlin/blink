@@ -17,3 +17,11 @@
         font-size: 0.875rem;
         line-height: 1.5rem;
     }
+
+
+.blink-form-field-label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}

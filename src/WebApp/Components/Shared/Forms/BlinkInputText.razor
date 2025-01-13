@@ -1,5 +1,10 @@
 ﻿@using System.Linq.Expressions
 
+@if (FormField?.Label is not null)
+{
+    <label class="blink-form-field-label" for="@FormField?.FieldId">@FormField?.Label</label>
+}
+
 <div class="blink-input">
     <InputText id="@FormField?.FieldId" @attributes="@AdditionalAttributes" Value="@Value" ValueChanged="@ValueChanged" ValueExpression="@ValueExpression" />
 </div>

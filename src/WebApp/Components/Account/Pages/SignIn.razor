@@ -26,15 +26,12 @@
                     <BlinkInputText @bind-Value="Input.Password" autocomplete="current-password" aria-required="true" placeholder="password" type="password" />
                 </BlinkFormField>
 
-                <div class="form-groups">
-                    <div class="form-group">
-                        <label class="form-label">
-                            <InputCheckbox @bind-Value="Input.RememberMe" />
-                            Remember me
-                        </label>
-                    </div>
-                    <div class="form-group">
-                        <a class="bold" href="Account/ForgotPassword">Forgot password?</a>
+                <div class="flex space-between">
+                    <BlinkFormField FieldId="Input.RememberMe" Label="Remember me">
+                        <BlinkInputCheckbox @bind-Checked="Input.RememberMe" />
+                    </BlinkFormField>
+                    <div>
+                        <a class="bold" style="font-size: 0.875rem;" href="Account/ForgotPassword">Forgot password?</a>
                     </div>
                 </div>
 
@@ -44,14 +41,7 @@
             </EditForm>
             <section id="socialLogins">
 
-                <div class="relative">
-                    <div class="absolute inset-0 flex items-center" aria-hidden="true">
-                        <div class="w-full border-top border-gray-200"></div>
-                    </div>
-                    <div class="relative flex justify-center text-sm/6 font-medium">
-                        <span class="bg-white" style="padding: 0 1.5rem;">Or continue with</span>
-                    </div>
-                </div>
+                <BlinkDivider Text="Or continue with" />
 
                 <form action="account/performExternalLogin" method="post" style="margin-top: 1.5rem;">
                     <div>

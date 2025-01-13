@@ -48,11 +48,11 @@ public sealed partial class SignIn
 
     private sealed class InputModel
     {
-        [Required]
+        [Required(ErrorMessage = "Email address is required.")]
         [EmailAddress]
         public string Email { get; set; } = "";
 
-        [Required]
+        [Required(ErrorMessage = "Password is required.")]
         [DataType(DataType.Password)]
         public string Password { get; set; } = "";
 

@@ -1,10 +1,6 @@
 ﻿@using System.Linq.Expressions
 
 <div class="blink-form-field">
-    @if (Label is not null)
-    {
-        <label class="blink-form-field-label" for="@FieldId">@Label</label>
-    }
     <CascadingValue Value="this">
         @ChildContent
     </CascadingValue>

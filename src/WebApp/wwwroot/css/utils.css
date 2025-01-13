@@ -27,7 +27,11 @@
 }
 
 .items-center {
-  align-items: center;
+    align-items: center;
+}
+
+.space-between {
+    justify-content: space-between;
 }
 
 .justify-center {

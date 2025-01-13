@@ -4,6 +4,11 @@
   box-sizing: border-box;
 }
 
+html, :host {
+    line-height: 1.5;
+    tab-size: 4;
+}
+
 html, body {
   height: 100%;
 }
@@ -30,4 +35,14 @@ ol, ul {
 img, svg, video, canvas, audio, iframe, embed, object {
   display: block;
   vertical-align: middle;
+}
+
+button, input, select, optgroup, textarea, ::file-selector-button {
+    font: inherit;
+    font-feature-settings: inherit;
+    font-variation-settings: inherit;
+    color: inherit;
+    border-radius: 0;
+    background-color: transparent;
+    opacity: 1;
 }

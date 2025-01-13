@@ -1,0 +1,14 @@
+﻿input {
+    outline: 1px solid rgb(var(--border-color-rgb));
+}
+
+    input.invalid {
+        outline-color: rgb(var(--colors-red-500-rgb));
+    }
+
+.validation-error {
+    color: rgb(var(--colors-red-500-rgb));
+    font-size: 0.75rem;
+    font-weight: 500;
+    margin-top: 0.25rem;
+}
