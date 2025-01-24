@@ -1,0 +1,14 @@
+﻿<div class="blink-divider">
+    <div class="blink-divider-line" aria-hidden="true"></div>
+    @if (Text is not null)
+    {
+        <div class="blink-divider-text">
+            <span>@Text</span>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public string? Text { get; set; }
+}

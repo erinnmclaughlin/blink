@@ -1,0 +1,15 @@
+header {
+  background-color: white;
+  display: flex;
+  padding: 1rem 3rem;
+}
+
+  header .account-info {
+    margin-left: auto;
+    display: flex;
+    gap: 0.25rem;
+  }
+
+main {
+    flex-grow: 1;
+}

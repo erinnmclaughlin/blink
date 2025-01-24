@@ -1,0 +1,11 @@
+@import 'blazor.css';
+@import 'colors.css';
+@import 'forms.css';
+@import 'resets.css';
+@import 'spacing.css';
+@import 'tables.css';
+@import 'typography.css';
+@import 'utils.css';
+
+/* TODO: Use SCSS */
+/* TODO: Add dark mode */

@@ -1,10 +1,13 @@
+using Blink.AppHost;
+
 var builder = DistributedApplication.CreateBuilder(args);
 
-var apiService = builder.AddProject<Projects.ApiService>("apiservice");
+var postgresServer = builder.AddDefaultPostgresServer();
+var pgDatabase = postgresServer.AddDatabase("blink-pg-db");
 
-builder.AddProject<Projects.Web>("webfrontend")
-    .WithExternalHttpEndpoints()
-    .WithReference(apiService)
-    .WaitFor(apiService);
+builder
+    .AddProject<Projects.WebApp>("blink-webapp")
+    .WithReference(pgDatabase)
+    .WaitFor(pgDatabase);
 
 builder.Build().Run();

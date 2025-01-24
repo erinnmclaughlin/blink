@@ -1,0 +1,57 @@
+﻿/* flex gap-3 */
+.blink-input-checkbox-field {
+    display: flex;
+    gap: 0.75rem;
+}
+
+/* flex h-6 shrink-0 items-center */
+.blink-input-checkbox-container {
+    align-items: center;
+    flex-shrink: 0;
+    height: 1.5rem;
+    display: flex;
+}
+
+/* group grid size-4 grid-cols-1 */
+.blink-input-checkbox {
+    display: grid;
+    width: 1rem;
+    height: 1rem;
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+}
+
+    .blink-input-checkbox > ::deep input {
+        border-style: solid;
+        border-width: 1px;
+        border-radius: 0.25rem;
+        appearance: none;
+        grid-row-start: 1;
+        grid-column-start: 1;
+        background-color: white;
+        margin: 0;
+    }
+
+        .blink-input-checkbox > ::deep input:checked {
+            background-color: rgb(var(--colors-orange-600-rgb));
+            border-color: rgb(var(--colors-orange-600-rgb));
+        }
+
+    .blink-input-checkbox > svg {
+        stroke: white;
+        justify-self: center;
+        align-self: center;
+        height: 0.875rem;
+        width: 0.875rem;
+        grid-column-start: 1;
+        grid-row-start: 1;
+        pointer-events: none;
+        display: block;
+        vertical-align: middle;
+    }
+
+.blink-form-field-label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1.5;
+}
