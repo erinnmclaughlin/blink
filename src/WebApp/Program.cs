@@ -6,6 +6,7 @@ using FluentValidation;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.FeatureManagement;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -53,28 +54,27 @@ builder.Services.AddIdentityCore<BlinkUser>(options => options.SignIn.RequireCon
 
 builder.Services.AddSingleton<IEmailSender<BlinkUser>, IdentityEmailSender>();
 
-var emailEndpoint = builder.Configuration.GetConnectionString("papercut");
-if (emailEndpoint is null)
+var emailEndpoint = builder.Configuration.GetConnectionString("papercut")!;
+emailEndpoint = emailEndpoint.Split('=')[1];
+var portIndex = emailEndpoint.LastIndexOf(':');
+
+var host = emailEndpoint[..portIndex].Replace("smtp://", "");
+var port = emailEndpoint[(portIndex + 1)..];
+
+builder.Services.Configure<EmailOptions>(options =>
 {
-    builder.Services.AddSingleton<IEmailSender>(new NoOpEmailSender());
-}
-else
+    options.Host = host;
+    options.Port = int.Parse(port);
+    options.From = "noreply@blink.test";
+});
+
+builder.Services.AddTransient<IEmailSender, SmtpEmailSender>();
+
+builder.Services.AddFeatureManagement();
+builder.Services.Configure<ConfigurationFeatureDefinitionProviderOptions>(o =>
 {
-    emailEndpoint = emailEndpoint.Split('=')[1];
-    var portIndex = emailEndpoint.LastIndexOf(':');
-
-    var host = emailEndpoint[..portIndex].Replace("smtp://", "");
-    var port = emailEndpoint[(portIndex + 1)..];
-
-    builder.Services.Configure<EmailOptions>(options =>
-    {
-        options.Host = host;
-        options.Port = int.Parse(port);
-        options.From = "noreply@blink.test";
-    });
-
-    builder.Services.AddTransient<IEmailSender, SmtpEmailSender>();
-}
+    o.CustomConfigurationMergingEnabled = true;
+});
 
 var app = builder.Build();
 

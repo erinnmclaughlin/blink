@@ -7,28 +7,32 @@
 @inject IdentityUserAccessor UserAccessor
 @inject IdentityRedirectManager RedirectManager
 @inject ILogger<Disable2fa> Logger
+@inject IVariantFeatureManager FeatureManager
 
-<PageTitle>Disable two-factor authentication (2FA)</PageTitle>
+@if (IsProfileManagementFeatureEnabled)
+{
+    <PageTitle>Disable two-factor authentication (2FA)</PageTitle>
 
-<StatusMessage />
-<h3>Disable two-factor authentication (2FA)</h3>
+    <StatusMessage />
+    <h3>Disable two-factor authentication (2FA)</h3>
 
-<div class="alert alert-warning" role="alert">
-    <p>
-        <strong>This action only disables 2FA.</strong>
-    </p>
-    <p>
-        Disabling 2FA does not change the keys used in authenticator apps. If you wish to change the key
-        used in an authenticator app you should <a href="Account/Manage/ResetAuthenticator">reset your authenticator keys.</a>
-    </p>
-</div>
+    <div class="alert alert-warning" role="alert">
+        <p>
+            <strong>This action only disables 2FA.</strong>
+        </p>
+        <p>
+            Disabling 2FA does not change the keys used in authenticator apps. If you wish to change the key
+            used in an authenticator app you should <a href="Account/Manage/ResetAuthenticator">reset your authenticator keys.</a>
+        </p>
+    </div>
 
-<div>
-    <form @formname="disable-2fa" @onsubmit="OnSubmitAsync" method="post">
-        <AntiforgeryToken />
-        <button class="btn btn-danger" type="submit">Disable 2FA</button>
-    </form>
-</div>
+    <div>
+        <form @formname="disable-2fa" @onsubmit="OnSubmitAsync" method="post">
+            <AntiforgeryToken />
+            <button class="btn btn-danger" type="submit">Disable 2FA</button>
+        </form>
+    </div>
+}
 
 @code {
     private BlinkUser user = default!;
@@ -36,13 +40,24 @@
     [CascadingParameter]
     private HttpContext HttpContext { get; set; } = default!;
 
+    private bool IsProfileManagementFeatureEnabled { get; set; }
+
     protected override async Task OnInitializedAsync()
     {
-        user = await UserAccessor.GetRequiredUserAsync(HttpContext);
+        IsProfileManagementFeatureEnabled = await FeatureManager.IsEnabledAsync(FeatureFlags.ProfileManagement);
 
-        if (HttpMethods.IsGet(HttpContext.Request.Method) && !await UserManager.GetTwoFactorEnabledAsync(user))
+        if (IsProfileManagementFeatureEnabled)
         {
-            throw new InvalidOperationException("Cannot disable 2FA for user as it's not currently enabled.");
+            user = await UserAccessor.GetRequiredUserAsync(HttpContext);
+
+            if (HttpMethods.IsGet(HttpContext.Request.Method) && !await UserManager.GetTwoFactorEnabledAsync(user))
+            {
+                throw new InvalidOperationException("Cannot disable 2FA for user as it's not currently enabled.");
+            }
+        }
+        else
+        {
+            RedirectManager.RedirectTo("");
         }
     }
 
