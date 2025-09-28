@@ -1,8 +1,8 @@
-using Blink.WebApp.Data;
+using Blink.WebApp.Authentication.SignIn;
+using MediatR;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
-using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Encodings.Web;
@@ -10,6 +10,9 @@ using System.Text.Encodings.Web;
 namespace Blink.WebApp.Components.Account.Pages;
 public sealed partial class ExternalLogin
 {
+    private readonly ISender _sender;
+
+    public const string FormName = "external-login-confirmation";
     public const string LoginCallbackAction = "LoginCallback";
 
     private ExternalLoginInfo? ExternalLoginInfo { get; set; }
@@ -20,7 +23,7 @@ public sealed partial class ExternalLogin
     private HttpContext HttpContext { get; set; } = default!;
 
     [SupplyParameterFromForm]
-    private InputModel Input { get; set; } = new();
+    private ExternalSignInConfirmationCommand Input { get; set; } = new();
 
     [SupplyParameterFromQuery]
     private string? RemoteError { get; set; }
@@ -32,6 +35,11 @@ public sealed partial class ExternalLogin
     private string? Action { get; set; }
 
     private string? ProviderDisplayName => ExternalLoginInfo?.ProviderDisplayName;
+
+    public ExternalLogin(ISender sender)
+    {
+        _sender = sender;
+    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -45,6 +53,9 @@ public sealed partial class ExternalLogin
         {
             RedirectManager.RedirectToWithStatus("Account/Login", "Error loading external login information.", HttpContext);
         }
+
+        Input.LoginProvider = ExternalLoginInfo.LoginProvider;
+        Input.ProviderKey = ExternalLoginInfo.ProviderKey;
 
         if (HttpMethods.IsGet(HttpContext.Request.Method))
         {
@@ -104,47 +115,31 @@ public sealed partial class ExternalLogin
             RedirectManager.RedirectToWithStatus("Account/Login", "Error loading external login information during confirmation.", HttpContext);
         }
 
-        var user = new BlinkUser();
+        var (result, user) = await _sender.Send(Input);
 
-        await UserEmailStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
-        await UserEmailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
-
-        var result = await UserManager.CreateAsync(user);
         if (result.Succeeded)
         {
-            result = await UserManager.AddLoginAsync(user, ExternalLoginInfo);
-            if (result.Succeeded)
+            var userId = await UserManager.GetUserIdAsync(user);
+            var code = await UserManager.GenerateEmailConfirmationTokenAsync(user);
+            code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+
+            var callbackUrl = NavigationManager.GetUriWithQueryParameters(
+                NavigationManager.ToAbsoluteUri("Account/ConfirmEmail").AbsoluteUri,
+                new Dictionary<string, object?> { ["userId"] = userId, ["code"] = code });
+
+            await EmailSender.SendConfirmationLinkAsync(user, Input.Email, HtmlEncoder.Default.Encode(callbackUrl));
+
+            // If account confirmation is required, we need to show the link if we don't have a real email sender
+            if (UserManager.Options.SignIn.RequireConfirmedAccount)
             {
-                Logger.LogInformation("User created an account using {Name} provider.", ExternalLoginInfo.LoginProvider);
-
-                var userId = await UserManager.GetUserIdAsync(user);
-                var code = await UserManager.GenerateEmailConfirmationTokenAsync(user);
-                code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
-
-                var callbackUrl = NavigationManager.GetUriWithQueryParameters(
-                    NavigationManager.ToAbsoluteUri("Account/ConfirmEmail").AbsoluteUri,
-                    new Dictionary<string, object?> { ["userId"] = userId, ["code"] = code });
-                await EmailSender.SendConfirmationLinkAsync(user, Input.Email, HtmlEncoder.Default.Encode(callbackUrl));
-
-                // If account confirmation is required, we need to show the link if we don't have a real email sender
-                if (UserManager.Options.SignIn.RequireConfirmedAccount)
-                {
-                    RedirectManager.RedirectTo("Account/RegisterConfirmation", new() { ["email"] = Input.Email });
-                }
-
-                await SignInManager.SignInAsync(user, isPersistent: false, ExternalLoginInfo.LoginProvider);
-                RedirectManager.RedirectTo(ReturnUrl);
+                RedirectManager.RedirectTo("Account/RegisterConfirmation", new() { ["email"] = Input.Email });
             }
+
+            await SignInManager.SignInAsync(user, isPersistent: false, ExternalLoginInfo.LoginProvider);
+            RedirectManager.RedirectTo(ReturnUrl);
         }
 
         Message = $"Error: {string.Join(",", result.Errors.Select(error => error.Description))}";
         RequestStatus = RequestStatus.Sent;
-    }
-
-    private sealed class InputModel
-    {
-        [Required]
-        [EmailAddress]
-        public string Email { get; set; } = "";
     }
 }

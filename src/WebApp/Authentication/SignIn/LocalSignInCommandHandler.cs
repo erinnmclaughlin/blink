@@ -8,13 +8,13 @@ namespace Blink.WebApp.Authentication.SignIn;
 internal sealed class LocalSignInCommandHandler : IRequestHandler<LocalSignInCommand>
 {
     private readonly ILogger<LocalSignInCommandHandler> _logger;
-    private readonly IMediator _mediator;
+    private readonly IPublisher _publisher;
     private readonly SignInManager<BlinkUser> _signInManager;
 
-    public LocalSignInCommandHandler(ILogger<LocalSignInCommandHandler> logger, IMediator mediator, SignInManager<BlinkUser> signInManager)
+    public LocalSignInCommandHandler(ILogger<LocalSignInCommandHandler> logger, IPublisher publisher, SignInManager<BlinkUser> signInManager)
     {
         _logger = logger;
-        _mediator = mediator;
+        _publisher = publisher;
         _signInManager = signInManager;
     }
 
@@ -29,11 +29,11 @@ internal sealed class LocalSignInCommandHandler : IRequestHandler<LocalSignInCom
 
         if (result.Succeeded)
         {
-            await _mediator.Publish(new SignInSucceededNotification(), cancellationToken);
+            await _publisher.Publish(new SignInSucceededNotification(), cancellationToken);
             return;
         }
 
         _logger.LogWarning("Failed to sign in user with email {Email}. Reason: {Result}", request.Email, result.ToString());
-        await _mediator.Publish(new SignInFailedNotification(result), cancellationToken);
+        await _publisher.Publish(new SignInFailedNotification(result), cancellationToken);
     }
 }

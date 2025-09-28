@@ -10,7 +10,6 @@
 
 @inject SignInManager<BlinkUser> SignInManager
 @inject UserManager<BlinkUser> UserManager
-@inject IUserEmailStore<BlinkUser> UserEmailStore
 @inject IEmailSender<BlinkUser> EmailSender
 @inject NavigationManager NavigationManager
 @inject IdentityRedirectManager RedirectManager
@@ -26,10 +25,8 @@
     <Paper>
         <div class="paper-content">
 
-            @*<h2 class="page-subtitle">Associate your @ProviderDisplayName account.</h2>*@
-
-            <EditForm Model="Input" OnValidSubmit="OnValidSubmitAsync" FormName="confirmation" method="post">
-                <DataAnnotationsValidator />
+            <EditForm Model="Input" OnValidSubmit="OnValidSubmitAsync" FormName="@FormName" method="post">
+                <FluentValidationValidator />
 
                 <AppAlert Level="AlertLevel.Info">
                     You've successfully authenticated with <span class="bold">@ProviderDisplayName</span>.

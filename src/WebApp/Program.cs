@@ -4,6 +4,7 @@ using Blink.WebApp.Configuration.Pipeline;
 using Blink.WebApp.Data;
 using FluentValidation;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -50,7 +51,30 @@ builder.Services.AddIdentityCore<BlinkUser>(options => options.SignIn.RequireCon
     .AddSignInManager()
     .AddDefaultTokenProviders();
 
-builder.Services.AddSingleton<IEmailSender<BlinkUser>, IdentityNoOpEmailSender>();
+builder.Services.AddSingleton<IEmailSender<BlinkUser>, IdentityEmailSender>();
+
+var emailEndpoint = builder.Configuration.GetConnectionString("papercut");
+if (emailEndpoint is null)
+{
+    builder.Services.AddSingleton<IEmailSender>(new NoOpEmailSender());
+}
+else
+{
+    emailEndpoint = emailEndpoint.Split('=')[1];
+    var portIndex = emailEndpoint.LastIndexOf(':');
+
+    var host = emailEndpoint[..portIndex].Replace("smtp://", "");
+    var port = emailEndpoint[(portIndex + 1)..];
+
+    builder.Services.Configure<EmailOptions>(options =>
+    {
+        options.Host = host;
+        options.Port = int.Parse(port);
+        options.From = "noreply@blink.test";
+    });
+
+    builder.Services.AddTransient<IEmailSender, SmtpEmailSender>();
+}
 
 var app = builder.Build();
 

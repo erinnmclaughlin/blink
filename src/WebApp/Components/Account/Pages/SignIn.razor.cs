@@ -36,12 +36,4 @@ public sealed partial class SignIn
         await Mediator.Send(Input);
         RequestStatus = RequestStatus.Sent;
     }
-
-    public sealed class FormValidator : AbstractValidator<SignIn>
-    {
-        public FormValidator(IValidator<LocalSignInCommand> commandValidator)
-        {
-            RuleFor(x => x.Input).SetValidator(commandValidator);
-        }
-    }
 }
