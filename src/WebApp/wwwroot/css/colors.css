@@ -1,7 +1,7 @@
 /* Heavily inspired by (copied from) Tailwind */
 
 :root {
-    /*Gray*/
+    /* Gray */
     --colors-gray-50-rgb: 249 250 251;
     --colors-gray-100-rgb: 243 244 246;
     --colors-gray-200-rgb: 229 231 235;
@@ -35,6 +35,17 @@
     --colors-orange-700-rgb: 194 65 12;
     --colors-orange-800-rgb: 154 52 18;
     --colors-orange-900-rgb: 124 45 18;
+    /* Blue */
+    --colors-blue-50-rgb: 239 246 255;
+    --colors-blue-100-rgb: 219 234 254;
+    --colors-blue-200-rgb: 191 219 254;
+    --colors-blue-300-rgb: 147 197 253;
+    --colors-blue-400-rgb: 96 165 250;
+    --colors-blue-500-rgb: 59 130 246;
+    --colors-blue-600-rgb: 37 99 235;
+    --colors-blue-700-rgb: 29 78 216;
+    --colors-blue-800-rgb: 30 64 175;
+    --colors-blue-900-rgb: 30 58 138;
 }
 
 /* Theme */

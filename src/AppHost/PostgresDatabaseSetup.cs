@@ -12,9 +12,9 @@ public static class PostgresDatabaseSetup
 
         if (builder.Environment.IsDevelopment())
         {
-            server = server.WithDataVolume()
-                .WithLifetime(ContainerLifetime.Persistent)
-                .WithContainerRuntimeArgs("-p", "5432:5432");
+            server = server
+                .WithDataVolume()
+                .WithPgWeb();
         }
         
         return server;

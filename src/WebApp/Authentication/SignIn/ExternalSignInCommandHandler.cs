@@ -1,4 +1,4 @@
-using Blink.WebApp.Components.Account.TempPages;
+using Blink.WebApp.Components.Account.Pages;
 using Blink.WebApp.Data;
 using MediatR;
 using Microsoft.AspNetCore.Authentication;

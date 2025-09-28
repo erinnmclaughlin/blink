@@ -4,6 +4,7 @@ using Blink.WebApp.Configuration.Pipeline;
 using Blink.WebApp.Data;
 using FluentValidation;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,6 +17,7 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddScoped<IdentityUserAccessor>();
 builder.Services.AddScoped<IdentityRedirectManager>();
+builder.Services.AddScoped(sp => (IUserEmailStore<BlinkUser>)sp.GetRequiredService<IUserStore<BlinkUser>>());
 
 builder.Services.AddMediatR(options =>
 {
@@ -56,7 +58,10 @@ app.MapDefaultEndpoints();
 
 if (app.Environment.IsDevelopment())
 {
-    app.UseMigrationsEndPoint();
+    //app.UseMigrationsEndPoint();
+    using var scope = app.Services.CreateScope();
+    var dbContext = scope.ServiceProvider.GetRequiredService<BlinkDbContext>();
+    await dbContext.Database.MigrateAsync();
 }
 else
 {
