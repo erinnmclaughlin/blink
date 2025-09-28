@@ -17,3 +17,24 @@ public sealed record BlinkButtonTheme
         return Value;
     }
 }
+
+public sealed record BlinkButtonSize
+{
+    public string Value { get; }
+
+    public static BlinkButtonSize Default => Medium;
+
+    public static BlinkButtonSize Small => new("sm");
+    public static BlinkButtonSize Medium => new("md");
+    // TODO: public static BlinkButtonSize Large => new("large");
+
+    private BlinkButtonSize(string value)
+    {
+        Value = value;
+    }
+
+    public override string ToString()
+    {
+        return Value;
+    }
+}

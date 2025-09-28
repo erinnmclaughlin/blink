@@ -1,31 +1,35 @@
 ﻿@inherits LayoutComponentBase
 @implements IDisposable
 @inject NavigationManager NavigationManager
+@inject IVariantFeatureManager FeatureManager
 
 <header class="border-bottom">
     <div class="account-info">
         <AuthorizeView>
             <Authorized>
-                <div class="header-item">
-                    <NavLink class="nav-link" href="Account/Manage">
-                        @context.User.Identity?.Name
-                    </NavLink>
-                </div>
+                @if (IsProfileManagementFeatureEnabled)
+                {
+                    <div class="header-item">
+                        <NavLink class="nav-link" href="Account/Manage">
+                            @context.User.Identity?.Name
+                        </NavLink>
+                    </div>
+                }
                 <div class="header-item">
                     <form action="Account/Logout" method="post">
                         <AntiforgeryToken />
                         <input type="hidden" name="ReturnUrl" value="@CurrentUrl" />
-                        <button type="submit" class="nav-link">
-                            <span class="bi bi-arrow-bar-left-nav-menu" aria-hidden="true"></span> Logout
-                        </button>
+                        <BlinkButton ButtonTheme="BlinkButtonTheme.Default" ButtonSize="BlinkButtonSize.Small" ButtonType="BlinkButtonType.Submit" Id="navLogoutButton">
+                            Logout
+                        </BlinkButton>
                     </form>
                 </div>
             </Authorized>
             <NotAuthorized>
                 <div class="header-item">
-                    <NavLink class="nav-link" href="Account/Login">
+                    <BlinkButton ButtonTheme="BlinkButtonTheme.Primary" ButtonSize="BlinkButtonSize.Small" Id="navLoginButton" Href="Account/Login">
                         Login
-                    </NavLink>
+                    </BlinkButton>
                 </div>
             </NotAuthorized>
         </AuthorizeView>
@@ -38,9 +42,12 @@
 
 @code {
     private string? CurrentUrl { get; set; }
+    private bool IsProfileManagementFeatureEnabled { get; set; }
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
+        IsProfileManagementFeatureEnabled = await FeatureManager.IsEnabledAsync(FeatureFlags.ProfileManagement);
+
         CurrentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
         NavigationManager.LocationChanged += OnLocationChanged;
     }

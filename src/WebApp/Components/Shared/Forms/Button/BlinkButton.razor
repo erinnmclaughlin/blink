@@ -33,6 +33,12 @@ else
     public BlinkButtonTheme ButtonTheme { get; set; } = BlinkButtonTheme.Default;
 
     /// <summary>
+    /// The button size.
+    /// </summary>
+    [Parameter]
+    public BlinkButtonSize ButtonSize { get; set; } = BlinkButtonSize.Default;
+
+    /// <summary>
     /// Whether or not the button is disabled.
     /// </summary>
     [Parameter]
@@ -140,6 +146,11 @@ else
         if (ButtonTheme != BlinkButtonTheme.Default)
         {
             yield return $"blink-button-theme-{ButtonTheme}";
+        }
+
+        if (ButtonSize != BlinkButtonSize.Default)
+        {
+            yield return $"blink-button-size-{ButtonSize}";
         }
 
         if (FullWidth)

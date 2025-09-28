@@ -20,6 +20,10 @@
     transition: background-color 0.2s ease-in-out;
 }
 
+    .blink-button:hover {
+        text-decoration: none;
+    }
+
     .blink-button:not(:disabled):hover {
         background-color: rgb(var(--colors-gray-100-rgb));
     }
@@ -34,6 +38,11 @@
             background-color: rgb(var(--colors-orange-500-rgb));
         }
 
+    .blink-button.blink-button-size-sm {
+        padding: 0.5rem 1rem;
+        font-size: 0.825rem;
+    }
+        
     .blink-button:disabled {
         cursor: not-allowed;
         opacity: 0.75;
