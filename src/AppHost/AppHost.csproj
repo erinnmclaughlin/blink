@@ -13,11 +13,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Blink.WebApi\Blink.WebApi.csproj" />
     <ProjectReference Include="..\WebApp\WebApp.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Aspire.Hosting.AppHost" Version="9.5.0" />
+    <PackageReference Include="Aspire.Hosting.Keycloak" Version="9.5.0-preview.1.25474.7" />
     <PackageReference Include="Aspire.Hosting.PostgreSQL" Version="9.5.0" />
     <PackageReference Include="CommunityToolkit.Aspire.Hosting.PapercutSmtp" Version="9.8.0" />
   </ItemGroup>
