@@ -17,13 +17,16 @@ builder.AddFluentMigrations();
 builder.AddKnownClientsCorsPolicy();
 
 builder.AddKeycloakAuthorization();
-builder.AddKeycloakEventPoller();
+//builder.AddKeycloakEventPoller();
 
 var app = builder.Build();
 
 app.UseHttpsRedirection();
 
 app.UseCors(CorsConfiguration.KnownClientPolicy);
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapGet("/test", () => "Hello, Blink!")
     .WithName("TestEndpoint");
@@ -37,9 +40,6 @@ app.MapGet("/claims", (ClaimsPrincipal user) => Results.Json(user.Claims.Select(
     .RequireAuthorization();
 
 app.MapDefaultEndpoints();
-
-app.UseAuthentication();
-app.UseAuthorization();
 
 using (var scope = app.Services.CreateScope())
 {

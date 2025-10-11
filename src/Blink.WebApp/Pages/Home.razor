@@ -3,31 +3,111 @@
 
 <PageTitle>Home</PageTitle>
 
-<h1>Hello, world!</h1>
-
-@if (Message is null)
-{
-    <p><em>Loading...</em></p>
-}
-else
-{
-    <p>@Message</p>
-}
+<div style="margin-bottom: 2rem;">
+    <h2>Public API Test</h2>
+    @if (publicMessage is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else
+    {
+        <p>✓ @publicMessage</p>
+    }
+</div>
 
 <AuthorizeView>
-    <ul>
-        @foreach (var claim in context.User.Claims)
-        {
-            <li>@claim.Type = @claim.Value</li>
-        }
-    </ul>
+    <Authorized>
+        <div style="margin-bottom: 2rem;">
+            <h2>Authenticated API Test</h2>
+            @if (authenticatedMessage is null)
+            {
+                <p><em>Loading...</em></p>
+            }
+            else if (authError is not null)
+            {
+                <p style="color: red;">❌ Error: @authError</p>
+            }
+            else
+            {
+                <p>✓ @authenticatedMessage</p>
+            }
+        </div>
+
+        <div style="margin-bottom: 2rem;">
+            <h2>Your Claims from API</h2>
+            @if (apiClaims is null)
+            {
+                <p><em>Loading...</em></p>
+            }
+            else if (claimsError is not null)
+            {
+                <p style="color: red;">❌ Error: @claimsError</p>
+            }
+            else
+            {
+                <pre>@apiClaims</pre>
+            }
+        </div>
+
+        <div>
+            <h2>Your Claims (Client-Side)</h2>
+            <ul>
+                @foreach (var claim in context.User.Claims)
+                {
+                    <li>@claim.Type = @claim.Value</li>
+                }
+            </ul>
+        </div>
+    </Authorized>
+    <NotAuthorized>
+        <p>Please log in to test authenticated API calls.</p>
+    </NotAuthorized>
 </AuthorizeView>
 
 @code {
-    private string? Message { get; set; }
+    private string? publicMessage;
+    private string? authenticatedMessage;
+    private string? authError;
+    private string? apiClaims;
+    private string? claimsError;
 
     protected override async Task OnInitializedAsync()
     {
-        Message = await ApiClient.GetTestMessage();
+        // Test public endpoint
+        try
+        {
+            publicMessage = await ApiClient.GetTestMessage();
+        }
+        catch (Exception ex)
+        {
+            publicMessage = $"Error: {ex.Message}";
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            // Test authenticated endpoints (only after auth state is available)
+            try
+            {
+                authenticatedMessage = await ApiClient.GetAuthenticatedTestMessage();
+            }
+            catch (Exception ex)
+            {
+                authError = ex.Message;
+            }
+
+            try
+            {
+                apiClaims = await ApiClient.GetClaims();
+            }
+            catch (Exception ex)
+            {
+                claimsError = ex.Message;
+            }
+
+            StateHasChanged();
+        }
     }
 }

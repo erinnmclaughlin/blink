@@ -25,7 +25,7 @@ var blinkApi = builder.AddProject<Projects.Blink_WebApi>("blinkapi")
     .WithReference(papercut)
     .WithReference(keycloak)
     .WithEnvironment("Keycloak:ClientId", keycloakAdminClientId)
-    .WithEnvironment("Keycloak:Clientsecret", keycloakAdminClientSecret)
+    .WithEnvironment("Keycloak:ClientSecret", keycloakAdminClientSecret)
     .WaitFor(blinkDb)
     .WaitFor(keycloak);
 

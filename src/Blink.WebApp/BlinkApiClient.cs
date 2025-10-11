@@ -12,7 +12,21 @@ public sealed class BlinkApiClient
     public async Task<string> GetTestMessage(CancellationToken cancellationToken = default)
     {
         var response = await _httpClient.GetAsync("test", cancellationToken);
-        //response.EnsureSuccessStatusCode();
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadAsStringAsync(cancellationToken);
+    }
+
+    public async Task<string> GetAuthenticatedTestMessage(CancellationToken cancellationToken = default)
+    {
+        var response = await _httpClient.GetAsync("test-auth", cancellationToken);
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadAsStringAsync(cancellationToken);
+    }
+
+    public async Task<string> GetClaims(CancellationToken cancellationToken = default)
+    {
+        var response = await _httpClient.GetAsync("claims", cancellationToken);
+        response.EnsureSuccessStatusCode();
         return await response.Content.ReadAsStringAsync(cancellationToken);
     }
 }

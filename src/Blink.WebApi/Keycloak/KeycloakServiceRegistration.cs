@@ -1,4 +1,5 @@
 ﻿using Blink.WebApi.Keycloak;
+using Microsoft.Extensions.Options;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
@@ -22,7 +23,7 @@ public static class KeycloakServiceRegistration
             .Configure<KeycloakOptions>(builder.Configuration.GetSection("Keycloak"))
             .AddHttpClient("keycloak", (sp, client) =>
             {
-                var opt = sp.GetRequiredService<Microsoft.Extensions.Options.IOptions<KeycloakOptions>>().Value;
+                var opt = sp.GetRequiredService<IOptions<KeycloakOptions>>().Value;
                 client.BaseAddress = new Uri(opt.BaseUrl);
             });
 
