@@ -1,6 +1,9 @@
 using Blink.WebApi;
 using Blink.WebApi.Videos;
+using Blink.WebApi.Videos.Upload;
 using FluentMigrator.Runner;
+using FluentValidation;
+using MediatR;
 using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -23,6 +26,14 @@ builder.AddKeycloakAuthorization();
 builder.AddAzureBlobServiceClient("blobs");
 builder.Services.AddScoped<IVideoStorageClient, VideoStorageClient>();
 
+builder.Services.AddMediatR(o =>
+{
+    o.AddOpenBehavior(typeof(ValidationBehavior<,>));
+    o.RegisterServicesFromAssembly(typeof(Program).Assembly);
+});
+
+builder.Services.AddValidatorsFromAssembly(typeof(Program).Assembly);
+
 var app = builder.Build();
 
 app.UseHttpsRedirection();
@@ -43,50 +54,20 @@ app.MapGet("/claims", (ClaimsPrincipal user) => Results.Json(user.Claims.Select(
     .WithName("ClaimsEndpoint")
     .RequireAuthorization();
 
-app.MapPost("/api/videos/upload", async (HttpContext context, IVideoStorageClient videoStorageClient, ILogger<Program> logger) =>
+app.MapPost("/api/videos/upload", async (HttpContext context, ISender sender) =>
 {
-    try
+    var form = await context.Request.ReadFormAsync();
+
+    var file = form.Files.GetFile("video");
+
+    if (file is null)
     {
-        var form = await context.Request.ReadFormAsync();
-        var file = form.Files.GetFile("video");
-
-        if (file == null || file.Length == 0)
-        {
-            return Results.BadRequest(new { error = "No video file provided" });
-        }
-
-        // Validate file size (e.g., max 500MB)
-        const long maxFileSize = 500L * 1024 * 1024;
-        if (file.Length > maxFileSize)
-        {
-            return Results.BadRequest(new { error = "File size exceeds maximum allowed size of 500MB" });
-        }
-
-        // Validate file type
-        var allowedExtensions = new[] { ".mp4", ".avi", ".mov", ".wmv", ".flv", ".webm", ".mkv" };
-        var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
-        if (!allowedExtensions.Contains(extension))
-        {
-            return Results.BadRequest(new { error = $"Invalid file type. Allowed types: {string.Join(", ", allowedExtensions)}" });
-        }
-
-        using var stream = file.OpenReadStream();
-        var blobName = await videoStorageClient.UploadAsync(stream, file.FileName);
-
-        logger.LogInformation("Video uploaded successfully: {FileName} -> {BlobName}", file.FileName, blobName);
-
-        return Results.Ok(new { 
-            message = "Video uploaded successfully",
-            blobName = blobName,
-            fileName = file.FileName,
-            fileSize = file.Length
-        });
+        return Results.BadRequest(new { error = "No video file provided" });
     }
-    catch (Exception ex)
-    {
-        logger.LogError(ex, "Error uploading video");
-        return Results.Problem("An error occurred while uploading the video");
-    }
+
+    var request = new UploadVideoRequest { File = file };
+    var uploadedVideo = await sender.Send(request, context.RequestAborted);
+    return Results.Ok(uploadedVideo);
 })
     .WithName("UploadVideo")
     .RequireAuthorization()
