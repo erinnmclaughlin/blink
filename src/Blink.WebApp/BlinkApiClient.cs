@@ -1,4 +1,6 @@
-﻿namespace Blink.WebApp;
+﻿using System.Net.Http.Json;
+
+namespace Blink.WebApp;
 
 public sealed class BlinkApiClient
 {
@@ -23,10 +25,8 @@ public sealed class BlinkApiClient
         return await response.Content.ReadAsStringAsync(cancellationToken);
     }
 
-    public async Task<string> GetClaims(CancellationToken cancellationToken = default)
+    public async Task<Dictionary<string, string[]>> GetClaims(CancellationToken cancellationToken = default)
     {
-        var response = await _httpClient.GetAsync("claims", cancellationToken);
-        response.EnsureSuccessStatusCode();
-        return await response.Content.ReadAsStringAsync(cancellationToken);
+        return await _httpClient.GetFromJsonAsync<Dictionary<string, string[]>>("claims", cancellationToken) ?? [];
     }
 }

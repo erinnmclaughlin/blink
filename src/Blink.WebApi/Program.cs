@@ -35,7 +35,7 @@ app.MapGet("/test-auth", () => "Hello, Authorized Blink!")
     .WithName("TestAuthEndpoint")
     .RequireAuthorization();
 
-app.MapGet("/claims", (ClaimsPrincipal user) => Results.Json(user.Claims.Select(c => new { c.Type, c.Value })))
+app.MapGet("/claims", (ClaimsPrincipal user) => Results.Json(user.Claims.Select(c => new { c.Type, c.Value }).GroupBy(c => c.Type, c => c.Value).ToDictionary(g => g.Key, g => g.ToArray())))
     .WithName("ClaimsEndpoint")
     .RequireAuthorization();
 

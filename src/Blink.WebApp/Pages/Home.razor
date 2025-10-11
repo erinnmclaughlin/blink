@@ -45,7 +45,12 @@
             }
             else
             {
-                <pre>@apiClaims</pre>
+                <ul>
+                    @foreach (var claim in apiClaims)
+                    {
+                        <li>@claim.Key = @string.Join(", ", claim.Value)</li>
+                    }
+                </ul>
             }
         </div>
 
@@ -68,7 +73,7 @@
     private string? publicMessage;
     private string? authenticatedMessage;
     private string? authError;
-    private string? apiClaims;
+    private Dictionary<string, string[]>? apiClaims;
     private string? claimsError;
 
     protected override async Task OnInitializedAsync()
