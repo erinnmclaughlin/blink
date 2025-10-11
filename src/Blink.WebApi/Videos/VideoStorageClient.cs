@@ -201,12 +201,9 @@ public class VideoStorageClient : IVideoStorageClient
         return extension switch
         {
             ".mp4" => "video/mp4",
-            ".avi" => "video/x-msvideo",
-            ".mov" => "video/quicktime",
-            ".wmv" => "video/x-ms-wmv",
-            ".flv" => "video/x-flv",
             ".webm" => "video/webm",
-            ".mkv" => "video/x-matroska",
+            ".avi" => "video/x-msvideo",
+            ".wmv" => "video/x-ms-wmv",
             _ => "application/octet-stream"
         };
     }
