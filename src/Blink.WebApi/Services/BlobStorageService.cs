@@ -8,7 +8,16 @@ public interface IBlobStorageService
     Task<string> UploadVideoAsync(Stream videoStream, string fileName, CancellationToken cancellationToken = default);
     Task<bool> DeleteVideoAsync(string blobName, CancellationToken cancellationToken = default);
     Task<Stream> DownloadVideoAsync(string blobName, CancellationToken cancellationToken = default);
+    Task<List<VideoInfo>> ListVideosAsync(CancellationToken cancellationToken = default);
 }
+
+public record VideoInfo(
+    string BlobName,
+    string FileName,
+    long SizeInBytes,
+    DateTimeOffset? LastModified,
+    string ContentType
+);
 
 public class BlobStorageService : IBlobStorageService
 {
@@ -95,6 +104,50 @@ public class BlobStorageService : IBlobStorageService
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error downloading video: {BlobName}", blobName);
+            throw;
+        }
+    }
+
+    public async Task<List<VideoInfo>> ListVideosAsync(CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var containerClient = _blobServiceClient.GetBlobContainerClient("videos");
+            
+            // Check if container exists
+            if (!await containerClient.ExistsAsync(cancellationToken))
+            {
+                _logger.LogInformation("Videos container does not exist yet");
+                return new List<VideoInfo>();
+            }
+
+            var videos = new List<VideoInfo>();
+            
+            await foreach (var blobItem in containerClient.GetBlobsAsync(cancellationToken: cancellationToken))
+            {
+                // Extract original filename from blob name (format: guid_filename)
+                var fileName = blobItem.Name;
+                var underscoreIndex = fileName.IndexOf('_');
+                if (underscoreIndex > 0 && underscoreIndex < fileName.Length - 1)
+                {
+                    fileName = fileName.Substring(underscoreIndex + 1);
+                }
+
+                videos.Add(new VideoInfo(
+                    BlobName: blobItem.Name,
+                    FileName: fileName,
+                    SizeInBytes: blobItem.Properties.ContentLength ?? 0,
+                    LastModified: blobItem.Properties.LastModified,
+                    ContentType: blobItem.Properties.ContentType ?? "video/mp4"
+                ));
+            }
+
+            _logger.LogInformation("Retrieved {Count} videos from blob storage", videos.Count);
+            return videos;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error listing videos");
             throw;
         }
     }

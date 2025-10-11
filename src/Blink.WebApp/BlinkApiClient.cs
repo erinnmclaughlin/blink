@@ -42,6 +42,11 @@ public sealed class BlinkApiClient
         return await response.Content.ReadFromJsonAsync<VideoUploadResponse>(cancellationToken) 
             ?? throw new InvalidOperationException("Failed to deserialize upload response");
     }
+
+    public async Task<List<VideoInfo>> GetVideosAsync(CancellationToken cancellationToken = default)
+    {
+        return await _httpClient.GetFromJsonAsync<List<VideoInfo>>("api/videos", cancellationToken) ?? [];
+    }
 }
 
 public sealed record VideoUploadResponse(
@@ -49,4 +54,12 @@ public sealed record VideoUploadResponse(
     string BlobName,
     string FileName,
     long FileSize
+);
+
+public sealed record VideoInfo(
+    string BlobName,
+    string FileName,
+    long SizeInBytes,
+    DateTimeOffset? LastModified,
+    string ContentType
 );

@@ -91,6 +91,23 @@ app.MapPost("/api/videos/upload", async (HttpContext context, IBlobStorageServic
     .RequireAuthorization()
     .DisableAntiforgery();
 
+app.MapGet("/api/videos", async (IBlobStorageService blobStorageService, ILogger<Program> logger) =>
+{
+    try
+    {
+        var videos = await blobStorageService.ListVideosAsync();
+        logger.LogInformation("Retrieved {Count} videos", videos.Count);
+        return Results.Ok(videos);
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "Error retrieving videos");
+        return Results.Problem("An error occurred while retrieving videos");
+    }
+})
+    .WithName("ListVideos")
+    .RequireAuthorization();
+
 app.MapDefaultEndpoints();
 
 using (var scope = app.Services.CreateScope())
