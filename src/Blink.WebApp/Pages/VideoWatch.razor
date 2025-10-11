@@ -1,0 +1,193 @@
+@page "/videos/watch/{BlobName}"
+@using Microsoft.AspNetCore.Authorization
+@inject BlinkApiClient ApiClient
+@inject ILogger<VideoWatch> Logger
+@inject NavigationManager NavigationManager
+@attribute [Authorize]
+
+<PageTitle>@(video != null ? GetDisplayTitle(video) : "Watch Video")</PageTitle>
+
+<div class="container mt-4">
+    @if (isLoadingVideo)
+    {
+        <div class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading video...</span>
+            </div>
+            <p class="mt-3">Loading video...</p>
+        </div>
+    }
+    else if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <div class="alert alert-danger" role="alert">
+            <strong>Error!</strong> @errorMessage
+        </div>
+        <div class="text-center">
+            <button class="btn btn-primary" @onclick="GoBackToList">
+                <span class="bi bi-arrow-left"></span> Back to Videos
+            </button>
+        </div>
+    }
+    else if (video != null)
+    {
+        <div class="row">
+            <div class="col-lg-10 mx-auto">
+                <div class="mb-3">
+                    <button class="btn btn-outline-secondary" @onclick="GoBackToList">
+                        <span class="bi bi-arrow-left"></span> Back to Videos
+                    </button>
+                </div>
+                
+                <div class="card shadow-sm">
+                    <div class="card-header">
+                        <h3 class="mb-0">@GetDisplayTitle(video)</h3>
+                        <small class="text-muted">
+                            @FormatFileSize(video.SizeInBytes) • 
+                            @(video.LastModified?.LocalDateTime.ToString("g") ?? "Unknown")
+                        </small>
+                    </div>
+                    <div class="card-body p-0">
+                        @if (!string.IsNullOrEmpty(videoPlayerError))
+                        {
+                            <div class="alert alert-danger m-3" role="alert">
+                                <strong>Error!</strong> @videoPlayerError
+                            </div>
+                        }
+                        else if (!string.IsNullOrEmpty(currentVideoUrl))
+                        {
+                            <div class="ratio ratio-16x9">
+                                <video @ref="videoElement" 
+                                       controls 
+                                       autoplay 
+                                       preload="metadata" 
+                                       class="w-100"
+                                       @onerror="OnVideoError"
+                                       @onloadedmetadata="OnVideoMetadataLoaded"
+                                       @oncanplay="OnVideoCanPlay">
+                                    <source src="@currentVideoUrl" type="@video.ContentType">
+                                    Your browser does not support the video tag.
+                                </video>
+                            </div>
+                            <div class="p-3">
+                                <small class="text-muted">If the video doesn't play, try clicking the play button.</small>
+                            </div>
+                        }
+                    </div>
+                    <div class="card-footer">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <small class="text-muted">
+                                    <strong>File:</strong> @video.FileName
+                                </small>
+                            </div>
+                            <div class="col-md-6 text-md-end">
+                                <small class="text-muted">
+                                    <strong>Type:</strong> @video.ContentType
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public string BlobName { get; set; } = string.Empty;
+    
+    private VideoInfo? video;
+    private string? currentVideoUrl;
+    private bool isLoadingVideo = true;
+    private string? errorMessage;
+    private string? videoPlayerError;
+    private ElementReference videoElement;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadVideoAsync();
+    }
+
+    private async Task LoadVideoAsync()
+    {
+        if (string.IsNullOrEmpty(BlobName))
+        {
+            errorMessage = "No video specified.";
+            isLoadingVideo = false;
+            return;
+        }
+
+        isLoadingVideo = true;
+        errorMessage = null;
+        videoPlayerError = null;
+
+        try
+        {
+            // First, get the list of videos to find details about this video
+            var videos = await ApiClient.GetVideosAsync();
+            video = videos.FirstOrDefault(v => v.BlobName == BlobName);
+            
+            if (video == null)
+            {
+                errorMessage = "Video not found.";
+                return;
+            }
+
+            // Get the video URL
+            currentVideoUrl = await ApiClient.GetVideoUrlAsync(BlobName);
+            Logger.LogInformation("Loaded video URL for: {FileName}, URL: {Url}", video.FileName, currentVideoUrl);
+            Console.WriteLine($"Video URL: {currentVideoUrl}");
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Failed to load video: {ex.Message}";
+            Logger.LogError(ex, "Error loading video: {BlobName}", BlobName);
+            Console.WriteLine($"Error getting video: {ex.Message}");
+        }
+        finally
+        {
+            isLoadingVideo = false;
+        }
+    }
+
+    private void GoBackToList()
+    {
+        NavigationManager.NavigateTo("/videos");
+    }
+
+    private void OnVideoError()
+    {
+        Console.WriteLine("Video error occurred!");
+        videoPlayerError = "Video failed to load. The video format may not be supported by your browser, or the file may be corrupted.";
+    }
+
+    private void OnVideoMetadataLoaded()
+    {
+        Console.WriteLine("Video metadata loaded successfully");
+    }
+
+    private void OnVideoCanPlay()
+    {
+        Console.WriteLine("Video can play - ready to start playback");
+    }
+
+    private string FormatFileSize(long bytes)
+    {
+        string[] sizes = { "B", "KB", "MB", "GB" };
+        double len = bytes;
+        int order = 0;
+        while (len >= 1024 && order < sizes.Length - 1)
+        {
+            order++;
+            len /= 1024;
+        }
+        return $"{len:0.##} {sizes[order]}";
+    }
+
+    private string GetDisplayTitle(VideoInfo video)
+    {
+        return !string.IsNullOrWhiteSpace(video.Title) ? video.Title : video.FileName;
+    }
+}
+
