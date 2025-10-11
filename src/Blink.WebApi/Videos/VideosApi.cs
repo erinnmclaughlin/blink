@@ -1,3 +1,5 @@
+using Blink.WebApi.Videos.GetUrl;
+using Blink.WebApi.Videos.List;
 using Blink.WebApi.Videos.Upload;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -5,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Blink.WebApi.Videos;
 
 /// <summary>
-/// Endpoint for uploading videos following CQRS pattern
+/// Videos API endpoints following CQRS pattern with MediatR
 /// </summary>
 public static class VideosApi
 {
@@ -18,6 +20,21 @@ public static class VideosApi
             .DisableAntiforgery()
             .Produces<UploadedVideoInfo>(StatusCodes.Status200OK)
             .Produces<ProblemDetails>(StatusCodes.Status400BadRequest)
+            .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError);
+
+        // GET /api/videos
+        endpoints.MapGet("/api/videos", HandleListVideosAsync)
+            .WithName("ListVideos")
+            .RequireAuthorization()
+            .Produces<List<VideoInfo>>(StatusCodes.Status200OK)
+            .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError);
+
+        // GET /api/videos/{blobName}/url
+        endpoints.MapGet("/api/videos/{blobName}/url", HandleGetVideoUrlAsync)
+            .WithName("GetVideoUrl")
+            .RequireAuthorization()
+            .Produces<VideoUrlResponse>(StatusCodes.Status200OK)
+            .Produces<ProblemDetails>(StatusCodes.Status404NotFound)
             .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError);
 
         return endpoints;
@@ -51,6 +68,29 @@ public static class VideosApi
         var result = await sender.Send(request, cancellationToken);
 
         logger.LogInformation("Video uploaded successfully: {BlobName}", result.BlobName);
+        return Results.Ok(result);
+    }
+
+    private static async Task<IResult> HandleListVideosAsync(
+        ISender sender,
+        CancellationToken cancellationToken)
+    {
+        // Send query through MediatR pipeline
+        var query = new ListVideosQuery();
+        var videos = await sender.Send(query, cancellationToken);
+        
+        return Results.Ok(videos);
+    }
+
+    private static async Task<IResult> HandleGetVideoUrlAsync(
+        string blobName,
+        ISender sender,
+        CancellationToken cancellationToken)
+    {
+        // Send query through MediatR pipeline
+        var query = new GetVideoUrlQuery { BlobName = blobName };
+        var result = await sender.Send(query, cancellationToken);
+        
         return Results.Ok(result);
     }
 }

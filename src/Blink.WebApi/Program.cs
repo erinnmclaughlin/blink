@@ -77,26 +77,8 @@ app.MapGet("/claims", (ClaimsPrincipal user) => Results.Json(user.Claims.Select(
     .WithName("ClaimsEndpoint")
     .RequireAuthorization();
 
-// Map the video upload endpoint using CQRS pattern with MediatR
+// Map all video endpoints using CQRS pattern with MediatR
 app.MapVideosApi();
-
-app.MapGet("/api/videos", async (IVideoStorageClient blobStorageService, ILogger<Program> logger) =>
-{
-    var videos = await blobStorageService.ListAsync();
-    logger.LogInformation("Retrieved {Count} videos", videos.Count);
-    return Results.Ok(videos);
-})
-    .WithName("ListVideos")
-    .RequireAuthorization();
-
-app.MapGet("/api/videos/{blobName}/url", async (string blobName, IVideoStorageClient blobStorageService, ILogger<Program> logger) =>
-{
-    var url = await blobStorageService.GetUrlAsync(blobName);
-    logger.LogInformation("Generated URL for video: {BlobName}", blobName);
-    return Results.Ok(new { url });
-})
-    .WithName("GetVideoUrl")
-    .RequireAuthorization();
 
 app.MapDefaultEndpoints();
 
