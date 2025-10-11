@@ -1,5 +1,8 @@
 var builder = DistributedApplication.CreateBuilder(args);
 
+var storage = builder.AddAzureStorage("storage").RunAsEmulator(azurite => azurite.WithDataVolume());
+var blobs = storage.AddBlobs("blobs");
+
 var keycloak = builder
     .AddKeycloak("keycloak", 8080)
     .WithExternalHttpEndpoints()
@@ -13,7 +16,7 @@ var pgServer = builder
     .WithDataVolume()
     .WithPgWeb();
 
-var papercut = builder.AddPapercutSmtp("papercut");
+//var papercut = builder.AddPapercutSmtp("papercut");
 var blinkDb = pgServer.AddDatabase("blinkdb");
 
 var keycloakAdminClientId = builder.AddParameter("keycloak-clientid", "user-sync-job-test");
@@ -22,11 +25,13 @@ var keycloakAdminClientSecret = builder.AddParameter("keycloak-clientsecret", se
 var blinkApi = builder.AddProject<Projects.Blink_WebApi>("blinkapi")
     .WithExternalHttpEndpoints()
     .WithReference(blinkDb)
-    .WithReference(papercut)
+    .WithReference(blobs)
+    //.WithReference(papercut)
     .WithReference(keycloak)
     .WithEnvironment("Keycloak:ClientId", keycloakAdminClientId)
     .WithEnvironment("Keycloak:ClientSecret", keycloakAdminClientSecret)
     .WaitFor(blinkDb)
+    .WaitFor(blobs)
     .WaitFor(keycloak);
 
 var blinkWebApp = builder
