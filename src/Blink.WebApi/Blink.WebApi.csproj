@@ -8,8 +8,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Aspire.Keycloak.Authentication" Version="9.5.0-preview.1.25474.7" />
-    <PackageReference Include="Aspire.Npgsql" Version="9.5.0" />
+    <PackageReference Include="Aspire.Keycloak.Authentication" Version="9.5.1-preview.1.25502.11" />
+    <PackageReference Include="Aspire.Npgsql" Version="9.5.1" />
     <PackageReference Include="Dapper" Version="2.1.66" />
     <PackageReference Include="FluentMigrator" Version="7.1.0" />
     <PackageReference Include="FluentMigrator.Runner.Postgres" Version="7.1.0" />
