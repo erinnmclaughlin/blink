@@ -2,6 +2,7 @@ using Blink.WebApi.Videos.Delete;
 using Blink.WebApi.Videos.GetUrl;
 using Blink.WebApi.Videos.List;
 using Blink.WebApi.Videos.Upload;
+using Blink.WebApi.Videos.UpdateTitle;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -43,6 +44,15 @@ public static class VideosApi
             .WithName("DeleteVideo")
             .RequireAuthorization()
             .Produces<DeleteVideoResponse>(StatusCodes.Status200OK)
+            .Produces<ProblemDetails>(StatusCodes.Status404NotFound)
+            .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError);
+
+        // PUT /api/videos/{blobName}/title
+        endpoints.MapPut("/api/videos/{blobName}/title", HandleUpdateTitleAsync)
+            .WithName("UpdateVideoTitle")
+            .RequireAuthorization()
+            .Produces<UpdateTitleResponse>(StatusCodes.Status200OK)
+            .Produces<ProblemDetails>(StatusCodes.Status400BadRequest)
             .Produces<ProblemDetails>(StatusCodes.Status404NotFound)
             .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError);
 
@@ -114,4 +124,19 @@ public static class VideosApi
         
         return Results.Ok(result);
     }
+
+    private static async Task<IResult> HandleUpdateTitleAsync(
+        string blobName,
+        [FromBody] UpdateTitleRequest request,
+        ISender sender,
+        CancellationToken cancellationToken)
+    {
+        // Send command through MediatR pipeline
+        var command = new UpdateTitleCommand { BlobName = blobName, Title = request.Title };
+        var result = await sender.Send(command, cancellationToken);
+        
+        return Results.Ok(result);
+    }
 }
+
+public sealed record UpdateTitleRequest(string Title);

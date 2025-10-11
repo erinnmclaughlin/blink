@@ -39,7 +39,7 @@
                 </svg>
                 <h3>No Videos Yet</h3>
                 <p class="text-muted">You haven't uploaded any videos yet.</p>
-                <a href="/video-upload" class="btn btn-primary mt-3">
+                <a href="/videos/upload" class="btn btn-primary mt-3">
                     <span class="bi bi-cloud-upload"></span> Upload Your First Video
                 </a>
             </div>
@@ -55,7 +55,7 @@
                 <button class="btn btn-outline-secondary btn-sm" @onclick="LoadVideosAsync">
                     <span class="bi bi-arrow-clockwise"></span> Refresh
                 </button>
-                <a href="/video-upload" class="btn btn-primary btn-sm ms-2">
+                <a href="/videos/upload" class="btn btn-primary btn-sm ms-2">
                     <span class="bi bi-cloud-upload"></span> Upload Video
                 </a>
             </div>
@@ -69,9 +69,41 @@
                         <div class="card-body">
                             <div class="d-flex align-items-start mb-2">
                                 <div class="flex-grow-1" style="min-width: 0;">
-                                    <h5 class="card-title text-truncate mb-1" title="@video.FileName">
-                                        @video.FileName
-                                    </h5>
+                                    @if (editingVideoId == video.BlobName)
+                                    {
+                                        <div class="input-group input-group-sm mb-1">
+                                            <input type="text" 
+                                                   class="form-control" 
+                                                   @bind="editingTitle" 
+                                                   @bind:event="oninput"
+                                                   @onkeydown="@(e => HandleTitleKeyDown(e, video))"
+                                                   placeholder="Enter new title" />
+                                            <button class="btn btn-sm btn-success" @onclick="() => SaveTitle(video)" disabled="@isUpdatingTitle">
+                                                @if (isUpdatingTitle)
+                                                {
+                                                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="bi bi-check-lg"></span>
+                                                }
+                                            </button>
+                                            <button class="btn btn-sm btn-secondary" @onclick="CancelEditTitle" disabled="@isUpdatingTitle">
+                                                <span class="bi bi-x-lg"></span>
+                                            </button>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="d-flex align-items-center mb-1">
+                                            <h5 class="card-title text-truncate mb-0 flex-grow-1" title="@GetDisplayTitle(video)">
+                                                @GetDisplayTitle(video)
+                                            </h5>
+                                            <button class="btn btn-sm btn-link p-0 ms-2" @onclick="() => StartEditTitle(video)" title="Edit title">
+                                                <span class="bi bi-pencil text-primary"></span>
+                                            </button>
+                                        </div>
+                                    }
                                     <h6 class="card-subtitle mb-2 text-muted small">
                                         @GetFileExtension(video.FileName).ToUpperInvariant()
                                     </h6>
@@ -124,7 +156,7 @@
         <div class="modal-dialog modal-xl modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">@selectedVideoForPlayer.FileName</h5>
+                    <h5 class="modal-title">@GetDisplayTitle(selectedVideoForPlayer)</h5>
                     <button type="button" class="btn-close" @onclick="ClosePlayer"></button>
                 </div>
                 <div class="modal-body p-0">
@@ -185,6 +217,9 @@
                 </div>
                 <div class="modal-body">
                     <dl class="row">
+                        <dt class="col-sm-4">Title:</dt>
+                        <dd class="col-sm-8 text-break">@GetDisplayTitle(selectedVideoForDetails)</dd>
+
                         <dt class="col-sm-4">File Name:</dt>
                         <dd class="col-sm-8 text-break">@selectedVideoForDetails.FileName</dd>
 
@@ -292,6 +327,11 @@
     private VideoInfo? videoToDelete;
     private bool isDeletingVideo;
     private string? deleteError;
+    
+    // Video title editing state
+    private string? editingVideoId;
+    private string editingTitle = string.Empty;
+    private bool isUpdatingTitle;
 
     protected override async Task OnInitializedAsync()
     {
@@ -403,7 +443,7 @@
         catch (Exception ex)
         {
             deleteError = $"Failed to delete video: {ex.Message}";
-            Logger.LogError(ex, "Error deleting video: {FileName}", videoToDelete.FileName);
+            Logger.LogError(ex, "Error deleting video: {FileName}", videoToDelete?.FileName ?? "Unknown");
         }
         finally
         {
@@ -459,6 +499,71 @@
             "video/x-matroska" => "MKV",
             _ => "VIDEO"
         };
+    }
+
+    private string GetDisplayTitle(VideoInfo video)
+    {
+        return !string.IsNullOrWhiteSpace(video.Title) ? video.Title : video.FileName;
+    }
+
+    private void StartEditTitle(VideoInfo video)
+    {
+        editingVideoId = video.BlobName;
+        editingTitle = GetDisplayTitle(video);
+    }
+
+    private void CancelEditTitle()
+    {
+        editingVideoId = null;
+        editingTitle = string.Empty;
+        isUpdatingTitle = false;
+    }
+
+    private async Task HandleTitleKeyDown(KeyboardEventArgs e, VideoInfo video)
+    {
+        if (e.Key == "Enter")
+        {
+            await SaveTitle(video);
+        }
+        else if (e.Key == "Escape")
+        {
+            CancelEditTitle();
+        }
+    }
+
+    private async Task SaveTitle(VideoInfo video)
+    {
+        if (string.IsNullOrWhiteSpace(editingTitle))
+        {
+            return;
+        }
+
+        isUpdatingTitle = true;
+
+        try
+        {
+            var result = await ApiClient.UpdateVideoTitleAsync(video.BlobName, editingTitle.Trim());
+            Logger.LogInformation("Video title updated: {BlobName}, Title: {Title}", video.BlobName, result.Title);
+            
+            // Find and update the video in the list
+            var videoIndex = videos.FindIndex(v => v.BlobName == video.BlobName);
+            if (videoIndex >= 0)
+            {
+                videos[videoIndex] = videos[videoIndex] with { Title = result.Title };
+            }
+            
+            // Close the edit mode
+            CancelEditTitle();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error updating video title: {BlobName}", video.BlobName);
+            // Keep edit mode open on error so user can retry
+        }
+        finally
+        {
+            isUpdatingTitle = false;
+        }
     }
 }
 

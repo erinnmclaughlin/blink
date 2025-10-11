@@ -11,6 +11,7 @@ public interface IVideoStorageClient
     Task<string> GetUrlAsync(string blobName, CancellationToken cancellationToken = default);
     Task<List<VideoInfo>> ListAsync(CancellationToken cancellationToken = default);
     Task<(string BlobName, long FileSize)> UploadAsync(Stream videoStream, string fileName, CancellationToken cancellationToken = default);
+    Task<bool> UpdateTitleAsync(string blobName, string title, CancellationToken cancellationToken = default);
 }
 
 public class VideoStorageClient : IVideoStorageClient
@@ -132,7 +133,7 @@ public class VideoStorageClient : IVideoStorageClient
 
             var videos = new List<VideoInfo>();
 
-            await foreach (var blobItem in containerClient.GetBlobsAsync(cancellationToken: cancellationToken))
+            await foreach (var blobItem in containerClient.GetBlobsAsync(traits: BlobTraits.Metadata, cancellationToken: cancellationToken))
             {
                 // Extract original filename from blob name (format: guid_filename)
                 var fileName = blobItem.Name;
@@ -142,12 +143,20 @@ public class VideoStorageClient : IVideoStorageClient
                     fileName = fileName[(underscoreIndex + 1)..];
                 }
 
+                // Get title from metadata, or use filename as fallback
+                string? title = null;
+                if (blobItem.Metadata != null && blobItem.Metadata.TryGetValue("title", out var metadataTitle))
+                {
+                    title = metadataTitle;
+                }
+
                 videos.Add(new VideoInfo(
                     BlobName: blobItem.Name,
                     FileName: fileName,
                     SizeInBytes: blobItem.Properties.ContentLength ?? 0,
                     LastModified: blobItem.Properties.LastModified,
-                    ContentType: blobItem.Properties.ContentType ?? "video/mp4"
+                    ContentType: blobItem.Properties.ContentType ?? "video/mp4",
+                    Title: title
                 ));
             }
 
@@ -195,6 +204,39 @@ public class VideoStorageClient : IVideoStorageClient
         return containerClient.GetBlobClient(blobName);
     }
 
+    public async Task<bool> UpdateTitleAsync(string blobName, string title, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var blobClient = await GetBlobClientAsync(blobName, cancellationToken);
+
+            // Check if blob exists
+            if (!await blobClient.ExistsAsync(cancellationToken))
+            {
+                _logger.LogWarning("Video not found for title update: {BlobName}", blobName);
+                return false;
+            }
+
+            // Get current metadata
+            var properties = await blobClient.GetPropertiesAsync(cancellationToken: cancellationToken);
+            var metadata = properties.Value.Metadata;
+
+            // Update or add title metadata
+            metadata["title"] = title;
+
+            // Set the updated metadata
+            await blobClient.SetMetadataAsync(metadata, cancellationToken: cancellationToken);
+
+            _logger.LogInformation("Video title updated successfully: {BlobName}, Title: {Title}", blobName, title);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating video title: {BlobName}", blobName);
+            throw;
+        }
+    }
+
     private static string GetContentType(string fileName)
     {
         var extension = Path.GetExtension(fileName).ToLowerInvariant();
@@ -214,5 +256,6 @@ public record VideoInfo(
     string FileName,
     long SizeInBytes,
     DateTimeOffset? LastModified,
-    string ContentType
+    string ContentType,
+    string? Title
 );
