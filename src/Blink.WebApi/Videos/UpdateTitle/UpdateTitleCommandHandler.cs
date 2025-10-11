@@ -4,26 +4,39 @@ namespace Blink.WebApi.Videos.UpdateTitle;
 
 public sealed class UpdateTitleCommandHandler : IRequestHandler<UpdateTitleCommand, UpdateTitleResponse>
 {
-    private readonly IVideoStorageClient _videoStorageClient;
+    private readonly IVideoRepository _videoRepository;
     private readonly ILogger<UpdateTitleCommandHandler> _logger;
 
-    public UpdateTitleCommandHandler(IVideoStorageClient videoStorageClient, ILogger<UpdateTitleCommandHandler> logger)
+    public UpdateTitleCommandHandler(IVideoRepository videoRepository, ILogger<UpdateTitleCommandHandler> logger)
     {
-        _videoStorageClient = videoStorageClient;
+        _videoRepository = videoRepository;
         _logger = logger;
     }
 
     public async Task<UpdateTitleResponse> Handle(UpdateTitleCommand request, CancellationToken cancellationToken)
     {
-        var wasUpdated = await _videoStorageClient.UpdateTitleAsync(request.BlobName, request.Title, cancellationToken);
+        // Get the video from database
+        var video = await _videoRepository.GetByBlobNameAsync(request.BlobName, cancellationToken);
         
-        if (!wasUpdated)
+        if (video == null)
         {
             _logger.LogWarning("Video not found for title update: {BlobName}", request.BlobName);
             throw new FileNotFoundException($"Video not found: {request.BlobName}");
         }
 
-        _logger.LogInformation("Video title updated successfully: {BlobName}, Title: {Title}", request.BlobName, request.Title);
+        // Update title and timestamp
+        video.Title = request.Title;
+        video.UpdatedAt = DateTime.UtcNow;
+
+        var wasUpdated = await _videoRepository.UpdateAsync(video, cancellationToken);
+        
+        if (!wasUpdated)
+        {
+            _logger.LogWarning("Failed to update video title in database: {BlobName}", request.BlobName);
+            throw new InvalidOperationException($"Failed to update video: {request.BlobName}");
+        }
+
+        _logger.LogInformation("Video title updated successfully in database: {BlobName}, Title: {Title}", request.BlobName, request.Title);
         
         return new UpdateTitleResponse 
         { 

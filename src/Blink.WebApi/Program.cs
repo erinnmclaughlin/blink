@@ -26,7 +26,9 @@ builder.AddKeycloakAuthorization();
 
 builder.AddAzureBlobServiceClient("blobs");
 builder.Services.AddScoped<IVideoStorageClient, VideoStorageClient>();
+builder.Services.AddScoped<IVideoRepository, VideoRepository>();
 builder.Services.AddScoped<IMultipartFormFileParser, MultipartFormFileParser>();
+builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddMediatR(o =>
 {
