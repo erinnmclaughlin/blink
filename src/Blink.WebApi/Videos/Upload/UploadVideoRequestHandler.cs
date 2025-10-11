@@ -14,13 +14,13 @@ public sealed class UploadVideoRequestHandler : IRequestHandler<UploadVideoReque
     public async Task<UploadedVideoInfo> Handle(UploadVideoRequest request, CancellationToken cancellationToken)
     {
         using var stream = request.File.OpenReadStream();
-        var blobName = await _videoStorageClient.UploadAsync(stream, request.File.FileName, cancellationToken);
+        var (blobName, fileSize) = await _videoStorageClient.UploadAsync(stream, request.File.FileName, cancellationToken);
 
         return new UploadedVideoInfo
         {
             BlobName = blobName,
             FileName = request.File.FileName,
-            FileSize = request.FileSize
+            FileSize = fileSize
         };
     }
 }

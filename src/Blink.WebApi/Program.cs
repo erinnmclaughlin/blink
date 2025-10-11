@@ -6,6 +6,8 @@ using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
+using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Net.Http.Headers;
 using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -36,16 +38,16 @@ builder.Services.AddMediatR(o =>
 
 builder.Services.AddValidatorsFromAssembly(typeof(Program).Assembly);
 
-// Configure Kestrel to allow larger request bodies (500MB for video uploads)
+// Configure Kestrel to allow larger request bodies (2000MB for video uploads)
 builder.Services.Configure<KestrelServerOptions>(options =>
 {
-    options.Limits.MaxRequestBodySize = 500 * 1024 * 1024; // 500MB
+    options.Limits.MaxRequestBodySize = 2000 * 1024 * 1024; // 2000MB
 });
 
 // Configure Form options to allow larger multipart form data
 builder.Services.Configure<FormOptions>(options =>
 {
-    options.MultipartBodyLengthLimit = 500 * 1024 * 1024; // 500MB
+    options.MultipartBodyLengthLimit = 2000 * 1024 * 1024; // 2000MB
     options.ValueLengthLimit = int.MaxValue;
     options.MultipartHeadersLengthLimit = int.MaxValue;
 });
@@ -70,20 +72,68 @@ app.MapGet("/claims", (ClaimsPrincipal user) => Results.Json(user.Claims.Select(
     .WithName("ClaimsEndpoint")
     .RequireAuthorization();
 
-app.MapPost("/api/videos/upload", async (HttpContext context, ISender sender) =>
+app.MapPost("/api/videos/upload", async (HttpContext context, ISender sender, ILogger<Program> logger) =>
 {
-    var form = await context.Request.ReadFormAsync();
-
-    var file = form.Files.GetFile("video");
-
-    if (file is null)
+    try
     {
-        return Results.BadRequest(new { error = "No video file provided" });
-    }
+        logger.LogInformation("Video upload request received. ContentType: {ContentType}, ContentLength: {ContentLength}", 
+            context.Request.ContentType, context.Request.ContentLength);
 
-    var request = new UploadVideoRequest { File = file };
-    var uploadedVideo = await sender.Send(request, context.RequestAborted);
-    return Results.Ok(uploadedVideo);
+        if (!context.Request.HasFormContentType || 
+            !MediaTypeHeaderValue.TryParse(context.Request.ContentType, out var mediaTypeHeader) ||
+            string.IsNullOrEmpty(mediaTypeHeader.Boundary.Value))
+        {
+            logger.LogWarning("Invalid content type: {ContentType}", context.Request.ContentType);
+            return Results.BadRequest(new { error = "Invalid content type" });
+        }
+
+        var boundary = HeaderUtilities.RemoveQuotes(mediaTypeHeader.Boundary.Value).Value;
+        if (string.IsNullOrWhiteSpace(boundary))
+        {
+            logger.LogWarning("Missing boundary in content type");
+            return Results.BadRequest(new { error = "Missing boundary" });
+        }
+
+        logger.LogInformation("Reading multipart data with boundary: {Boundary}", boundary);
+
+        var reader = new MultipartReader(boundary, context.Request.Body);
+        MultipartSection? section;
+        StreamingFormFile? videoFile = null;
+
+        // Read sections one at a time (streaming)
+        while ((section = await reader.ReadNextSectionAsync(context.RequestAborted)) != null)
+        {
+            var hasContentDispositionHeader = ContentDispositionHeaderValue.TryParse(
+                section.ContentDisposition, out var contentDisposition);
+
+            if (hasContentDispositionHeader && contentDisposition!.DispositionType.Equals("form-data") &&
+                !string.IsNullOrEmpty(contentDisposition.FileName.Value))
+            {
+                // This is a file
+                var fileName = contentDisposition.FileName.Value;
+                logger.LogInformation("Found file in multipart: {FileName}", fileName);
+                videoFile = new StreamingFormFile(section.Body, fileName, section.ContentType);
+                break; // We only expect one file
+            }
+        }
+
+        if (videoFile == null)
+        {
+            logger.LogWarning("No video file found in request");
+            return Results.BadRequest(new { error = "No video file provided" });
+        }
+
+        logger.LogInformation("Processing upload for file: {FileName}", videoFile.FileName);
+        var request = new UploadVideoRequest { File = videoFile };
+        var uploadedVideo = await sender.Send(request, context.RequestAborted);
+        logger.LogInformation("Video uploaded successfully: {BlobName}", uploadedVideo.BlobName);
+        return Results.Ok(uploadedVideo);
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "Error processing video upload");
+        return Results.Problem(detail: ex.Message, title: "Upload failed", statusCode: 500);
+    }
 })
     .WithName("UploadVideo")
     .RequireAuthorization()

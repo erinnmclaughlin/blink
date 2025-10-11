@@ -142,10 +142,21 @@
                     }
                     else if (!string.IsNullOrEmpty(currentVideoUrl))
                     {
-                        <video controls autoplay class="w-100" style="max-height: 70vh;">
+                        <video @ref="videoElement" 
+                               controls 
+                               autoplay 
+                               preload="metadata" 
+                               class="w-100" 
+                               style="max-height: 70vh;" 
+                               @onerror="OnVideoError"
+                               @onloadedmetadata="OnVideoMetadataLoaded"
+                               @oncanplay="OnVideoCanPlay">
                             <source src="@currentVideoUrl" type="@selectedVideoForPlayer.ContentType">
                             Your browser does not support the video tag.
                         </video>
+                        <div class="mt-2">
+                            <small class="text-muted">If the video doesn't play, try clicking the play button.</small>
+                        </div>
                     }
                 </div>
                 <div class="modal-footer">
@@ -188,7 +199,7 @@
                     </dl>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" @onclick="() => { CloseDetailsModal(); WatchVideo(selectedVideoForDetails); }">
+                    <button type="button" class="btn btn-primary" @onclick="async () => { CloseDetailsModal(); await WatchVideo(selectedVideoForDetails); }">
                         <span class="bi bi-play-circle"></span> Watch
                     </button>
                     <button type="button" class="btn btn-secondary" @onclick="CloseDetailsModal">Close</button>
@@ -208,6 +219,7 @@
     private string? currentVideoUrl;
     private bool isLoadingVideo;
     private string? videoPlayerError;
+    private ElementReference videoElement;
     
     // Video details state
     private VideoInfo? selectedVideoForDetails;
@@ -248,12 +260,14 @@
         try
         {
             currentVideoUrl = await ApiClient.GetVideoUrlAsync(video.BlobName);
-            Logger.LogInformation("Loaded video URL for: {FileName}", video.FileName);
+            Logger.LogInformation("Loaded video URL for: {FileName}, URL: {Url}", video.FileName, currentVideoUrl);
+            Console.WriteLine($"Video URL: {currentVideoUrl}"); // Debug output to browser console
         }
         catch (Exception ex)
         {
             videoPlayerError = $"Failed to load video: {ex.Message}";
             Logger.LogError(ex, "Error loading video URL for: {FileName}", video.FileName);
+            Console.WriteLine($"Error getting video URL: {ex.Message}");
         }
         finally
         {
@@ -277,6 +291,22 @@
     private void CloseDetailsModal()
     {
         selectedVideoForDetails = null;
+    }
+
+    private void OnVideoError()
+    {
+        Console.WriteLine("Video error occurred!");
+        videoPlayerError = "Video failed to load. The video format may not be supported by your browser, or the file may be corrupted.";
+    }
+
+    private void OnVideoMetadataLoaded()
+    {
+        Console.WriteLine("Video metadata loaded successfully");
+    }
+
+    private void OnVideoCanPlay()
+    {
+        Console.WriteLine("Video can play - ready to start playback");
     }
 
     private string FormatFileSize(long bytes)

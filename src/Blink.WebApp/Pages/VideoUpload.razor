@@ -2,8 +2,14 @@
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.Forms
 @using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@using Microsoft.JSInterop
+@using System.Text.Json
 @inject BlinkApiClient ApiClient
 @inject ILogger<VideoUpload> Logger
+@inject IJSRuntime JS
+@inject IAccessTokenProvider TokenProvider
+@inject IConfiguration Configuration
 @attribute [Authorize]
 
 <PageTitle>Video Upload</PageTitle>
@@ -59,13 +65,14 @@
 
                     <div class="mb-3">
                         <label for="videoFile" class="form-label">Select Video File</label>
-                        <InputFile OnChange="OnFileSelected" 
+                        <InputFile @ref="fileInputRef"
+                                   OnChange="OnFileSelected" 
                                    class="form-control" 
                                    id="videoFile" 
                                    accept="video/*"
                                    disabled="@isUploading" />
                         <div class="form-text">
-                            Supported formats: MP4, AVI, MOV, WMV, FLV, WEBM, MKV (Max size: 500MB)
+                            Supported formats: MP4, AVI, MOV, WMV, FLV, WEBM, MKV (Max size: 2GB)
                         </div>
                     </div>
 
@@ -147,7 +154,7 @@
                     
                     <h6>Tips:</h6>
                     <ul class="small">
-                        <li>Ensure your video file is under 500MB</li>
+                        <li>Ensure your video file is under 2GB</li>
                         <li>Supported formats include MP4, AVI, MOV, and more</li>
                         <li>Do not close or refresh the page during upload</li>
                         <li>Upload times vary based on file size and connection speed</li>
@@ -159,6 +166,7 @@
 </div>
 
 @code {
+    private InputFile? fileInputRef;
     private IBrowserFile? selectedFile;
     private bool isUploading;
     private int uploadProgress;
@@ -174,7 +182,7 @@
 
     private async Task UploadVideo()
     {
-        if (selectedFile == null)
+        if (selectedFile == null || fileInputRef == null)
             return;
 
         isUploading = true;
@@ -183,36 +191,61 @@
 
         try
         {
-            // Validate file size (500MB)
-            const long maxFileSize = 500L * 1024 * 1024;
+            // Validate file size (2GB)
+            const long maxFileSize = 2000L * 1024 * 1024;
             if (selectedFile.Size > maxFileSize)
             {
-                errorMessage = "File size exceeds the maximum allowed size of 500MB.";
+                errorMessage = "File size exceeds the maximum allowed size of 2GB.";
                 return;
             }
 
-            // Simulate progress (since we can't track actual upload progress easily in Blazor WASM)
+            // Get access token for authentication
+            var tokenResult = await TokenProvider.RequestAccessToken();
+            if (!tokenResult.TryGetToken(out var token))
+            {
+                errorMessage = "Failed to get authentication token.";
+                return;
+            }
+
+            // Simulate progress (since we can't track actual upload progress easily)
             var progressTask = SimulateProgress();
 
-            using var stream = selectedFile.OpenReadStream(maxFileSize);
-            var response = await ApiClient.UploadVideoAsync(stream, selectedFile.Name);
+            // Get the API base address
+            var apiBaseAddress = Configuration["BlinkApi:BaseAddress"]?.TrimEnd('/');
+            if (string.IsNullOrEmpty(apiBaseAddress))
+            {
+                errorMessage = "API base address not configured";
+                return;
+            }
+            var uploadUrl = $"{apiBaseAddress}/api/videos/upload";
+
+            // Use JavaScript Fetch API for large file upload (avoids memory buffering)
+            var fileInputElement = fileInputRef.Element;
+            var response = await JS.InvokeAsync<JsonElement>("uploadLargeFile", 
+                uploadUrl, 
+                fileInputElement, 
+                token.Value);
 
             uploadProgress = 100;
             await Task.Delay(500); // Brief delay to show 100%
 
-            successMessage = $"Video uploaded successfully! Blob: {response.BlobName}";
+            var blobName = response.GetProperty("blobName").GetString() ?? "";
+            var fileName = response.GetProperty("fileName").GetString() ?? selectedFile.Name;
+            var fileSize = response.GetProperty("fileSize").GetInt64();
+
+            successMessage = $"Video uploaded successfully! Blob: {blobName}";
             
             uploadedVideos.Add(new UploadedVideoInfo
             {
-                FileName = response.FileName,
-                BlobName = response.BlobName,
-                FileSize = response.FileSize,
+                FileName = fileName,
+                BlobName = blobName,
+                FileSize = fileSize,
                 UploadedAt = DateTime.Now
             });
 
             selectedFile = null;
             
-            Logger.LogInformation("Video uploaded successfully: {FileName}", response.FileName);
+            Logger.LogInformation("Video uploaded successfully: {FileName}", fileName);
         }
         catch (Exception ex)
         {

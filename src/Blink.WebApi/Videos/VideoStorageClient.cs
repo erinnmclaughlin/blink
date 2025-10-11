@@ -10,7 +10,7 @@ public interface IVideoStorageClient
     Task<Stream> DownloadAsync(string blobName, CancellationToken cancellationToken = default);
     Task<string> GetUrlAsync(string blobName, CancellationToken cancellationToken = default);
     Task<List<VideoInfo>> ListAsync(CancellationToken cancellationToken = default);
-    Task<string> UploadAsync(Stream videoStream, string fileName, CancellationToken cancellationToken = default);
+    Task<(string BlobName, long FileSize)> UploadAsync(Stream videoStream, string fileName, CancellationToken cancellationToken = default);
 }
 
 public class VideoStorageClient : IVideoStorageClient
@@ -104,7 +104,9 @@ public class VideoStorageClient : IVideoStorageClient
             {
                 // If we can't generate SAS (using connection string without key), return the blob URI
                 // This scenario would need anonymous access or different auth strategy
-                _logger.LogWarning("Cannot generate SAS token for blob: {BlobName}", blobName);
+                _logger.LogWarning("Cannot generate SAS token for blob: {BlobName}. Returning direct URI: {Uri}", blobName, blobClient.Uri);
+                
+                // For local development with Azurite, the URI should still work
                 return blobClient.Uri.ToString();
             }
         }
@@ -159,7 +161,7 @@ public class VideoStorageClient : IVideoStorageClient
         }
     }
 
-    public async Task<string> UploadAsync(Stream videoStream, string fileName, CancellationToken cancellationToken = default)
+    public async Task<(string BlobName, long FileSize)> UploadAsync(Stream videoStream, string fileName, CancellationToken cancellationToken = default)
     {
         var blobName = $"{Guid.NewGuid()}_{fileName}";
 
@@ -167,13 +169,17 @@ public class VideoStorageClient : IVideoStorageClient
         {
             var blobClient = await GetBlobClientAsync(blobName, cancellationToken);
 
-            await blobClient.UploadAsync(
+            var response = await blobClient.UploadAsync(
                 videoStream,
                 new BlobUploadOptions { HttpHeaders = new() { ContentType = GetContentType(fileName) } },
                 cancellationToken);
 
-            _logger.LogInformation("Video uploaded successfully: {BlobName}", blobName);
-            return blobName;
+            // Get the actual uploaded size from the response
+            var properties = await blobClient.GetPropertiesAsync(cancellationToken: cancellationToken);
+            var fileSize = properties.Value.ContentLength;
+
+            _logger.LogInformation("Video uploaded successfully: {BlobName}, Size: {FileSize} bytes", blobName, fileSize);
+            return (blobName, fileSize);
         }
         catch (Exception ex)
         {
