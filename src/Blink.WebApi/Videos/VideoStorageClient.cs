@@ -128,7 +128,7 @@ public class VideoStorageClient : IVideoStorageClient
             if (!await containerClient.ExistsAsync(cancellationToken))
             {
                 _logger.LogInformation("Videos container does not exist yet");
-                return new List<VideoInfo>();
+                return [];
             }
 
             var videos = new List<VideoInfo>();
@@ -158,7 +158,8 @@ public class VideoStorageClient : IVideoStorageClient
                     ContentType: blobItem.Properties.ContentType ?? "video/mp4",
                     Title: title,
                     Description: null,
-                    VideoDate: null
+                    VideoDate: null,
+                    OwnerId: string.Empty // Legacy method - owner info not available in blob storage
                 ));
             }
 
@@ -261,5 +262,6 @@ public record VideoInfo(
     string ContentType,
     string? Title,
     string? Description,
-    DateTime? VideoDate
+    DateTime? VideoDate,
+    string OwnerId
 );

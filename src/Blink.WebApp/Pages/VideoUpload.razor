@@ -1,15 +1,10 @@
 @page "/videos/upload"
-@using Microsoft.AspNetCore.Authorization
-@using Microsoft.AspNetCore.Components.Forms
-@using Microsoft.AspNetCore.Components.Authorization
-@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
-@using Microsoft.JSInterop
-@using System.Text.Json
 @inject BlinkApiClient ApiClient
 @inject ILogger<VideoUpload> Logger
 @inject IJSRuntime JS
 @inject IAccessTokenProvider TokenProvider
 @inject IConfiguration Configuration
+@inject NavigationManager NavigationManager
 @attribute [Authorize]
 
 <PageTitle>Video Upload</PageTitle>
@@ -36,11 +31,11 @@
                             @if (uploadProgress > 0)
                             {
                                 <div class="progress mt-3">
-                                    <div class="progress-bar progress-bar-striped progress-bar-animated" 
-                                         role="progressbar" 
+                                    <div class="progress-bar progress-bar-striped progress-bar-animated"
+                                         role="progressbar"
                                          style="width: @(uploadProgress)%"
-                                         aria-valuenow="@uploadProgress" 
-                                         aria-valuemin="0" 
+                                         aria-valuenow="@uploadProgress"
+                                         aria-valuemin="0"
                                          aria-valuemax="100">
                                         @uploadProgress%
                                     </div>
@@ -65,9 +60,9 @@
 
                     <div class="mb-3">
                         <label for="videoTitle" class="form-label">Video Title</label>
-                        <input type="text" 
-                               class="form-control" 
-                               id="videoTitle" 
+                        <input type="text"
+                               class="form-control"
+                               id="videoTitle"
                                @bind="videoTitle"
                                placeholder="Enter video title (optional - will use filename if not provided)"
                                disabled="@isUploading" />
@@ -78,8 +73,8 @@
 
                     <div class="mb-3">
                         <label for="videoDescription" class="form-label">Description (Optional)</label>
-                        <textarea class="form-control" 
-                                  id="videoDescription" 
+                        <textarea class="form-control"
+                                  id="videoDescription"
                                   @bind="videoDescription"
                                   rows="3"
                                   placeholder="Enter video description"
@@ -92,9 +87,9 @@
 
                     <div class="mb-3">
                         <label for="videoDate" class="form-label">Video Date (Optional)</label>
-                        <input type="date" 
-                               class="form-control" 
-                               id="videoDate" 
+                        <input type="date"
+                               class="form-control"
+                               id="videoDate"
                                @bind="videoDate"
                                disabled="@isUploading" />
                         <div class="form-text">
@@ -105,9 +100,9 @@
                     <div class="mb-3">
                         <label for="videoFile" class="form-label">Select Video File</label>
                         <InputFile @ref="fileInputRef"
-                                   OnChange="OnFileSelected" 
-                                   class="form-control" 
-                                   id="videoFile" 
+                                   OnChange="OnFileSelected"
+                                   class="form-control"
+                                   id="videoFile"
                                    accept="video/*"
                                    disabled="@isUploading" />
                         <div class="form-text">
@@ -136,8 +131,8 @@
                     }
 
                     <div class="d-grid gap-2">
-                        <button class="btn btn-primary btn-lg" 
-                                @onclick="UploadVideo" 
+                        <button class="btn btn-primary btn-lg"
+                                @onclick="UploadVideo"
                                 disabled="@(selectedFile == null || isUploading)">
                             @if (isUploading)
                             {
@@ -190,9 +185,9 @@
                         <li class="mb-2">Click "Upload Video" to start the upload process</li>
                         <li class="mb-2">Wait for the upload to complete</li>
                     </ol>
-                    
+
                     <hr />
-                    
+
                     <h6>Tips:</h6>
                     <ul class="small">
                         <li>Ensure your video file is under 2GB</li>
@@ -214,7 +209,7 @@
     private string? errorMessage;
     private string? successMessage;
     private List<UploadedVideoInfo> uploadedVideos = new();
-    
+
     // Video metadata fields
     private string? videoTitle;
     private string? videoDescription;
@@ -267,9 +262,9 @@
 
             // Use JavaScript Fetch API for large file upload (avoids memory buffering)
             var fileInputElement = fileInputRef.Element;
-            var response = await JS.InvokeAsync<JsonElement>("uploadLargeFile", 
-                uploadUrl, 
-                fileInputElement, 
+            var response = await JS.InvokeAsync<JsonElement>("uploadLargeFile",
+                uploadUrl,
+                fileInputElement,
                 token.Value,
                 videoTitle,
                 videoDescription,
@@ -283,7 +278,7 @@
             var fileSize = response.GetProperty("fileSize").GetInt64();
 
             successMessage = $"Video uploaded successfully! Blob: {blobName}";
-            
+
             uploadedVideos.Add(new UploadedVideoInfo
             {
                 FileName = fileName,
@@ -296,8 +291,11 @@
             videoTitle = null;
             videoDescription = null;
             videoDate = null;
-            
+
             Logger.LogInformation("Video uploaded successfully: {FileName}", fileName);
+
+            // Redirect to the watch page for the uploaded video
+            NavigationManager.NavigateTo($"/videos/watch/{blobName}");
         }
         catch (Exception ex)
         {

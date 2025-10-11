@@ -126,7 +126,8 @@ public sealed record VideoInfo(
     string ContentType,
     string? Title,
     string? Description,
-    DateTime? VideoDate
+    DateTime? VideoDate,
+    string OwnerId
 );
 
 public sealed record VideoUrlResponse(
