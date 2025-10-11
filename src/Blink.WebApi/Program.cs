@@ -4,6 +4,8 @@ using Blink.WebApi.Videos.Upload;
 using FluentMigrator.Runner;
 using FluentValidation;
 using MediatR;
+using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -33,6 +35,20 @@ builder.Services.AddMediatR(o =>
 });
 
 builder.Services.AddValidatorsFromAssembly(typeof(Program).Assembly);
+
+// Configure Kestrel to allow larger request bodies (500MB for video uploads)
+builder.Services.Configure<KestrelServerOptions>(options =>
+{
+    options.Limits.MaxRequestBodySize = 500 * 1024 * 1024; // 500MB
+});
+
+// Configure Form options to allow larger multipart form data
+builder.Services.Configure<FormOptions>(options =>
+{
+    options.MultipartBodyLengthLimit = 500 * 1024 * 1024; // 500MB
+    options.ValueLengthLimit = int.MaxValue;
+    options.MultipartHeadersLengthLimit = int.MaxValue;
+});
 
 var app = builder.Build();
 
