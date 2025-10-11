@@ -7,5 +7,4 @@ public sealed record UploadVideoRequest : IRequest<UploadedVideoInfo>
     public required IFormFile File { get; init; }
 
     public string FileExtension => Path.GetExtension(File.FileName).ToLowerInvariant();
-    public long FileSize => File.Length;
 }

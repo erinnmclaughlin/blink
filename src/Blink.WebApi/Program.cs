@@ -36,6 +36,10 @@ builder.Services.AddMediatR(o =>
 
 builder.Services.AddValidatorsFromAssembly(typeof(Program).Assembly);
 
+// Add global exception handler
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
+
 // Configure Kestrel to allow larger request bodies (2000MB for video uploads)
 builder.Services.Configure<KestrelServerOptions>(options =>
 {
@@ -51,6 +55,9 @@ builder.Services.Configure<FormOptions>(options =>
 });
 
 var app = builder.Build();
+
+// Enable global exception handling
+app.UseExceptionHandler();
 
 app.UseHttpsRedirection();
 
@@ -71,42 +78,22 @@ app.MapGet("/claims", (ClaimsPrincipal user) => Results.Json(user.Claims.Select(
     .RequireAuthorization();
 
 // Map the video upload endpoint using CQRS pattern with MediatR
-app.MapUploadVideoEndpoint();
+app.MapVideosApi();
 
 app.MapGet("/api/videos", async (IVideoStorageClient blobStorageService, ILogger<Program> logger) =>
 {
-    try
-    {
-        var videos = await blobStorageService.ListAsync();
-        logger.LogInformation("Retrieved {Count} videos", videos.Count);
-        return Results.Ok(videos);
-    }
-    catch (Exception ex)
-    {
-        logger.LogError(ex, "Error retrieving videos");
-        return Results.Problem("An error occurred while retrieving videos");
-    }
+    var videos = await blobStorageService.ListAsync();
+    logger.LogInformation("Retrieved {Count} videos", videos.Count);
+    return Results.Ok(videos);
 })
     .WithName("ListVideos")
     .RequireAuthorization();
 
 app.MapGet("/api/videos/{blobName}/url", async (string blobName, IVideoStorageClient blobStorageService, ILogger<Program> logger) =>
 {
-    try
-    {
-        var url = await blobStorageService.GetUrlAsync(blobName);
-        logger.LogInformation("Generated URL for video: {BlobName}", blobName);
-        return Results.Ok(new { url });
-    }
-    catch (FileNotFoundException)
-    {
-        return Results.NotFound(new { error = "Video not found" });
-    }
-    catch (Exception ex)
-    {
-        logger.LogError(ex, "Error generating video URL");
-        return Results.Problem("An error occurred while generating video URL");
-    }
+    var url = await blobStorageService.GetUrlAsync(blobName);
+    logger.LogInformation("Generated URL for video: {BlobName}", blobName);
+    return Results.Ok(new { url });
 })
     .WithName("GetVideoUrl")
     .RequireAuthorization();
