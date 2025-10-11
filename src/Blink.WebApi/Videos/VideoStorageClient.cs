@@ -156,7 +156,9 @@ public class VideoStorageClient : IVideoStorageClient
                     SizeInBytes: blobItem.Properties.ContentLength ?? 0,
                     LastModified: blobItem.Properties.LastModified,
                     ContentType: blobItem.Properties.ContentType ?? "video/mp4",
-                    Title: title
+                    Title: title,
+                    Description: null,
+                    VideoDate: null
                 ));
             }
 
@@ -257,5 +259,7 @@ public record VideoInfo(
     long SizeInBytes,
     DateTimeOffset? LastModified,
     string ContentType,
-    string? Title
+    string? Title,
+    string? Description,
+    DateTime? VideoDate
 );

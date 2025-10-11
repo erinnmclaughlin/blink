@@ -64,6 +64,45 @@
                     }
 
                     <div class="mb-3">
+                        <label for="videoTitle" class="form-label">Video Title</label>
+                        <input type="text" 
+                               class="form-control" 
+                               id="videoTitle" 
+                               @bind="videoTitle"
+                               placeholder="Enter video title (optional - will use filename if not provided)"
+                               disabled="@isUploading" />
+                        <div class="form-text">
+                            If left blank, the filename will be used as the title.
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="videoDescription" class="form-label">Description (Optional)</label>
+                        <textarea class="form-control" 
+                                  id="videoDescription" 
+                                  @bind="videoDescription"
+                                  rows="3"
+                                  placeholder="Enter video description"
+                                  maxlength="2000"
+                                  disabled="@isUploading"></textarea>
+                        <div class="form-text">
+                            Add details about this video. @(videoDescription?.Length ?? 0)/2000 characters
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="videoDate" class="form-label">Video Date (Optional)</label>
+                        <input type="date" 
+                               class="form-control" 
+                               id="videoDate" 
+                               @bind="videoDate"
+                               disabled="@isUploading" />
+                        <div class="form-text">
+                            The date when this video was originally recorded (not the upload date).
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
                         <label for="videoFile" class="form-label">Select Video File</label>
                         <InputFile @ref="fileInputRef"
                                    OnChange="OnFileSelected" 
@@ -175,6 +214,11 @@
     private string? errorMessage;
     private string? successMessage;
     private List<UploadedVideoInfo> uploadedVideos = new();
+    
+    // Video metadata fields
+    private string? videoTitle;
+    private string? videoDescription;
+    private DateOnly? videoDate;
 
     private void OnFileSelected(InputFileChangeEventArgs e)
     {
@@ -226,7 +270,10 @@
             var response = await JS.InvokeAsync<JsonElement>("uploadLargeFile", 
                 uploadUrl, 
                 fileInputElement, 
-                token.Value);
+                token.Value,
+                videoTitle,
+                videoDescription,
+                videoDate?.ToString("yyyy-MM-dd"));
 
             uploadProgress = 100;
             await Task.Delay(500); // Brief delay to show 100%
@@ -246,6 +293,9 @@
             });
 
             selectedFile = null;
+            videoTitle = null;
+            videoDescription = null;
+            videoDate = null;
             
             Logger.LogInformation("Video uploaded successfully: {FileName}", fileName);
         }

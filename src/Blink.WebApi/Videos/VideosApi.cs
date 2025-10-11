@@ -3,6 +3,7 @@ using Blink.WebApi.Videos.GetUrl;
 using Blink.WebApi.Videos.List;
 using Blink.WebApi.Videos.Upload;
 using Blink.WebApi.Videos.UpdateTitle;
+using Blink.WebApi.Videos.UpdateMetadata;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -56,6 +57,15 @@ public static class VideosApi
             .Produces<ProblemDetails>(StatusCodes.Status404NotFound)
             .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError);
 
+        // PUT /api/videos/{blobName}/metadata
+        endpoints.MapPut("/api/videos/{blobName}/metadata", HandleUpdateMetadataAsync)
+            .WithName("UpdateVideoMetadata")
+            .RequireAuthorization()
+            .Produces<UpdateMetadataResponse>(StatusCodes.Status200OK)
+            .Produces<ProblemDetails>(StatusCodes.Status400BadRequest)
+            .Produces<ProblemDetails>(StatusCodes.Status404NotFound)
+            .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError);
+
         return endpoints;
     }
 
@@ -71,19 +81,35 @@ public static class VideosApi
             context.Request.ContentType,
             context.Request.ContentLength);
 
-        // Parse the multipart form file
-        var file = await fileParser.ParseFileAsync(context, cancellationToken);
+        // Parse the multipart form data (file and fields)
+        var formData = await fileParser.ParseAsync(context, cancellationToken);
         
-        if (file == null)
+        if (formData.File == null)
         {
             logger.LogWarning("No video file found in request");
             throw new ArgumentException("No video file provided or invalid content type");
         }
 
-        logger.LogInformation("Processing upload for file: {FileName}", file.FileName);
+        logger.LogInformation("Processing upload for file: {FileName}", formData.File.FileName);
+
+        // Extract additional form fields
+        formData.Fields.TryGetValue("title", out var title);
+        formData.Fields.TryGetValue("description", out var description);
+        DateTime? videoDate = null;
+        if (formData.Fields.TryGetValue("videoDate", out var videoDateStr) && 
+            DateTime.TryParse(videoDateStr, out var parsedDate))
+        {
+            videoDate = parsedDate;
+        }
 
         // Send command through MediatR pipeline (validation happens automatically via ValidationBehavior)
-        var request = new UploadVideoRequest { File = file };
+        var request = new UploadVideoRequest 
+        { 
+            File = formData.File,
+            Title = string.IsNullOrWhiteSpace(title) ? null : title,
+            Description = string.IsNullOrWhiteSpace(description) ? null : description,
+            VideoDate = videoDate
+        };
         var result = await sender.Send(request, cancellationToken);
 
         logger.LogInformation("Video uploaded successfully: {BlobName}", result.BlobName);
@@ -133,6 +159,25 @@ public static class VideosApi
     {
         // Send command through MediatR pipeline
         var command = new UpdateTitleCommand { BlobName = blobName, Title = request.Title };
+        var result = await sender.Send(command, cancellationToken);
+        
+        return Results.Ok(result);
+    }
+
+    private static async Task<IResult> HandleUpdateMetadataAsync(
+        string blobName,
+        [FromBody] UpdateMetadataRequest request,
+        ISender sender,
+        CancellationToken cancellationToken)
+    {
+        // Send command through MediatR pipeline
+        var command = new UpdateMetadataCommand 
+        { 
+            BlobName = blobName, 
+            Title = request.Title,
+            Description = request.Description,
+            VideoDate = request.VideoDate
+        };
         var result = await sender.Send(command, cancellationToken);
         
         return Results.Ok(result);

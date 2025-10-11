@@ -42,9 +42,11 @@ public sealed class UploadVideoRequestHandler : IRequestHandler<UploadVideoReque
         {
             Id = Guid.NewGuid(),
             BlobName = blobName,
-            Title = Path.GetFileNameWithoutExtension(request.File.FileName), // Default title from filename
-            Description = null,
-            VideoDate = null,
+            Title = !string.IsNullOrWhiteSpace(request.Title) 
+                ? request.Title 
+                : Path.GetFileNameWithoutExtension(request.File.FileName), // Default title from filename
+            Description = request.Description,
+            VideoDate = request.VideoDate,
             FileName = request.File.FileName,
             ContentType = contentType,
             SizeInBytes = fileSize,

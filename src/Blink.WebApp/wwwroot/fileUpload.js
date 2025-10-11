@@ -1,7 +1,7 @@
 // JavaScript interop for large file uploads using Fetch API
 // This avoids Blazor's HttpClient memory buffering issues
 
-window.uploadLargeFile = async function (url, fileInput, authToken) {
+window.uploadLargeFile = async function (url, fileInput, authToken, title, description, videoDate) {
     try {
         const file = fileInput.files[0];
         if (!file) {
@@ -9,6 +9,20 @@ window.uploadLargeFile = async function (url, fileInput, authToken) {
         }
 
         const formData = new FormData();
+        
+        // IMPORTANT: Add metadata fields BEFORE the file
+        // The server reads form fields first, then the file stream
+        if (title) {
+            formData.append('title', title);
+        }
+        if (description) {
+            formData.append('description', description);
+        }
+        if (videoDate) {
+            formData.append('videoDate', videoDate);
+        }
+        
+        // Add the video file last
         formData.append('video', file);
 
         const headers = {

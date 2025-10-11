@@ -36,7 +36,9 @@ public sealed class ListVideosQueryHandler : IRequestHandler<ListVideosQuery, Li
             SizeInBytes: v.SizeInBytes,
             LastModified: new DateTimeOffset(v.UploadedAt, TimeSpan.Zero),
             ContentType: v.ContentType,
-            Title: v.Title
+            Title: v.Title,
+            Description: v.Description,
+            VideoDate: v.VideoDate
         )).ToList();
 
         _logger.LogInformation("Retrieved {Count} videos for user {UserId}", videoInfoList.Count, userId);

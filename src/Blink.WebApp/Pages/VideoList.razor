@@ -70,40 +70,25 @@
                         <div class="card-body">
                             <div class="d-flex align-items-start mb-2">
                                 <div class="flex-grow-1" style="min-width: 0;">
-                                    @if (editingVideoId == video.BlobName)
+                                    <div class="d-flex align-items-center mb-1">
+                                        <h5 class="card-title text-truncate mb-0 flex-grow-1" title="@GetDisplayTitle(video)">
+                                            @GetDisplayTitle(video)
+                                        </h5>
+                                        <button class="btn btn-sm btn-link p-0 ms-2" @onclick="() => StartEditMetadata(video)" title="Edit video details">
+                                            <span class="bi bi-pencil text-primary"></span>
+                                        </button>
+                                    </div>
+                                    @if (!string.IsNullOrEmpty(video.Description))
                                     {
-                                        <div class="input-group input-group-sm mb-1">
-                                            <input type="text" 
-                                                   class="form-control" 
-                                                   @bind="editingTitle" 
-                                                   @bind:event="oninput"
-                                                   @onkeydown="@(e => HandleTitleKeyDown(e, video))"
-                                                   placeholder="Enter new title" />
-                                            <button class="btn btn-sm btn-success" @onclick="() => SaveTitle(video)" disabled="@isUpdatingTitle">
-                                                @if (isUpdatingTitle)
-                                                {
-                                                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                                }
-                                                else
-                                                {
-                                                    <span class="bi bi-check-lg"></span>
-                                                }
-                                            </button>
-                                            <button class="btn btn-sm btn-secondary" @onclick="CancelEditTitle" disabled="@isUpdatingTitle">
-                                                <span class="bi bi-x-lg"></span>
-                                            </button>
-                                        </div>
+                                        <p class="card-text small text-muted mb-2" style="overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">
+                                            @video.Description
+                                        </p>
                                     }
-                                    else
+                                    @if (video.VideoDate.HasValue)
                                     {
-                                        <div class="d-flex align-items-center mb-1">
-                                            <h5 class="card-title text-truncate mb-0 flex-grow-1" title="@GetDisplayTitle(video)">
-                                                @GetDisplayTitle(video)
-                                            </h5>
-                                            <button class="btn btn-sm btn-link p-0 ms-2" @onclick="() => StartEditTitle(video)" title="Edit title">
-                                                <span class="bi bi-pencil text-primary"></span>
-                                            </button>
-                                        </div>
+                                        <p class="card-text small text-muted mb-2">
+                                            <span class="bi bi-calendar3"></span> @video.VideoDate.Value.ToString("MMM d, yyyy")
+                                        </p>
                                     }
                                     <h6 class="card-subtitle mb-2 text-muted small">
                                         @GetFileExtension(video.FileName).ToUpperInvariant()
@@ -165,6 +150,18 @@
                         <dt class="col-sm-4">Title:</dt>
                         <dd class="col-sm-8 text-break">@GetDisplayTitle(selectedVideoForDetails)</dd>
 
+                        @if (!string.IsNullOrEmpty(selectedVideoForDetails.Description))
+                        {
+                            <dt class="col-sm-4">Description:</dt>
+                            <dd class="col-sm-8 text-break">@selectedVideoForDetails.Description</dd>
+                        }
+
+                        @if (selectedVideoForDetails.VideoDate.HasValue)
+                        {
+                            <dt class="col-sm-4">Video Date:</dt>
+                            <dd class="col-sm-8">@selectedVideoForDetails.VideoDate.Value.ToString("MMMM d, yyyy")</dd>
+                        }
+
                         <dt class="col-sm-4">File Name:</dt>
                         <dd class="col-sm-8 text-break">@selectedVideoForDetails.FileName</dd>
 
@@ -177,7 +174,7 @@
                         <dt class="col-sm-4">Content Type:</dt>
                         <dd class="col-sm-8">@selectedVideoForDetails.ContentType</dd>
 
-                        <dt class="col-sm-4">Last Modified:</dt>
+                        <dt class="col-sm-4">Uploaded:</dt>
                         <dd class="col-sm-8">@(selectedVideoForDetails.LastModified?.LocalDateTime.ToString("F") ?? "Unknown")</dd>
                     </dl>
                 </div>
@@ -253,6 +250,80 @@
     </div>
 }
 
+@if (videoToEdit != null)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.6);">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <span class="bi bi-pencil"></span> Edit Video Details
+                    </h5>
+                    <button type="button" class="btn-close" @onclick="CancelEditMetadata" disabled="@isUpdatingMetadata"></button>
+                </div>
+                <div class="modal-body">
+                    @if (isUpdatingMetadata)
+                    {
+                        <div class="text-center py-3">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Updating...</span>
+                            </div>
+                            <p class="mt-3">Updating video details...</p>
+                        </div>
+                    }
+                    else if (!string.IsNullOrEmpty(editMetadataError))
+                    {
+                        <div class="alert alert-danger" role="alert">
+                            <strong>Error!</strong> @editMetadataError
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="mb-3">
+                            <label for="editTitle" class="form-label">Title <span class="text-danger">*</span></label>
+                            <input type="text" 
+                                   class="form-control" 
+                                   id="editTitle"
+                                   @bind="editingTitle"
+                                   @bind:event="oninput"
+                                   placeholder="Enter video title"
+                                   maxlength="512" />
+                            <div class="form-text">@(editingTitle?.Length ?? 0)/512 characters</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="editDescription" class="form-label">Description</label>
+                            <textarea class="form-control" 
+                                      id="editDescription"
+                                      @bind="editingDescription"
+                                      @bind:event="oninput"
+                                      rows="4"
+                                      placeholder="Enter video description (optional)"
+                                      maxlength="2000"></textarea>
+                            <div class="form-text">@(editingDescription?.Length ?? 0)/2000 characters</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="editVideoDate" class="form-label">Video Date</label>
+                            <input type="date" 
+                                   class="form-control" 
+                                   id="editVideoDate"
+                                   @bind="editingVideoDate" />
+                            <div class="form-text">The date when this video was originally recorded</div>
+                        </div>
+                    }
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" @onclick="SaveMetadata" disabled="@(isUpdatingMetadata || string.IsNullOrWhiteSpace(editingTitle))">
+                        <span class="bi bi-check-lg"></span> Save Changes
+                    </button>
+                    <button type="button" class="btn btn-secondary" @onclick="CancelEditMetadata" disabled="@isUpdatingMetadata">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
 @code {
     private List<VideoInfo> videos = new();
     private bool isLoading = true;
@@ -266,10 +337,13 @@
     private bool isDeletingVideo;
     private string? deleteError;
     
-    // Video title editing state
-    private string? editingVideoId;
+    // Video metadata editing state
+    private VideoInfo? videoToEdit;
     private string editingTitle = string.Empty;
-    private bool isUpdatingTitle;
+    private string? editingDescription;
+    private DateOnly? editingVideoDate;
+    private bool isUpdatingMetadata;
+    private string? editMetadataError;
 
     protected override async Task OnInitializedAsync()
     {
@@ -400,64 +474,97 @@
         return !string.IsNullOrWhiteSpace(video.Title) ? video.Title : video.FileName;
     }
 
+    private void StartEditMetadata(VideoInfo video)
+    {
+        videoToEdit = video;
+        editingTitle = video.Title ?? Path.GetFileNameWithoutExtension(video.FileName);
+        editingDescription = video.Description;
+        editingVideoDate = video.VideoDate.HasValue ? DateOnly.FromDateTime(video.VideoDate.Value) : null;
+        editMetadataError = null;
+    }
+
+    private void CancelEditMetadata()
+    {
+        if (!isUpdatingMetadata)
+        {
+            videoToEdit = null;
+            editingTitle = string.Empty;
+            editingDescription = null;
+            editingVideoDate = null;
+            editMetadataError = null;
+        }
+    }
+
+    private async Task SaveMetadata()
+    {
+        if (videoToEdit == null || string.IsNullOrWhiteSpace(editingTitle))
+            return;
+
+        isUpdatingMetadata = true;
+        editMetadataError = null;
+
+        try
+        {
+            var result = await ApiClient.UpdateVideoMetadataAsync(
+                videoToEdit.BlobName, 
+                editingTitle.Trim(),
+                editingDescription?.Trim(),
+                editingVideoDate);
+            
+            Logger.LogInformation("Video metadata updated: {BlobName}", videoToEdit.BlobName);
+            
+            // Find and update the video in the list
+            var videoIndex = videos.FindIndex(v => v.BlobName == videoToEdit.BlobName);
+            if (videoIndex >= 0)
+            {
+                videos[videoIndex] = videos[videoIndex] with 
+                { 
+                    Title = result.Title,
+                    Description = result.Description,
+                    VideoDate = result.VideoDate
+                };
+            }
+            
+            // Close the modal
+            CancelEditMetadata();
+        }
+        catch (Exception ex)
+        {
+            editMetadataError = $"Failed to update video: {ex.Message}";
+            Logger.LogError(ex, "Error updating video metadata: {BlobName}", videoToEdit?.BlobName ?? "Unknown");
+        }
+        finally
+        {
+            isUpdatingMetadata = false;
+        }
+    }
+
+    // Legacy title editing methods (kept for backwards compatibility but not used in UI)
     private void StartEditTitle(VideoInfo video)
     {
-        editingVideoId = video.BlobName;
-        editingTitle = GetDisplayTitle(video);
+        StartEditMetadata(video);
     }
 
     private void CancelEditTitle()
     {
-        editingVideoId = null;
-        editingTitle = string.Empty;
-        isUpdatingTitle = false;
+        CancelEditMetadata();
     }
 
     private async Task HandleTitleKeyDown(KeyboardEventArgs e, VideoInfo video)
     {
         if (e.Key == "Enter")
         {
-            await SaveTitle(video);
+            await SaveMetadata();
         }
         else if (e.Key == "Escape")
         {
-            CancelEditTitle();
+            CancelEditMetadata();
         }
     }
 
     private async Task SaveTitle(VideoInfo video)
     {
-        if (string.IsNullOrWhiteSpace(editingTitle))
-        {
-            return;
-        }
-
-        isUpdatingTitle = true;
-
-        try
-        {
-            var result = await ApiClient.UpdateVideoTitleAsync(video.BlobName, editingTitle.Trim());
-            Logger.LogInformation("Video title updated: {BlobName}, Title: {Title}", video.BlobName, result.Title);
-            
-            // Find and update the video in the list
-            var videoIndex = videos.FindIndex(v => v.BlobName == video.BlobName);
-            if (videoIndex >= 0)
-            {
-                videos[videoIndex] = videos[videoIndex] with { Title = result.Title };
-            }
-            
-            // Close the edit mode
-            CancelEditTitle();
-        }
-        catch (Exception ex)
-        {
-            Logger.LogError(ex, "Error updating video title: {BlobName}", video.BlobName);
-            // Keep edit mode open on error so user can retry
-        }
-        finally
-        {
-            isUpdatingTitle = false;
-        }
+        await SaveMetadata();
     }
 }
 

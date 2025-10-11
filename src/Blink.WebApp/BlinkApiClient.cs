@@ -30,11 +30,26 @@ public sealed class BlinkApiClient
         return await _httpClient.GetFromJsonAsync<Dictionary<string, string[]>>("claims", cancellationToken) ?? [];
     }
 
-    public async Task<VideoUploadResponse> UploadVideoAsync(Stream videoStream, string fileName, CancellationToken cancellationToken = default)
+    public async Task<VideoUploadResponse> UploadVideoAsync(
+        Stream videoStream, 
+        string fileName, 
+        string? title = null,
+        string? description = null,
+        DateOnly? videoDate = null,
+        CancellationToken cancellationToken = default)
     {
         using var content = new MultipartFormDataContent();
         using var streamContent = new StreamContent(videoStream);
         content.Add(streamContent, "video", fileName);
+        
+        if (!string.IsNullOrWhiteSpace(title))
+            content.Add(new StringContent(title), "title");
+            
+        if (!string.IsNullOrWhiteSpace(description))
+            content.Add(new StringContent(description), "description");
+            
+        if (videoDate.HasValue)
+            content.Add(new StringContent(videoDate.Value.ToString("yyyy-MM-dd")), "videoDate");
 
         var response = await _httpClient.PostAsync("api/videos/upload", content, cancellationToken);
         response.EnsureSuccessStatusCode();
@@ -74,6 +89,26 @@ public sealed class BlinkApiClient
         return await response.Content.ReadFromJsonAsync<VideoTitleUpdateResponse>(cancellationToken) 
             ?? throw new InvalidOperationException("Failed to deserialize update title response");
     }
+
+    public async Task<VideoMetadataUpdateResponse> UpdateVideoMetadataAsync(
+        string blobName, 
+        string title, 
+        string? description = null, 
+        DateOnly? videoDate = null,
+        CancellationToken cancellationToken = default)
+    {
+        var encodedBlobName = Uri.EscapeDataString(blobName);
+        var response = await _httpClient.PutAsJsonAsync($"api/videos/{encodedBlobName}/metadata", new 
+        { 
+            Title = title,
+            Description = description,
+            VideoDate = videoDate?.ToString("yyyy-MM-dd")
+        }, cancellationToken);
+        response.EnsureSuccessStatusCode();
+        
+        return await response.Content.ReadFromJsonAsync<VideoMetadataUpdateResponse>(cancellationToken) 
+            ?? throw new InvalidOperationException("Failed to deserialize update metadata response");
+    }
 }
 
 public sealed record VideoUploadResponse(
@@ -89,7 +124,9 @@ public sealed record VideoInfo(
     long SizeInBytes,
     DateTimeOffset? LastModified,
     string ContentType,
-    string? Title
+    string? Title,
+    string? Description,
+    DateTime? VideoDate
 );
 
 public sealed record VideoUrlResponse(
@@ -107,4 +144,13 @@ public sealed record VideoTitleUpdateResponse(
     string Message,
     string BlobName,
     string Title
+);
+
+public sealed record VideoMetadataUpdateResponse(
+    bool Success,
+    string Message,
+    string BlobName,
+    string Title,
+    string? Description,
+    DateTime? VideoDate
 );
