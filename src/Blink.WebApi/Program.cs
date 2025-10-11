@@ -1,5 +1,5 @@
 using Blink.WebApi;
-using Blink.WebApi.Services;
+using Blink.WebApi.Videos;
 using FluentMigrator.Runner;
 using System.Security.Claims;
 
@@ -20,7 +20,8 @@ builder.AddKnownClientsCorsPolicy();
 builder.AddKeycloakAuthorization();
 //builder.AddKeycloakEventPoller();
 
-builder.AddBlobStorage();
+builder.AddAzureBlobServiceClient("blobs");
+builder.Services.AddScoped<IVideoStorageClient, VideoStorageClient>();
 
 var app = builder.Build();
 
@@ -42,7 +43,7 @@ app.MapGet("/claims", (ClaimsPrincipal user) => Results.Json(user.Claims.Select(
     .WithName("ClaimsEndpoint")
     .RequireAuthorization();
 
-app.MapPost("/api/videos/upload", async (HttpContext context, IBlobStorageService blobStorageService, ILogger<Program> logger) =>
+app.MapPost("/api/videos/upload", async (HttpContext context, IVideoStorageClient videoStorageClient, ILogger<Program> logger) =>
 {
     try
     {
@@ -70,7 +71,7 @@ app.MapPost("/api/videos/upload", async (HttpContext context, IBlobStorageServic
         }
 
         using var stream = file.OpenReadStream();
-        var blobName = await blobStorageService.UploadVideoAsync(stream, file.FileName);
+        var blobName = await videoStorageClient.UploadAsync(stream, file.FileName);
 
         logger.LogInformation("Video uploaded successfully: {FileName} -> {BlobName}", file.FileName, blobName);
 
@@ -91,11 +92,11 @@ app.MapPost("/api/videos/upload", async (HttpContext context, IBlobStorageServic
     .RequireAuthorization()
     .DisableAntiforgery();
 
-app.MapGet("/api/videos", async (IBlobStorageService blobStorageService, ILogger<Program> logger) =>
+app.MapGet("/api/videos", async (IVideoStorageClient blobStorageService, ILogger<Program> logger) =>
 {
     try
     {
-        var videos = await blobStorageService.ListVideosAsync();
+        var videos = await blobStorageService.ListAsync();
         logger.LogInformation("Retrieved {Count} videos", videos.Count);
         return Results.Ok(videos);
     }
@@ -108,11 +109,11 @@ app.MapGet("/api/videos", async (IBlobStorageService blobStorageService, ILogger
     .WithName("ListVideos")
     .RequireAuthorization();
 
-app.MapGet("/api/videos/{blobName}/url", async (string blobName, IBlobStorageService blobStorageService, ILogger<Program> logger) =>
+app.MapGet("/api/videos/{blobName}/url", async (string blobName, IVideoStorageClient blobStorageService, ILogger<Program> logger) =>
 {
     try
     {
-        var url = await blobStorageService.GetVideoUrlAsync(blobName);
+        var url = await blobStorageService.GetUrlAsync(blobName);
         logger.LogInformation("Generated URL for video: {BlobName}", blobName);
         return Results.Ok(new { url });
     }
