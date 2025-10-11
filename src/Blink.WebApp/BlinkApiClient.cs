@@ -54,6 +54,16 @@ public sealed class BlinkApiClient
         var response = await _httpClient.GetFromJsonAsync<VideoUrlResponse>($"api/videos/{encodedBlobName}/url", cancellationToken);
         return response?.Url ?? throw new InvalidOperationException("Failed to get video URL");
     }
+
+    public async Task<VideoDeleteResponse> DeleteVideoAsync(string blobName, CancellationToken cancellationToken = default)
+    {
+        var encodedBlobName = Uri.EscapeDataString(blobName);
+        var response = await _httpClient.DeleteAsync($"api/videos/{encodedBlobName}", cancellationToken);
+        response.EnsureSuccessStatusCode();
+        
+        return await response.Content.ReadFromJsonAsync<VideoDeleteResponse>(cancellationToken) 
+            ?? throw new InvalidOperationException("Failed to deserialize delete response");
+    }
 }
 
 public sealed record VideoUploadResponse(
@@ -73,4 +83,10 @@ public sealed record VideoInfo(
 
 public sealed record VideoUrlResponse(
     string Url
+);
+
+public sealed record VideoDeleteResponse(
+    bool Success,
+    string Message,
+    string BlobName
 );

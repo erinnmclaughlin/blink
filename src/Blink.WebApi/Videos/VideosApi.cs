@@ -1,3 +1,4 @@
+using Blink.WebApi.Videos.Delete;
 using Blink.WebApi.Videos.GetUrl;
 using Blink.WebApi.Videos.List;
 using Blink.WebApi.Videos.Upload;
@@ -34,6 +35,14 @@ public static class VideosApi
             .WithName("GetVideoUrl")
             .RequireAuthorization()
             .Produces<VideoUrlResponse>(StatusCodes.Status200OK)
+            .Produces<ProblemDetails>(StatusCodes.Status404NotFound)
+            .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError);
+
+        // DELETE /api/videos/{blobName}
+        endpoints.MapDelete("/api/videos/{blobName}", HandleDeleteVideoAsync)
+            .WithName("DeleteVideo")
+            .RequireAuthorization()
+            .Produces<DeleteVideoResponse>(StatusCodes.Status200OK)
             .Produces<ProblemDetails>(StatusCodes.Status404NotFound)
             .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError);
 
@@ -90,6 +99,18 @@ public static class VideosApi
         // Send query through MediatR pipeline
         var query = new GetVideoUrlQuery { BlobName = blobName };
         var result = await sender.Send(query, cancellationToken);
+        
+        return Results.Ok(result);
+    }
+
+    private static async Task<IResult> HandleDeleteVideoAsync(
+        string blobName,
+        ISender sender,
+        CancellationToken cancellationToken)
+    {
+        // Send command through MediatR pipeline
+        var command = new DeleteVideoCommand { BlobName = blobName };
+        var result = await sender.Send(command, cancellationToken);
         
         return Results.Ok(result);
     }
