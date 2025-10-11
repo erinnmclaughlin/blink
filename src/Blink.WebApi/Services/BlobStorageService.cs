@@ -1,5 +1,6 @@
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
+using Azure.Storage.Sas;
 
 namespace Blink.WebApi.Services;
 
@@ -9,6 +10,7 @@ public interface IBlobStorageService
     Task<bool> DeleteVideoAsync(string blobName, CancellationToken cancellationToken = default);
     Task<Stream> DownloadVideoAsync(string blobName, CancellationToken cancellationToken = default);
     Task<List<VideoInfo>> ListVideosAsync(CancellationToken cancellationToken = default);
+    Task<string> GetVideoUrlAsync(string blobName, CancellationToken cancellationToken = default);
 }
 
 public record VideoInfo(
@@ -148,6 +150,52 @@ public class BlobStorageService : IBlobStorageService
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error listing videos");
+            throw;
+        }
+    }
+
+    public async Task<string> GetVideoUrlAsync(string blobName, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var containerClient = _blobServiceClient.GetBlobContainerClient("videos");
+            var blobClient = containerClient.GetBlobClient(blobName);
+            
+            // Check if blob exists
+            if (!await blobClient.ExistsAsync(cancellationToken))
+            {
+                throw new FileNotFoundException($"Video not found: {blobName}");
+            }
+
+            // Generate SAS token valid for 1 hour
+            if (blobClient.CanGenerateSasUri)
+            {
+                var sasBuilder = new BlobSasBuilder
+                {
+                    BlobContainerName = "videos",
+                    BlobName = blobName,
+                    Resource = "b", // b for blob
+                    StartsOn = DateTimeOffset.UtcNow.AddMinutes(-5), // Allow for clock skew
+                    ExpiresOn = DateTimeOffset.UtcNow.AddHours(1)
+                };
+                
+                sasBuilder.SetPermissions(BlobSasPermissions.Read);
+                
+                var sasUri = blobClient.GenerateSasUri(sasBuilder);
+                _logger.LogInformation("Generated SAS URL for video: {BlobName}", blobName);
+                return sasUri.ToString();
+            }
+            else
+            {
+                // If we can't generate SAS (using connection string without key), return the blob URI
+                // This scenario would need anonymous access or different auth strategy
+                _logger.LogWarning("Cannot generate SAS token for blob: {BlobName}", blobName);
+                return blobClient.Uri.ToString();
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error generating video URL: {BlobName}", blobName);
             throw;
         }
     }

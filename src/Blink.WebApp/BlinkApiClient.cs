@@ -47,6 +47,13 @@ public sealed class BlinkApiClient
     {
         return await _httpClient.GetFromJsonAsync<List<VideoInfo>>("api/videos", cancellationToken) ?? [];
     }
+
+    public async Task<string> GetVideoUrlAsync(string blobName, CancellationToken cancellationToken = default)
+    {
+        var encodedBlobName = Uri.EscapeDataString(blobName);
+        var response = await _httpClient.GetFromJsonAsync<VideoUrlResponse>($"api/videos/{encodedBlobName}/url", cancellationToken);
+        return response?.Url ?? throw new InvalidOperationException("Failed to get video URL");
+    }
 }
 
 public sealed record VideoUploadResponse(
@@ -62,4 +69,8 @@ public sealed record VideoInfo(
     long SizeInBytes,
     DateTimeOffset? LastModified,
     string ContentType
+);
+
+public sealed record VideoUrlResponse(
+    string Url
 );

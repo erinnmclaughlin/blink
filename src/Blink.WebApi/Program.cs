@@ -108,6 +108,27 @@ app.MapGet("/api/videos", async (IBlobStorageService blobStorageService, ILogger
     .WithName("ListVideos")
     .RequireAuthorization();
 
+app.MapGet("/api/videos/{blobName}/url", async (string blobName, IBlobStorageService blobStorageService, ILogger<Program> logger) =>
+{
+    try
+    {
+        var url = await blobStorageService.GetVideoUrlAsync(blobName);
+        logger.LogInformation("Generated URL for video: {BlobName}", blobName);
+        return Results.Ok(new { url });
+    }
+    catch (FileNotFoundException)
+    {
+        return Results.NotFound(new { error = "Video not found" });
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "Error generating video URL");
+        return Results.Problem("An error occurred while generating video URL");
+    }
+})
+    .WithName("GetVideoUrl")
+    .RequireAuthorization();
+
 app.MapDefaultEndpoints();
 
 using (var scope = app.Services.CreateScope())
