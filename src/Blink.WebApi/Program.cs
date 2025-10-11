@@ -1,4 +1,4 @@
-using Blink.WebApi.Keycloak;
+using Blink.WebApi;
 using FluentMigrator.Runner;
 using System.Security.Claims;
 
@@ -10,45 +10,20 @@ if (builder.Environment.IsDevelopment())
 }
 
 builder.AddServiceDefaults();
+
 builder.AddNpgsqlDataSource("blinkdb");
+builder.AddFluentMigrations();
 
-builder.Services.AddAuthorization();
+builder.AddKnownClientsCorsPolicy();
 
-builder.Services.AddAuthentication()
-    .AddKeycloakJwtBearer("keycloak", "blink", o =>
-    {
-        o.Audience = "account";
-        o.RequireHttpsMetadata = builder.Environment.IsProduction();
-    });
-
-builder.Services
-    .AddFluentMigratorCore()
-    .ConfigureRunner(rb =>
-    {
-        rb.AddPostgres();
-        rb.WithGlobalConnectionString(builder.Configuration.GetConnectionString("blinkdb"));
-        rb.ScanIn(typeof(Program).Assembly).For.All();
-    })
-    .AddLogging(lb => lb.AddFluentMigratorConsole());
-
-builder.Services
-    .Configure<KeycloakOptions>(builder.Configuration.GetSection("Keycloak"))
-    .AddHttpClient("keycloak", (sp, client) =>
-    {
-        var opt = sp.GetRequiredService<Microsoft.Extensions.Options.IOptions<KeycloakOptions>>().Value;
-        client.BaseAddress = new Uri(opt.BaseUrl);
-    });
-
-builder.Services.AddHostedService<KeycloakEventPoller>();
-builder.Services.Configure<HostOptions>(o =>
-{
-    o.ServicesStartConcurrently = true;
-    o.ServicesStopConcurrently = true;
-});
+builder.AddKeycloakAuthorization();
+builder.AddKeycloakEventPoller();
 
 var app = builder.Build();
 
 app.UseHttpsRedirection();
+
+app.UseCors(CorsConfiguration.KnownClientPolicy);
 
 app.MapGet("/test", () => "Hello, Blink!")
     .WithName("TestEndpoint");

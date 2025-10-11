@@ -29,10 +29,12 @@ var blinkApi = builder.AddProject<Projects.Blink_WebApi>("blinkapi")
     .WaitFor(blinkDb)
     .WaitFor(keycloak);
 
-builder
+var blinkWebApp = builder
     .AddProject<Projects.Blink_WebApp>("blink-webapp")
     .WithExternalHttpEndpoints()
-    .WithReference(blinkApi);
+    .WithReference(blinkApi)
+    .WaitFor(blinkApi);
 
+blinkApi.WithReference(blinkWebApp);
 
 builder.Build().Run();

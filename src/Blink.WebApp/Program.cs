@@ -8,6 +8,14 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 
 builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
 
+builder.Services.AddScoped(sp =>
+{
+    // https+http//blinkapi doesn't work for standalone wasm
+    var uri = builder.Configuration["BlinkApi:BaseAddress"]!;
+    var httpClient = new HttpClient { BaseAddress = new Uri(uri) };
+    return new BlinkApiClient(httpClient);
+});
+
 builder.Services.AddOidcAuthentication(options =>
 {
     builder.Configuration.Bind("Local", options.ProviderOptions);

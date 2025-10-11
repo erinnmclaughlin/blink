@@ -1,0 +1,19 @@
+﻿using FluentMigrator.Runner;
+
+namespace Microsoft.Extensions.DependencyInjection;
+
+public static class FluentMigrationServiceRegistration
+{
+    public static void AddFluentMigrations(this WebApplicationBuilder builder)
+    {
+        builder.Services
+            .AddFluentMigratorCore()
+            .ConfigureRunner(rb =>
+            {
+                rb.AddPostgres();
+                rb.WithGlobalConnectionString(builder.Configuration.GetConnectionString("blinkdb"));
+                rb.ScanIn(typeof(Program).Assembly).For.All();
+            })
+            .AddLogging(lb => lb.AddFluentMigratorConsole());
+    }
+}
