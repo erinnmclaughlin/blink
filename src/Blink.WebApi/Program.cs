@@ -3,11 +3,8 @@ using Blink.WebApi.Videos;
 using Blink.WebApi.Videos.Upload;
 using FluentMigrator.Runner;
 using FluentValidation;
-using MediatR;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
-using Microsoft.AspNetCore.WebUtilities;
-using Microsoft.Net.Http.Headers;
 using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -29,6 +26,7 @@ builder.AddKeycloakAuthorization();
 
 builder.AddAzureBlobServiceClient("blobs");
 builder.Services.AddScoped<IVideoStorageClient, VideoStorageClient>();
+builder.Services.AddScoped<IMultipartFormFileParser, MultipartFormFileParser>();
 
 builder.Services.AddMediatR(o =>
 {
@@ -72,72 +70,8 @@ app.MapGet("/claims", (ClaimsPrincipal user) => Results.Json(user.Claims.Select(
     .WithName("ClaimsEndpoint")
     .RequireAuthorization();
 
-app.MapPost("/api/videos/upload", async (HttpContext context, ISender sender, ILogger<Program> logger) =>
-{
-    try
-    {
-        logger.LogInformation("Video upload request received. ContentType: {ContentType}, ContentLength: {ContentLength}", 
-            context.Request.ContentType, context.Request.ContentLength);
-
-        if (!context.Request.HasFormContentType || 
-            !MediaTypeHeaderValue.TryParse(context.Request.ContentType, out var mediaTypeHeader) ||
-            string.IsNullOrEmpty(mediaTypeHeader.Boundary.Value))
-        {
-            logger.LogWarning("Invalid content type: {ContentType}", context.Request.ContentType);
-            return Results.BadRequest(new { error = "Invalid content type" });
-        }
-
-        var boundary = HeaderUtilities.RemoveQuotes(mediaTypeHeader.Boundary.Value).Value;
-        if (string.IsNullOrWhiteSpace(boundary))
-        {
-            logger.LogWarning("Missing boundary in content type");
-            return Results.BadRequest(new { error = "Missing boundary" });
-        }
-
-        logger.LogInformation("Reading multipart data with boundary: {Boundary}", boundary);
-
-        var reader = new MultipartReader(boundary, context.Request.Body);
-        MultipartSection? section;
-        StreamingFormFile? videoFile = null;
-
-        // Read sections one at a time (streaming)
-        while ((section = await reader.ReadNextSectionAsync(context.RequestAborted)) != null)
-        {
-            var hasContentDispositionHeader = ContentDispositionHeaderValue.TryParse(
-                section.ContentDisposition, out var contentDisposition);
-
-            if (hasContentDispositionHeader && contentDisposition!.DispositionType.Equals("form-data") &&
-                !string.IsNullOrEmpty(contentDisposition.FileName.Value))
-            {
-                // This is a file
-                var fileName = contentDisposition.FileName.Value;
-                logger.LogInformation("Found file in multipart: {FileName}", fileName);
-                videoFile = new StreamingFormFile(section.Body, fileName, section.ContentType);
-                break; // We only expect one file
-            }
-        }
-
-        if (videoFile == null)
-        {
-            logger.LogWarning("No video file found in request");
-            return Results.BadRequest(new { error = "No video file provided" });
-        }
-
-        logger.LogInformation("Processing upload for file: {FileName}", videoFile.FileName);
-        var request = new UploadVideoRequest { File = videoFile };
-        var uploadedVideo = await sender.Send(request, context.RequestAborted);
-        logger.LogInformation("Video uploaded successfully: {BlobName}", uploadedVideo.BlobName);
-        return Results.Ok(uploadedVideo);
-    }
-    catch (Exception ex)
-    {
-        logger.LogError(ex, "Error processing video upload");
-        return Results.Problem(detail: ex.Message, title: "Upload failed", statusCode: 500);
-    }
-})
-    .WithName("UploadVideo")
-    .RequireAuthorization()
-    .DisableAntiforgery();
+// Map the video upload endpoint using CQRS pattern with MediatR
+app.MapUploadVideoEndpoint();
 
 app.MapGet("/api/videos", async (IVideoStorageClient blobStorageService, ILogger<Program> logger) =>
 {
