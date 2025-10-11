@@ -19,7 +19,7 @@ var blinkDb = pgServer.AddDatabase("blinkdb");
 var keycloakAdminClientId = builder.AddParameter("keycloak-clientid", "user-sync-job-test");
 var keycloakAdminClientSecret = builder.AddParameter("keycloak-clientsecret", secret: true);
 
-builder.AddProject<Projects.Blink_WebApi>("blinkapi")
+var blinkApi = builder.AddProject<Projects.Blink_WebApi>("blinkapi")
     .WithExternalHttpEndpoints()
     .WithReference(blinkDb)
     .WithReference(papercut)
@@ -29,17 +29,10 @@ builder.AddProject<Projects.Blink_WebApi>("blinkapi")
     .WaitFor(blinkDb)
     .WaitFor(keycloak);
 
-/*
-var pgDatabase = pgServer.AddDatabase("blink-pg-db");
-
 builder
-    .AddProject<Projects.WebApp>("blink-webapp")
-    .WithReference(keycloak)
-    .WithReference(papercut)
-    .WithReference(pgDatabase)
-    .WaitFor(keycloak)
-    .WaitFor(papercut)
-    .WaitFor(pgDatabase);
-*/
+    .AddProject<Projects.Blink_WebApp>("blink-webapp")
+    .WithExternalHttpEndpoints()
+    .WithReference(blinkApi);
+
 
 builder.Build().Run();

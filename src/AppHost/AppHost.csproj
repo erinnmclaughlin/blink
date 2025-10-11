@@ -14,7 +14,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Blink.WebApi\Blink.WebApi.csproj" />
-    <ProjectReference Include="..\WebApp\WebApp.csproj" />
+    <ProjectReference Include="..\Blink.WebApp\Blink.WebApp.csproj" />
   </ItemGroup>
 
   <ItemGroup>
