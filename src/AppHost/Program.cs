@@ -1,27 +1,30 @@
+using Blink;
 using Blink.AppHost;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
-var storage = builder.AddAndConfigureAzureStorage();
-var serviceBus = builder.AddAndConfigureServiceBus();
-
 var keycloak = builder.AddAndConfigureKeycloak();
 
-var blinkDb = builder.AddAndConfigurePostgresServer().AddDatabase("blinkdb");
+var serviceBus = builder.AddAndConfigureServiceBus();
+var storage = builder.AddAndConfigureAzureStorage();
 
-var blinkApi = builder.AddProject<Projects.Blink_WebApi>("blinkapi")
+var blinkDatabase = builder
+    .AddAndConfigurePostgresServer()
+    .AddDatabase(ServiceNames.BlinkDatabase);
+
+var blinkWebApi = builder.AddProject<Projects.Blink_WebApi>(ServiceNames.BlinkWebApi)
     .WithExternalHttpEndpoints()
-    .WithAwaitedReference(blinkDb)
+    .WithAwaitedReference(blinkDatabase)
     .WithAwaitedReference(keycloak)
     .WithAwaitedReference(storage.Blobs)
     .WithAwaitedReference(storage.Queues)
-    .WithAwaitedReference(serviceBus);
+    .WithAwaitedReference(serviceBus.VideosTopic);
 
 var blinkWebApp = builder
-    .AddProject<Projects.Blink_WebApp>("blink-webapp")
+    .AddProject<Projects.Blink_WebApp>(ServiceNames.BlinkWebApp)
     .WithExternalHttpEndpoints()
-    .WithAwaitedReference(blinkApi);
+    .WithAwaitedReference(blinkWebApi);
 
-blinkApi.WithReference(blinkWebApp);
+blinkWebApi.WithReference(blinkWebApp);
 
 builder.Build().Run();

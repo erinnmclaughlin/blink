@@ -7,7 +7,7 @@ public static class AzureStorageDefaults
 {
     public static AzureStorageResources AddAndConfigureAzureStorage(this IDistributedApplicationBuilder builder)
     {
-        var storage = builder.AddAzureStorage("storage");
+        var storage = builder.AddAzureStorage(ServiceNames.AzureStorage);
 
         if (builder.Environment.IsDevelopment())
         {
@@ -16,8 +16,8 @@ public static class AzureStorageDefaults
 
         return new AzureStorageResources
         {
-            Blobs = storage.AddBlobs("blobs"),
-            Queues = storage.AddQueues("queues")
+            Blobs = storage.AddBlobs(ServiceNames.AzureBlobStorage),
+            Queues = storage.AddQueues(ServiceNames.AzureQueueStorage)
         };
     }
 }

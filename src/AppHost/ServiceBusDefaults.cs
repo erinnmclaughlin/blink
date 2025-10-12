@@ -5,15 +5,26 @@ namespace Blink.AppHost;
 
 public static class ServiceBusDefaults
 {
-    public static IResourceBuilder<AzureServiceBusResource> AddAndConfigureServiceBus(this IDistributedApplicationBuilder builder)
+    public static AzureServiceBusResources AddAndConfigureServiceBus(this IDistributedApplicationBuilder builder)
     {
-        var serviceBus = builder.AddAzureServiceBus("messaging");
+        var serviceBus = builder.AddAzureServiceBus(ServiceNames.ServiceBus);
 
         if (builder.Environment.IsDevelopment())
         {
             serviceBus.RunAsEmulator();
         }
 
-        return serviceBus;
+        return new AzureServiceBusResources
+        {
+            ServiceBus = serviceBus,
+            VideosTopic = serviceBus.AddServiceBusTopic(ServiceNames.ServiceBusVideosTopic),
+        };
     }
+}
+
+public sealed record AzureServiceBusResources
+{
+    public required IResourceBuilder<AzureServiceBusResource> ServiceBus { get; init; }
+
+    public required IResourceBuilder<AzureServiceBusTopicResource> VideosTopic { get; init; }
 }

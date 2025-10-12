@@ -1,3 +1,4 @@
+using Blink;
 using Blink.WebApi;
 using Blink.WebApi.Videos;
 using Blink.WebApi.Videos.Thumbnails;
@@ -17,7 +18,7 @@ if (builder.Environment.IsDevelopment())
 
 builder.AddServiceDefaults();
 
-builder.AddNpgsqlDataSource("blinkdb");
+builder.AddNpgsqlDataSource(ServiceNames.BlinkDatabase);
 builder.AddFluentMigrations();
 
 builder.AddKnownClientsCorsPolicy();
@@ -25,8 +26,8 @@ builder.AddKnownClientsCorsPolicy();
 builder.AddKeycloakAuthorization();
 //builder.AddKeycloakEventPoller();
 
-builder.AddAzureBlobServiceClient("blobs");
-builder.AddAzureQueueServiceClient("queues");
+builder.AddAzureBlobServiceClient(ServiceNames.AzureBlobStorage);
+builder.AddAzureQueueServiceClient(ServiceNames.AzureQueueStorage);
 builder.Services.AddScoped<IVideoStorageClient, VideoStorageClient>();
 builder.Services.AddScoped<IVideoRepository, VideoRepository>();
 builder.Services.AddScoped<IMultipartFormFileParser, MultipartFormFileParser>();
@@ -38,7 +39,7 @@ builder.Services.AddSingleton<IThumbnailQueue, ThumbnailQueue>();
 builder.Services.AddScoped<IThumbnailGenerator,SimpleThumbnailGenerator>();
 builder.Services.AddHostedService<ThumbnailGenerationService>();
 
-builder.AddAzureServiceBusClient("messaging");
+builder.AddAzureServiceBusClient(ServiceNames.ServiceBus);
 
 builder.Services.AddMediatR(o =>
 {
