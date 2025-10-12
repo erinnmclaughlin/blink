@@ -1,5 +1,6 @@
 using Blink.WebApi;
 using Blink.WebApi.Videos;
+using Blink.WebApi.Videos.Thumbnails;
 using Blink.WebApi.Videos.Upload;
 using FluentMigrator.Runner;
 using FluentValidation;
@@ -33,9 +34,11 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddTransient<ICurrentUser, CurrentUserAccessor>();
 
 // Register thumbnail generation services
-builder.Services.AddSingleton<Blink.WebApi.Videos.Thumbnails.IThumbnailQueue, Blink.WebApi.Videos.Thumbnails.ThumbnailQueue>();
-builder.Services.AddScoped<Blink.WebApi.Videos.Thumbnails.IThumbnailGenerator, Blink.WebApi.Videos.Thumbnails.SimpleThumbnailGenerator>();
-builder.Services.AddHostedService<Blink.WebApi.Videos.Thumbnails.ThumbnailGenerationService>();
+builder.Services.AddSingleton<IThumbnailQueue, ThumbnailQueue>();
+builder.Services.AddScoped<IThumbnailGenerator,SimpleThumbnailGenerator>();
+builder.Services.AddHostedService<ThumbnailGenerationService>();
+
+builder.AddAzureServiceBusClient("messaging");
 
 builder.Services.AddMediatR(o =>
 {
