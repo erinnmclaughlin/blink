@@ -36,12 +36,8 @@ builder.Services.AddScoped<IMultipartFormFileParser, MultipartFormFileParser>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddTransient<ICurrentUser, CurrentUserAccessor>();
 
-// Register thumbnail generation services
-builder.Services.AddSingleton<IThumbnailQueue, ThumbnailQueue>();
 builder.Services.AddScoped<IThumbnailGenerator, SimpleThumbnailGenerator>();
-//builder.Services.AddHostedService<ThumbnailGenerationService>();
 builder.Services.AddScoped<IVideoMetadataExtractor, FFprobeMetadataExtractor>();
-
 
 builder.Services.AddMediatR(o =>
 {

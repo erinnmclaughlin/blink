@@ -1,4 +1,4 @@
-namespace Blink.WebApi.Videos.Events;
+namespace Blink.Messaging;
 
 /// <summary>
 /// Event published when a video has been successfully uploaded
@@ -18,4 +18,3 @@ public sealed record VideoUploadedEvent
     public int? Height { get; init; }
     public double? DurationInSeconds { get; init; }
 }
-

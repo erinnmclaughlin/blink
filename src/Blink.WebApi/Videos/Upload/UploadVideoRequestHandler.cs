@@ -1,5 +1,4 @@
-﻿using Blink.WebApi.Videos.Events;
-using Blink.WebApi.Videos.Thumbnails;
+﻿using Blink.Messaging;
 using MassTransit;
 using MediatR;
 
@@ -10,7 +9,6 @@ public sealed class UploadVideoRequestHandler : IRequestHandler<UploadVideoReque
     private readonly ICurrentUser _currentUser;
     private readonly ILogger<UploadVideoRequestHandler> _logger;
     private readonly IVideoMetadataExtractor _metadataExtractor;
-    private readonly IThumbnailQueue _thumbnailQueue;
     private readonly IPublishEndpoint _videoEventPublisher;
     private readonly IVideoRepository _videoRepository;
     private readonly IVideoStorageClient _videoStorageClient;
@@ -19,7 +17,6 @@ public sealed class UploadVideoRequestHandler : IRequestHandler<UploadVideoReque
         ICurrentUser currentUser,
         ILogger<UploadVideoRequestHandler> logger,
         IVideoMetadataExtractor metadataExtractor,
-        IThumbnailQueue thumbnailQueue,
         IPublishEndpoint videoEventPublisher,
         IVideoRepository videoRepository,
         IVideoStorageClient videoStorageClient)
@@ -27,7 +24,6 @@ public sealed class UploadVideoRequestHandler : IRequestHandler<UploadVideoReque
         _currentUser = currentUser;
         _logger = logger;
         _metadataExtractor = metadataExtractor;
-        _thumbnailQueue = thumbnailQueue;
         _videoEventPublisher = videoEventPublisher;
         _videoRepository = videoRepository;
         _videoStorageClient = videoStorageClient;

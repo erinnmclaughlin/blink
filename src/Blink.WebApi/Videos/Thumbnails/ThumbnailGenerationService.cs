@@ -1,4 +1,4 @@
-using Blink.WebApi.Videos.Events;
+using Blink.Messaging;
 using MassTransit;
 
 namespace Blink.WebApi.Videos.Thumbnails;
@@ -8,16 +8,13 @@ namespace Blink.WebApi.Videos.Thumbnails;
 /// </summary>
 public sealed class ThumbnailGenerationService : IConsumer<VideoUploadedEvent>
 {
-    private readonly IThumbnailQueue _thumbnailQueue;
     private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<ThumbnailGenerationService> _logger;
 
     public ThumbnailGenerationService(
-        IThumbnailQueue thumbnailQueue,
         IServiceProvider serviceProvider,
         ILogger<ThumbnailGenerationService> logger)
     {
-        _thumbnailQueue = thumbnailQueue;
         _serviceProvider = serviceProvider;
         _logger = logger;
     }
