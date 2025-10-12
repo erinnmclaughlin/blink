@@ -11,12 +11,8 @@ public static class MassTransitConfiguration
         {
             busConfigurator.SetKebabCaseEndpointNameFormatter();
 
-            busConfigurator.AddConsumer<ThumbnailGenerationService>();
-
-            //busConfigurator.UsingInMemory((context, config) =>
-            //{
-            //    config.ConfigureEndpoints(context);
-            //});
+            busConfigurator.AddConsumer<VideoThumbnailGeneratedConsumer>();
+            busConfigurator.AddConsumer<VideoUploadedEventConsumer>();
 
             busConfigurator.UsingRabbitMq((context, configurator) =>
             {
