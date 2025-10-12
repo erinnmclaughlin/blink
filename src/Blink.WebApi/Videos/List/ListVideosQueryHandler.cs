@@ -33,7 +33,8 @@ public sealed class ListVideosQueryHandler : IRequestHandler<ListVideosQuery, Li
             Title: v.Title,
             Description: v.Description,
             VideoDate: v.VideoDate,
-            OwnerId: v.OwnerId
+            OwnerId: v.OwnerId,
+            ThumbnailBlobName: v.ThumbnailBlobName
         )).ToList();
 
         _logger.LogInformation("Retrieved {Count} videos for user {UserId}", videoInfoList.Count, _currentUser.UserId);

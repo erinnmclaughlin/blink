@@ -12,6 +12,8 @@ public interface IVideoStorageClient
     Task<List<VideoInfo>> ListAsync(CancellationToken cancellationToken = default);
     Task<(string BlobName, long FileSize)> UploadAsync(Stream videoStream, string fileName, CancellationToken cancellationToken = default);
     Task<bool> UpdateTitleAsync(string blobName, string title, CancellationToken cancellationToken = default);
+    Task<string> UploadThumbnailAsync(Stream thumbnailStream, string videoBlobName, CancellationToken cancellationToken = default);
+    Task<string?> GetThumbnailUrlAsync(string thumbnailBlobName, CancellationToken cancellationToken = default);
 }
 
 public class VideoStorageClient : IVideoStorageClient
@@ -240,6 +242,84 @@ public class VideoStorageClient : IVideoStorageClient
         }
     }
 
+    public async Task<string> UploadThumbnailAsync(Stream thumbnailStream, string videoBlobName, CancellationToken cancellationToken = default)
+    {
+        // Create thumbnail blob name based on video blob name
+        var thumbnailBlobName = $"thumbnails/{Path.GetFileNameWithoutExtension(videoBlobName)}_thumb.jpg";
+
+        try
+        {
+            var containerClient = _blobServiceClient.GetBlobContainerClient("videos");
+            await containerClient.CreateIfNotExistsAsync(PublicAccessType.None, cancellationToken: cancellationToken);
+            var blobClient = containerClient.GetBlobClient(thumbnailBlobName);
+
+            await blobClient.UploadAsync(
+                thumbnailStream,
+                new BlobUploadOptions { HttpHeaders = new() { ContentType = "image/jpeg" } },
+                cancellationToken);
+
+            _logger.LogInformation("Thumbnail uploaded successfully: {ThumbnailBlobName} for video: {VideoBlobName}", 
+                thumbnailBlobName, videoBlobName);
+            return thumbnailBlobName;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error uploading thumbnail for video: {VideoBlobName}", videoBlobName);
+            throw;
+        }
+    }
+
+    public async Task<string?> GetThumbnailUrlAsync(string thumbnailBlobName, CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrEmpty(thumbnailBlobName))
+        {
+            return null;
+        }
+
+        try
+        {
+            var containerClient = _blobServiceClient.GetBlobContainerClient("videos");
+            var blobClient = containerClient.GetBlobClient(thumbnailBlobName);
+
+            // Check if blob exists
+            if (!await blobClient.ExistsAsync(cancellationToken))
+            {
+                _logger.LogWarning("Thumbnail not found: {ThumbnailBlobName}", thumbnailBlobName);
+                return null;
+            }
+
+            // Generate SAS token valid for 1 hour
+            if (blobClient.CanGenerateSasUri)
+            {
+                var sasBuilder = new BlobSasBuilder
+                {
+                    BlobContainerName = "videos",
+                    BlobName = thumbnailBlobName,
+                    Resource = "b",
+                    StartsOn = DateTimeOffset.UtcNow.AddMinutes(-5),
+                    ExpiresOn = DateTimeOffset.UtcNow.AddHours(1)
+                };
+
+                sasBuilder.SetPermissions(BlobSasPermissions.Read);
+
+                var sasUri = blobClient.GenerateSasUri(sasBuilder);
+                _logger.LogInformation("Generated SAS URL for thumbnail: {ThumbnailBlobName}", thumbnailBlobName);
+                return sasUri.ToString();
+            }
+            else
+            {
+                _logger.LogWarning("Cannot generate SAS token for thumbnail: {ThumbnailBlobName}. Returning direct URI: {Uri}", 
+                    thumbnailBlobName, blobClient.Uri);
+                return blobClient.Uri.ToString();
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error generating thumbnail URL: {ThumbnailBlobName}", thumbnailBlobName);
+            return null;
+        }
+    }
+
     private static string GetContentType(string fileName)
     {
         var extension = Path.GetExtension(fileName).ToLowerInvariant();
@@ -263,5 +343,6 @@ public record VideoInfo(
     string? Title,
     string? Description,
     DateTime? VideoDate,
-    string OwnerId
+    string OwnerId,
+    string? ThumbnailBlobName = null
 );

@@ -16,5 +16,6 @@ public sealed class Video
     public required string OwnerId { get; set; }
     public DateTime UploadedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
+    public string? ThumbnailBlobName { get; set; }
 }
 

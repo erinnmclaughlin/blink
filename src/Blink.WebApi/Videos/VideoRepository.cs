@@ -26,8 +26,8 @@ public sealed class VideoRepository : IVideoRepository
     public async Task<Video> CreateAsync(Video video, CancellationToken cancellationToken = default)
     {
         const string sql = """
-            INSERT INTO videos (id, blob_name, title, description, video_date, file_name, content_type, size_in_bytes, owner_id, uploaded_at, updated_at)
-            VALUES (@Id, @BlobName, @Title, @Description, @VideoDate, @FileName, @ContentType, @SizeInBytes, @OwnerId, @UploadedAt, @UpdatedAt)
+            INSERT INTO videos (id, blob_name, title, description, video_date, file_name, content_type, size_in_bytes, owner_id, uploaded_at, updated_at, thumbnail_blob_name)
+            VALUES (@Id, @BlobName, @Title, @Description, @VideoDate, @FileName, @ContentType, @SizeInBytes, @OwnerId, @UploadedAt, @UpdatedAt, @ThumbnailBlobName)
             RETURNING *
             """;
 
@@ -49,7 +49,7 @@ public sealed class VideoRepository : IVideoRepository
     public async Task<Video?> GetByBlobNameAsync(string blobName, CancellationToken cancellationToken = default)
     {
         const string sql = """
-            SELECT id, blob_name, title, description, video_date, file_name, content_type, size_in_bytes, owner_id, uploaded_at, updated_at
+            SELECT id, blob_name, title, description, video_date, file_name, content_type, size_in_bytes, owner_id, uploaded_at, updated_at, thumbnail_blob_name
             FROM videos
             WHERE blob_name = @BlobName
             """;
@@ -69,7 +69,7 @@ public sealed class VideoRepository : IVideoRepository
     public async Task<List<Video>> GetByOwnerIdAsync(string ownerId, CancellationToken cancellationToken = default)
     {
         const string sql = """
-            SELECT id, blob_name, title, description, video_date, file_name, content_type, size_in_bytes, owner_id, uploaded_at, updated_at
+            SELECT id, blob_name, title, description, video_date, file_name, content_type, size_in_bytes, owner_id, uploaded_at, updated_at, thumbnail_blob_name
             FROM videos
             WHERE owner_id = @OwnerId
             ORDER BY uploaded_at DESC
@@ -91,7 +91,7 @@ public sealed class VideoRepository : IVideoRepository
     public async Task<List<Video>> GetAllAsync(CancellationToken cancellationToken = default)
     {
         const string sql = """
-            SELECT id, blob_name, title, description, video_date, file_name, content_type, size_in_bytes, owner_id, uploaded_at, updated_at
+            SELECT id, blob_name, title, description, video_date, file_name, content_type, size_in_bytes, owner_id, uploaded_at, updated_at, thumbnail_blob_name
             FROM videos
             ORDER BY uploaded_at DESC
             """;
@@ -153,6 +153,36 @@ public sealed class VideoRepository : IVideoRepository
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error deleting video record: {BlobName}", blobName);
+            throw;
+        }
+    }
+
+    public async Task<bool> UpdateThumbnailAsync(string blobName, string thumbnailBlobName, CancellationToken cancellationToken = default)
+    {
+        const string sql = """
+            UPDATE videos
+            SET thumbnail_blob_name = @ThumbnailBlobName,
+                updated_at = @UpdatedAt
+            WHERE blob_name = @BlobName
+            """;
+
+        try
+        {
+            await using var connection = await _dataSource.OpenConnectionAsync(cancellationToken);
+            var rowsAffected = await connection.ExecuteAsync(sql, new 
+            { 
+                BlobName = blobName, 
+                ThumbnailBlobName = thumbnailBlobName,
+                UpdatedAt = DateTime.UtcNow
+            });
+            
+            _logger.LogInformation("Updated video thumbnail: {BlobName}, Thumbnail: {ThumbnailBlobName}, Rows affected: {RowsAffected}", 
+                blobName, thumbnailBlobName, rowsAffected);
+            return rowsAffected > 0;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating video thumbnail: {BlobName}", blobName);
             throw;
         }
     }

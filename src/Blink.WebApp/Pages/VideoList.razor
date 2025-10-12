@@ -67,6 +67,37 @@
             {
                 <div class="col">
                     <div class="card h-100 shadow-sm">
+                        @{
+                            var thumbnailUrl = GetThumbnailUrl(video);
+                            var hasThumbnail = HasThumbnail(video);
+                        }
+                        
+                        @if (!string.IsNullOrEmpty(thumbnailUrl))
+                        {
+                            <img src="@thumbnailUrl" class="card-img-top" alt="@GetDisplayTitle(video)" style="height: 180px; object-fit: cover;">
+                        }
+                        else if (hasThumbnail)
+                        {
+                            <!-- Thumbnail is being generated -->
+                            <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 180px;">
+                                <div class="text-center text-muted">
+                                    <div class="spinner-border spinner-border-sm mb-2" role="status">
+                                        <span class="visually-hidden">Generating thumbnail...</span>
+                                    </div>
+                                    <div class="small">Generating thumbnail...</div>
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <!-- No thumbnail yet - show placeholder -->
+                            <div class="card-img-top bg-secondary bg-opacity-10 d-flex align-items-center justify-content-center" style="height: 180px;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="currentColor" class="bi bi-camera-video text-secondary" viewBox="0 0 16 16">
+                                    <path fill-rule="evenodd" d="M0 5a2 2 0 0 1 2-2h7.5a2 2 0 0 1 1.983 1.738l3.11-1.382A1 1 0 0 1 16 4.269v7.462a1 1 0 0 1-1.406.913l-3.111-1.382A2 2 0 0 1 9.5 13H2a2 2 0 0 1-2-2V5zm11.5 5.175 3.5 1.556V4.269l-3.5 1.556v4.35zM2 4a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h7.5a1 1 0 0 0 1-1V5a1 1 0 0 0-1-1H2z"/>
+                                </svg>
+                            </div>
+                        }
+                        
                         <div class="card-body">
                             <div class="d-flex align-items-start mb-2">
                                 <div class="flex-grow-1" style="min-width: 0;">

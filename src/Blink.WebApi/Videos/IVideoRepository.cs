@@ -34,5 +34,10 @@ public interface IVideoRepository
     /// Deletes a video record by blob name
     /// </summary>
     Task<bool> DeleteByBlobNameAsync(string blobName, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Updates the thumbnail blob name for a video
+    /// </summary>
+    Task<bool> UpdateThumbnailAsync(string blobName, string thumbnailBlobName, CancellationToken cancellationToken = default);
 }
 

@@ -70,6 +70,13 @@ public sealed class BlinkApiClient
         return response?.Url ?? throw new InvalidOperationException("Failed to get video URL");
     }
 
+    public async Task<VideoUrlResponse> GetVideoUrlWithThumbnailAsync(string blobName, CancellationToken cancellationToken = default)
+    {
+        var encodedBlobName = Uri.EscapeDataString(blobName);
+        var response = await _httpClient.GetFromJsonAsync<VideoUrlResponse>($"api/videos/{encodedBlobName}/url", cancellationToken);
+        return response ?? throw new InvalidOperationException("Failed to get video URL");
+    }
+
     public async Task<VideoDeleteResponse> DeleteVideoAsync(string blobName, CancellationToken cancellationToken = default)
     {
         var encodedBlobName = Uri.EscapeDataString(blobName);
@@ -127,11 +134,13 @@ public sealed record VideoInfo(
     string? Title,
     string? Description,
     DateTime? VideoDate,
-    string OwnerId
+    string OwnerId,
+    string? ThumbnailBlobName = null
 );
 
 public sealed record VideoUrlResponse(
-    string Url
+    string Url,
+    string? ThumbnailUrl = null
 );
 
 public sealed record VideoDeleteResponse(

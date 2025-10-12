@@ -31,6 +31,11 @@ builder.Services.AddScoped<IMultipartFormFileParser, MultipartFormFileParser>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddTransient<ICurrentUser, CurrentUserAccessor>();
 
+// Register thumbnail generation services
+builder.Services.AddSingleton<Blink.WebApi.Videos.Thumbnails.IThumbnailQueue, Blink.WebApi.Videos.Thumbnails.ThumbnailQueue>();
+builder.Services.AddScoped<Blink.WebApi.Videos.Thumbnails.IThumbnailGenerator, Blink.WebApi.Videos.Thumbnails.SimpleThumbnailGenerator>();
+builder.Services.AddHostedService<Blink.WebApi.Videos.Thumbnails.ThumbnailGenerationService>();
+
 builder.Services.AddMediatR(o =>
 {
     o.AddOpenBehavior(typeof(ValidationBehavior<,>));

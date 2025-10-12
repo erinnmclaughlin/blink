@@ -1,4 +1,5 @@
-﻿using MediatR;
+﻿using Blink.WebApi.Videos.Thumbnails;
+using MediatR;
 
 namespace Blink.WebApi.Videos.Upload;
 
@@ -7,17 +8,20 @@ public sealed class UploadVideoRequestHandler : IRequestHandler<UploadVideoReque
     private readonly ICurrentUser _currentUser;
     private readonly IVideoStorageClient _videoStorageClient;
     private readonly IVideoRepository _videoRepository;
+    private readonly IThumbnailQueue _thumbnailQueue;
     private readonly ILogger<UploadVideoRequestHandler> _logger;
 
     public UploadVideoRequestHandler(
         ICurrentUser currentUser,
         IVideoStorageClient videoStorageClient,
         IVideoRepository videoRepository,
+        IThumbnailQueue thumbnailQueue,
         ILogger<UploadVideoRequestHandler> logger)
     {
         _currentUser = currentUser;
         _videoStorageClient = videoStorageClient;
         _videoRepository = videoRepository;
+        _thumbnailQueue = thumbnailQueue;
         _logger = logger;
     }
 
@@ -52,6 +56,10 @@ public sealed class UploadVideoRequestHandler : IRequestHandler<UploadVideoReque
         await _videoRepository.CreateAsync(video, cancellationToken);
 
         _logger.LogInformation("Video uploaded and saved to database: {BlobName}, Owner: {OwnerId}", blobName, _currentUser.UserId);
+
+        // Queue video for thumbnail generation
+        await _thumbnailQueue.EnqueueAsync(blobName, cancellationToken);
+        _logger.LogInformation("Video queued for thumbnail generation: {BlobName}", blobName);
 
         return new UploadedVideoInfo
         {
