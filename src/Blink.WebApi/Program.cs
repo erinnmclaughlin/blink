@@ -25,6 +25,7 @@ builder.AddKeycloakAuthorization();
 //builder.AddKeycloakEventPoller();
 
 builder.AddAzureBlobServiceClient("blobs");
+builder.AddAzureQueueServiceClient("queues");
 builder.Services.AddScoped<IVideoStorageClient, VideoStorageClient>();
 builder.Services.AddScoped<IVideoRepository, VideoRepository>();
 builder.Services.AddScoped<IMultipartFormFileParser, MultipartFormFileParser>();

@@ -2,6 +2,7 @@ var builder = DistributedApplication.CreateBuilder(args);
 
 var storage = builder.AddAzureStorage("storage").RunAsEmulator(azurite => azurite.WithDataVolume());
 var blobs = storage.AddBlobs("blobs");
+var queues = storage.AddQueues("queues");
 
 var keycloak = builder
     .AddKeycloak("keycloak", 8080)
@@ -26,12 +27,14 @@ var blinkApi = builder.AddProject<Projects.Blink_WebApi>("blinkapi")
     .WithExternalHttpEndpoints()
     .WithReference(blinkDb)
     .WithReference(blobs)
+    .WithReference(queues)
     //.WithReference(papercut)
     .WithReference(keycloak)
     .WithEnvironment("Keycloak:ClientId", keycloakAdminClientId)
     .WithEnvironment("Keycloak:ClientSecret", keycloakAdminClientSecret)
     .WaitFor(blinkDb)
     .WaitFor(blobs)
+    .WaitFor(queues)
     .WaitFor(keycloak);
 
 var blinkWebApp = builder

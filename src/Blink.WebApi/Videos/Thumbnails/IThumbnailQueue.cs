@@ -1,4 +1,4 @@
-using System.Threading.Channels;
+using Azure.Storage.Queues;
 
 namespace Blink.WebApi.Videos.Thumbnails;
 
@@ -15,40 +15,63 @@ public interface IThumbnailQueue
     /// <summary>
     /// Dequeues a video for thumbnail generation
     /// </summary>
-    ValueTask<string> DequeueAsync(CancellationToken cancellationToken = default);
+    ValueTask<string?> DequeueAsync(CancellationToken cancellationToken = default);
 }
 
 /// <summary>
-/// Channel-based implementation of thumbnail queue for high-performance async processing
+/// Azure Storage Queue implementation of thumbnail queue for reliable distributed processing
 /// </summary>
 public sealed class ThumbnailQueue : IThumbnailQueue
 {
-    private readonly Channel<string> _channel;
+    private const string QueueName = "thumbnail-generation";
+    private readonly QueueServiceClient _queueServiceClient;
     private readonly ILogger<ThumbnailQueue> _logger;
+    private QueueClient? _queueClient;
 
-    public ThumbnailQueue(ILogger<ThumbnailQueue> logger)
+    public ThumbnailQueue(
+        QueueServiceClient queueServiceClient,
+        ILogger<ThumbnailQueue> logger)
     {
+        _queueServiceClient = queueServiceClient;
         _logger = logger;
-        // Create unbounded channel for simplicity
-        // In production, consider bounded channel with appropriate capacity
-        _channel = Channel.CreateUnbounded<string>(new UnboundedChannelOptions
+    }
+
+    private async Task<QueueClient> GetQueueClientAsync(CancellationToken cancellationToken)
+    {
+        if (_queueClient is not null)
         {
-            SingleReader = false, // Allow multiple background workers if needed
-            SingleWriter = false
-        });
+            return _queueClient;
+        }
+
+        _queueClient = _queueServiceClient.GetQueueClient(QueueName);
+        await _queueClient.CreateIfNotExistsAsync(cancellationToken: cancellationToken);
+        return _queueClient;
     }
 
     public async ValueTask EnqueueAsync(string videoBlobName, CancellationToken cancellationToken = default)
     {
-        await _channel.Writer.WriteAsync(videoBlobName, cancellationToken);
+        var queueClient = await GetQueueClientAsync(cancellationToken);
+        await queueClient.SendMessageAsync(videoBlobName, cancellationToken: cancellationToken);
         _logger.LogInformation("Enqueued video for thumbnail generation: {VideoBlobName}", videoBlobName);
     }
 
-    public async ValueTask<string> DequeueAsync(CancellationToken cancellationToken = default)
+    public async ValueTask<string?> DequeueAsync(CancellationToken cancellationToken = default)
     {
-        var videoBlobName = await _channel.Reader.ReadAsync(cancellationToken);
+        var queueClient = await GetQueueClientAsync(cancellationToken);
+        var response = await queueClient.ReceiveMessageAsync(cancellationToken: cancellationToken);
+        
+        if (response.Value is null)
+        {
+            return null;
+        }
+
+        var message = response.Value;
+        var videoBlobName = message.MessageText;
+        
+        // Delete the message from the queue after receiving it
+        await queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, cancellationToken);
+        
         _logger.LogDebug("Dequeued video for thumbnail generation: {VideoBlobName}", videoBlobName);
         return videoBlobName;
     }
 }
-

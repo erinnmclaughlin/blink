@@ -30,6 +30,13 @@ public sealed class ThumbnailGenerationService : BackgroundService
                 // Dequeue the next video for processing
                 var videoBlobName = await _thumbnailQueue.DequeueAsync(stoppingToken);
 
+                // If no message is available, wait before trying again
+                if (videoBlobName is null)
+                {
+                    await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
+                    continue;
+                }
+
                 _logger.LogInformation("Processing thumbnail generation for video: {VideoBlobName}", videoBlobName);
 
                 // Create a scope for this work item
