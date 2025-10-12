@@ -17,5 +17,7 @@ public sealed class Video
     public DateTime UploadedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
     public string? ThumbnailBlobName { get; set; }
+    public int? Width { get; set; }
+    public int? Height { get; set; }
 }
 

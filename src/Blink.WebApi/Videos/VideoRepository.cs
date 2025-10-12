@@ -26,8 +26,8 @@ public sealed class VideoRepository : IVideoRepository
     public async Task<Video> CreateAsync(Video video, CancellationToken cancellationToken = default)
     {
         const string sql = """
-            INSERT INTO videos (id, blob_name, title, description, video_date, file_name, content_type, size_in_bytes, owner_id, uploaded_at, updated_at, thumbnail_blob_name)
-            VALUES (@Id, @BlobName, @Title, @Description, @VideoDate, @FileName, @ContentType, @SizeInBytes, @OwnerId, @UploadedAt, @UpdatedAt, @ThumbnailBlobName)
+            INSERT INTO videos (id, blob_name, title, description, video_date, file_name, content_type, size_in_bytes, owner_id, uploaded_at, updated_at, thumbnail_blob_name, width, height)
+            VALUES (@Id, @BlobName, @Title, @Description, @VideoDate, @FileName, @ContentType, @SizeInBytes, @OwnerId, @UploadedAt, @UpdatedAt, @ThumbnailBlobName, @Width, @Height)
             RETURNING *
             """;
 
@@ -49,7 +49,7 @@ public sealed class VideoRepository : IVideoRepository
     public async Task<Video?> GetByBlobNameAsync(string blobName, CancellationToken cancellationToken = default)
     {
         const string sql = """
-            SELECT id, blob_name, title, description, video_date, file_name, content_type, size_in_bytes, owner_id, uploaded_at, updated_at, thumbnail_blob_name
+            SELECT id, blob_name, title, description, video_date, file_name, content_type, size_in_bytes, owner_id, uploaded_at, updated_at, thumbnail_blob_name, width, height
             FROM videos
             WHERE blob_name = @BlobName
             """;
@@ -69,7 +69,7 @@ public sealed class VideoRepository : IVideoRepository
     public async Task<List<Video>> GetByOwnerIdAsync(string ownerId, CancellationToken cancellationToken = default)
     {
         const string sql = """
-            SELECT id, blob_name, title, description, video_date, file_name, content_type, size_in_bytes, owner_id, uploaded_at, updated_at, thumbnail_blob_name
+            SELECT id, blob_name, title, description, video_date, file_name, content_type, size_in_bytes, owner_id, uploaded_at, updated_at, thumbnail_blob_name, width, height
             FROM videos
             WHERE owner_id = @OwnerId
             ORDER BY uploaded_at DESC
@@ -91,7 +91,7 @@ public sealed class VideoRepository : IVideoRepository
     public async Task<List<Video>> GetAllAsync(CancellationToken cancellationToken = default)
     {
         const string sql = """
-            SELECT id, blob_name, title, description, video_date, file_name, content_type, size_in_bytes, owner_id, uploaded_at, updated_at, thumbnail_blob_name
+            SELECT id, blob_name, title, description, video_date, file_name, content_type, size_in_bytes, owner_id, uploaded_at, updated_at, thumbnail_blob_name, width, height
             FROM videos
             ORDER BY uploaded_at DESC
             """;

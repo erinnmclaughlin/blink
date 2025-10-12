@@ -9,6 +9,7 @@ public sealed class UploadVideoRequestHandler : IRequestHandler<UploadVideoReque
     private readonly IVideoStorageClient _videoStorageClient;
     private readonly IVideoRepository _videoRepository;
     private readonly IThumbnailQueue _thumbnailQueue;
+    private readonly IVideoMetadataExtractor _metadataExtractor;
     private readonly ILogger<UploadVideoRequestHandler> _logger;
 
     public UploadVideoRequestHandler(
@@ -16,20 +17,48 @@ public sealed class UploadVideoRequestHandler : IRequestHandler<UploadVideoReque
         IVideoStorageClient videoStorageClient,
         IVideoRepository videoRepository,
         IThumbnailQueue thumbnailQueue,
+        IVideoMetadataExtractor metadataExtractor,
         ILogger<UploadVideoRequestHandler> logger)
     {
         _currentUser = currentUser;
         _videoStorageClient = videoStorageClient;
         _videoRepository = videoRepository;
         _thumbnailQueue = thumbnailQueue;
+        _metadataExtractor = metadataExtractor;
         _logger = logger;
     }
 
     public async Task<UploadedVideoInfo> Handle(UploadVideoRequest request, CancellationToken cancellationToken)
     {
-        // Upload to blob storage
+        // Upload to blob storage first
         using var stream = request.File.OpenReadStream();
         var (blobName, fileSize) = await _videoStorageClient.UploadAsync(stream, request.File.FileName, cancellationToken);
+
+        _logger.LogInformation("Video uploaded to blob storage: {BlobName}", blobName);
+
+        // Extract metadata from uploaded video
+        VideoMetadata? metadata = null;
+        try
+        {
+            _logger.LogInformation("Extracting metadata from uploaded video: {BlobName}", blobName);
+            using var videoStream = await _videoStorageClient.DownloadAsync(blobName, cancellationToken);
+            metadata = await _metadataExtractor.ExtractMetadataAsync(videoStream, cancellationToken);
+            
+            if (metadata != null)
+            {
+                _logger.LogInformation("Video metadata extracted: {Width}x{Height} for {BlobName}", 
+                    metadata.Width, metadata.Height, blobName);
+            }
+            else
+            {
+                _logger.LogWarning("Could not extract metadata from video: {BlobName}", blobName);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error extracting metadata from video: {BlobName}", blobName);
+            // Continue with database save even if metadata extraction fails
+        }
 
         // Get content type
         var contentType = GetContentType(request.File.FileName);
@@ -50,12 +79,15 @@ public sealed class UploadVideoRequestHandler : IRequestHandler<UploadVideoReque
             SizeInBytes = fileSize,
             OwnerId = _currentUser.UserId,
             UploadedAt = now,
-            UpdatedAt = now
+            UpdatedAt = now,
+            Width = metadata?.Width,
+            Height = metadata?.Height
         };
 
         await _videoRepository.CreateAsync(video, cancellationToken);
 
-        _logger.LogInformation("Video uploaded and saved to database: {BlobName}, Owner: {OwnerId}", blobName, _currentUser.UserId);
+        _logger.LogInformation("Video saved to database: {BlobName}, Owner: {OwnerId}, Dimensions: {Width}x{Height}", 
+            blobName, _currentUser.UserId, metadata?.Width, metadata?.Height);
 
         // Queue video for thumbnail generation
         await _thumbnailQueue.EnqueueAsync(blobName, cancellationToken);
