@@ -1,7 +1,4 @@
-﻿using Azure.Messaging.ServiceBus;
-using Azure.Messaging.ServiceBus.Administration;
-using Blink.WebApi.Videos.Events;
-using Blink.WebApi.Videos.Thumbnails;
+﻿using Blink.WebApi.Videos.Thumbnails;
 using MassTransit;
 
 namespace Blink.WebApi;
@@ -16,9 +13,16 @@ public static class MassTransitConfiguration
 
             busConfigurator.AddConsumer<ThumbnailGenerationService>();
 
-            busConfigurator.UsingInMemory((context, config) =>
+            //busConfigurator.UsingInMemory((context, config) =>
+            //{
+            //    config.ConfigureEndpoints(context);
+            //});
+
+            busConfigurator.UsingRabbitMq((context, configurator) =>
             {
-                config.ConfigureEndpoints(context);
+                configurator.Host(builder.Configuration.GetConnectionString(ServiceNames.Messaging));
+
+                configurator.ConfigureEndpoints(context);
             });
         });
     }

@@ -10,6 +10,5 @@ public static class ServiceNames
     public const string BlinkWebApi = "blink-webapi";
     public const string BlinkWebApp = "blink-webapp";
 
-    public const string ServiceBus = "sb";
-    public const string ServiceBusVideosTopic = "sb-videos";
+    public const string Messaging = "messaging";
 }

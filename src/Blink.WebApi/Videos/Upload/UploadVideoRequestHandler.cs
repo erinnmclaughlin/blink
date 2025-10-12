@@ -1,10 +1,7 @@
-﻿using Azure.Messaging.ServiceBus;
-using Blink.WebApi.Videos.Events;
+﻿using Blink.WebApi.Videos.Events;
 using Blink.WebApi.Videos.Thumbnails;
 using MassTransit;
 using MediatR;
-using System.Text.Json;
-using System.Threading;
 
 namespace Blink.WebApi.Videos.Upload;
 

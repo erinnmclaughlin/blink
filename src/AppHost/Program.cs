@@ -7,6 +7,10 @@ var keycloak = builder.AddAndConfigureKeycloak();
 
 var storage = builder.AddAndConfigureAzureStorage();
 
+var messaging = builder
+    .AddRabbitMQ(ServiceNames.Messaging)
+    .WithDataVolume();
+
 var blinkDatabase = builder
     .AddAndConfigurePostgresServer()
     .AddDatabase(ServiceNames.BlinkDatabase);
@@ -15,6 +19,7 @@ var blinkWebApi = builder.AddProject<Projects.Blink_WebApi>(ServiceNames.BlinkWe
     .WithExternalHttpEndpoints()
     .WithAwaitedReference(blinkDatabase)
     .WithAwaitedReference(keycloak)
+    .WithAwaitedReference(messaging)
     .WithAwaitedReference(storage.Blobs)
     .WithAwaitedReference(storage.Queues);
 
