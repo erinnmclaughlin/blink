@@ -6,6 +6,7 @@ using Blink.WebApi.Videos.UpdateTitle;
 using Blink.WebApi.Videos.UpdateMetadata;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Blink.Storage;
 
 namespace Blink.WebApi.Videos;
 

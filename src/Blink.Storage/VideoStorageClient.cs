@@ -1,8 +1,9 @@
 ﻿using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using Azure.Storage.Sas;
+using Microsoft.Extensions.Logging;
 
-namespace Blink.WebApi.Videos;
+namespace Blink.Storage;
 
 public interface IVideoStorageClient
 {

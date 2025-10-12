@@ -20,8 +20,7 @@ var blinkWebApi = builder.AddProject<Projects.Blink_WebApi>(ServiceNames.BlinkWe
     .WithAwaitedReference(blinkDatabase)
     .WithAwaitedReference(keycloak)
     .WithAwaitedReference(messaging)
-    .WithAwaitedReference(storage.Blobs)
-    .WithAwaitedReference(storage.Queues);
+    .WithAwaitedReference(storage.Blobs);
 
 var blinkWebApp = builder
     .AddProject<Projects.Blink_WebApp>(ServiceNames.BlinkWebApp)
@@ -29,5 +28,10 @@ var blinkWebApp = builder
     .WithAwaitedReference(blinkWebApi);
 
 blinkWebApi.WithReference(blinkWebApp);
+
+builder
+    .AddProject<Projects.Blink_VideoProcessor>("blink-video-processor")
+    .WithAwaitedReference(messaging)
+    .WithAwaitedReference(storage.Blobs);
 
 builder.Build().Run();

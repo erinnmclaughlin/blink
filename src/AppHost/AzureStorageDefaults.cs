@@ -16,8 +16,7 @@ public static class AzureStorageDefaults
 
         return new AzureStorageResources
         {
-            Blobs = storage.AddBlobs(ServiceNames.AzureBlobStorage),
-            Queues = storage.AddQueues(ServiceNames.AzureQueueStorage)
+            Blobs = storage.AddBlobs(ServiceNames.AzureBlobStorage)
         };
     }
 }
@@ -25,5 +24,4 @@ public static class AzureStorageDefaults
 public sealed record AzureStorageResources
 {
     public required IResourceBuilder<AzureBlobStorageResource> Blobs { get; init; }
-    public required IResourceBuilder<AzureQueueStorageResource> Queues { get; init; }
 }

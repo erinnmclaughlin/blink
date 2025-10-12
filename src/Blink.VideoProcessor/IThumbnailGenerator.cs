@@ -1,6 +1,6 @@
 using System.Diagnostics;
 
-namespace Blink.WebApi.Videos.Thumbnails;
+namespace Blink.VideoProcessor;
 
 /// <summary>
 /// Service for generating video thumbnails
@@ -20,13 +20,13 @@ public interface IThumbnailGenerator
 /// Simple thumbnail generator that creates a placeholder image
 /// In production, this would use FFmpeg or similar to extract a frame from the video
 /// </summary>
-public sealed class SimpleThumbnailGenerator : IThumbnailGenerator
+public sealed class ThumbnailGenerator : IThumbnailGenerator
 {
     private const int JpegQuality = 15; // 2-31, lower is better quality
 
-    private readonly ILogger<SimpleThumbnailGenerator> _logger;
+    private readonly ILogger<ThumbnailGenerator> _logger;
 
-    public SimpleThumbnailGenerator(ILogger<SimpleThumbnailGenerator> logger)
+    public ThumbnailGenerator(ILogger<ThumbnailGenerator> logger)
     {
         _logger = logger;
     }

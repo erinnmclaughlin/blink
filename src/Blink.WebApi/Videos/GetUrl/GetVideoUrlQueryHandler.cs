@@ -1,3 +1,4 @@
+using Blink.Storage;
 using MediatR;
 
 namespace Blink.WebApi.Videos.GetUrl;

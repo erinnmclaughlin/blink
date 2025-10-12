@@ -1,7 +1,6 @@
 using Blink;
 using Blink.WebApi;
 using Blink.WebApi.Videos;
-using Blink.WebApi.Videos.Thumbnails;
 using Blink.WebApi.Videos.Upload;
 using FluentMigrator.Runner;
 using FluentValidation;
@@ -28,15 +27,13 @@ builder.AddAndConfigureFluentMigrations();
 
 builder.AddAndConfigureServiceBus();
 
-builder.AddAzureBlobServiceClient(ServiceNames.AzureBlobStorage);
-builder.AddAzureQueueServiceClient(ServiceNames.AzureQueueStorage);
-builder.Services.AddScoped<IVideoStorageClient, VideoStorageClient>();
+builder.AddBlinkStorage();
+
 builder.Services.AddScoped<IVideoRepository, VideoRepository>();
 builder.Services.AddScoped<IMultipartFormFileParser, MultipartFormFileParser>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddTransient<ICurrentUser, CurrentUserAccessor>();
 
-builder.Services.AddScoped<IThumbnailGenerator, SimpleThumbnailGenerator>();
 builder.Services.AddScoped<IVideoMetadataExtractor, FFprobeMetadataExtractor>();
 
 builder.Services.AddMediatR(o =>

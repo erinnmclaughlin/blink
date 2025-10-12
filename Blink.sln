@@ -28,6 +28,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Blink.ServiceNames", "src\B
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Blink.Messaging", "src\Blink.Messaging\Blink.Messaging.csproj", "{7D5DD16F-CEDA-4B72-8325-218DEE0AEB71}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Blink.VideoProcessor", "src\Blink.VideoProcessor\Blink.VideoProcessor.csproj", "{A7E26988-2AC8-94B9-FFF6-D796DD833CEC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Blink.Storage", "src\Blink.Storage\Blink.Storage.csproj", "{1C678AA1-C1FA-4A8E-8235-50DD0E53B55A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -62,6 +66,14 @@ Global
 		{7D5DD16F-CEDA-4B72-8325-218DEE0AEB71}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7D5DD16F-CEDA-4B72-8325-218DEE0AEB71}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7D5DD16F-CEDA-4B72-8325-218DEE0AEB71}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A7E26988-2AC8-94B9-FFF6-D796DD833CEC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A7E26988-2AC8-94B9-FFF6-D796DD833CEC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A7E26988-2AC8-94B9-FFF6-D796DD833CEC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A7E26988-2AC8-94B9-FFF6-D796DD833CEC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1C678AA1-C1FA-4A8E-8235-50DD0E53B55A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1C678AA1-C1FA-4A8E-8235-50DD0E53B55A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1C678AA1-C1FA-4A8E-8235-50DD0E53B55A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1C678AA1-C1FA-4A8E-8235-50DD0E53B55A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -74,6 +86,8 @@ Global
 		{0186033C-246F-F0FA-30C3-992DA32ADCE8} = {A7C59F7E-8D6E-423C-896F-F39DB9CC25AA}
 		{14B46BAC-32C3-4874-AEE4-97C5245737A9} = {A7C59F7E-8D6E-423C-896F-F39DB9CC25AA}
 		{7D5DD16F-CEDA-4B72-8325-218DEE0AEB71} = {A7C59F7E-8D6E-423C-896F-F39DB9CC25AA}
+		{A7E26988-2AC8-94B9-FFF6-D796DD833CEC} = {A7C59F7E-8D6E-423C-896F-F39DB9CC25AA}
+		{1C678AA1-C1FA-4A8E-8235-50DD0E53B55A} = {A7C59F7E-8D6E-423C-896F-F39DB9CC25AA}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7B2AAEE5-D361-4985-9019-907C59C8BAD8}

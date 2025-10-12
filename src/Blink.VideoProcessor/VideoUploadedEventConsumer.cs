@@ -1,7 +1,8 @@
 using Blink.Messaging;
+using Blink.Storage;
 using MassTransit;
 
-namespace Blink.WebApi.Videos.Thumbnails;
+namespace Blink.VideoProcessor;
 
 /// <summary>
 /// Background service that processes the thumbnail generation queue

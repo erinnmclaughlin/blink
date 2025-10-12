@@ -14,6 +14,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Blink.ServiceNames\Blink.ServiceNames.csproj" IsAspireProjectResource="false" />
+    <ProjectReference Include="..\Blink.VideoProcessor\Blink.VideoProcessor.csproj" />
     <ProjectReference Include="..\Blink.WebApi\Blink.WebApi.csproj" />
     <ProjectReference Include="..\Blink.WebApp\Blink.WebApp.csproj" />
   </ItemGroup>

@@ -1,4 +1,5 @@
 ﻿using Blink.Messaging;
+using Blink.Storage;
 using MassTransit;
 using MediatR;
 
