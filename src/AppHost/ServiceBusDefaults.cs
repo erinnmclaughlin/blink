@@ -3,6 +3,7 @@ using Microsoft.Extensions.Hosting;
 
 namespace Blink.AppHost;
 
+// TODO: Use Azure Service Bus instead of In-Memory for MassTransit
 public static class ServiceBusDefaults
 {
     public static AzureServiceBusResources AddAndConfigureServiceBus(this IDistributedApplicationBuilder builder)
@@ -16,10 +17,13 @@ public static class ServiceBusDefaults
             serviceBus.RunAsEmulator();
         }
 
+        var videosTopic = serviceBus.AddServiceBusTopic(ServiceNames.ServiceBusVideosTopic, ServiceNames.ServiceBusVideosTopic);
+        videosTopic.AddServiceBusSubscription("sb-videos-subscription");
+
         return new AzureServiceBusResources
         {
             ServiceBus = serviceBus,
-            VideosTopic = serviceBus.AddServiceBusTopic(ServiceNames.ServiceBusVideosTopic),
+            VideosTopic = videosTopic
         };
     }
 }

@@ -5,7 +5,7 @@ namespace Microsoft.Extensions.DependencyInjection;
 
 public static class FluentMigrationServiceRegistration
 {
-    public static void AddFluentMigrations(this WebApplicationBuilder builder)
+    public static void AddAndConfigureFluentMigrations(this WebApplicationBuilder builder)
     {
         builder.Services
             .AddFluentMigratorCore()

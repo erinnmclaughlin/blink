@@ -4,7 +4,7 @@ public static class CorsConfiguration
 {
     public const string KnownClientPolicy = "KnownClients";
 
-    public static void AddKnownClientsCorsPolicy(this WebApplicationBuilder builder)
+    public static void AddAndConfigureCors(this WebApplicationBuilder builder)
     {
         builder.Services.AddCors(o =>
         {

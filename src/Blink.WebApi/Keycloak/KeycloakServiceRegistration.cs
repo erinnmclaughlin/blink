@@ -5,7 +5,7 @@ namespace Microsoft.Extensions.DependencyInjection;
 
 public static class KeycloakServiceRegistration
 {
-    public static void AddKeycloakAuthorization(this WebApplicationBuilder builder)
+    public static void AddAndConfigureAuthentication(this WebApplicationBuilder builder)
     {
         builder.Services.AddAuthorization();
 

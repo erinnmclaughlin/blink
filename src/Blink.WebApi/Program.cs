@@ -5,6 +5,7 @@ using Blink.WebApi.Videos.Thumbnails;
 using Blink.WebApi.Videos.Upload;
 using FluentMigrator.Runner;
 using FluentValidation;
+using MassTransit;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using System.Security.Claims;
@@ -18,13 +19,14 @@ if (builder.Environment.IsDevelopment())
 
 builder.AddServiceDefaults();
 
+builder.AddAndConfigureAuthentication();
+
+builder.AddAndConfigureCors();
+
 builder.AddNpgsqlDataSource(ServiceNames.BlinkDatabase);
-builder.AddFluentMigrations();
+builder.AddAndConfigureFluentMigrations();
 
-builder.AddKnownClientsCorsPolicy();
-
-builder.AddKeycloakAuthorization();
-//builder.AddKeycloakEventPoller();
+builder.AddAndConfigureServiceBus();
 
 builder.AddAzureBlobServiceClient(ServiceNames.AzureBlobStorage);
 builder.AddAzureQueueServiceClient(ServiceNames.AzureQueueStorage);
@@ -37,12 +39,9 @@ builder.Services.AddTransient<ICurrentUser, CurrentUserAccessor>();
 // Register thumbnail generation services
 builder.Services.AddSingleton<IThumbnailQueue, ThumbnailQueue>();
 builder.Services.AddScoped<IThumbnailGenerator, SimpleThumbnailGenerator>();
-builder.Services.AddHostedService<ThumbnailGenerationService>();
-
-// Register video metadata extraction service
+//builder.Services.AddHostedService<ThumbnailGenerationService>();
 builder.Services.AddScoped<IVideoMetadataExtractor, FFprobeMetadataExtractor>();
 
-builder.AddAzureServiceBusClient(ServiceNames.ServiceBus);
 
 builder.Services.AddMediatR(o =>
 {

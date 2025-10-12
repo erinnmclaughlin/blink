@@ -1,31 +1,39 @@
-﻿using Blink.WebApi.Videos.Thumbnails;
+﻿using Azure.Messaging.ServiceBus;
+using Blink.WebApi.Videos.Events;
+using Blink.WebApi.Videos.Thumbnails;
+using MassTransit;
 using MediatR;
+using System.Text.Json;
+using System.Threading;
 
 namespace Blink.WebApi.Videos.Upload;
 
 public sealed class UploadVideoRequestHandler : IRequestHandler<UploadVideoRequest, UploadedVideoInfo>
 {
     private readonly ICurrentUser _currentUser;
-    private readonly IVideoStorageClient _videoStorageClient;
-    private readonly IVideoRepository _videoRepository;
-    private readonly IThumbnailQueue _thumbnailQueue;
-    private readonly IVideoMetadataExtractor _metadataExtractor;
     private readonly ILogger<UploadVideoRequestHandler> _logger;
+    private readonly IVideoMetadataExtractor _metadataExtractor;
+    private readonly IThumbnailQueue _thumbnailQueue;
+    private readonly IPublishEndpoint _videoEventPublisher;
+    private readonly IVideoRepository _videoRepository;
+    private readonly IVideoStorageClient _videoStorageClient;
 
     public UploadVideoRequestHandler(
         ICurrentUser currentUser,
-        IVideoStorageClient videoStorageClient,
-        IVideoRepository videoRepository,
-        IThumbnailQueue thumbnailQueue,
+        ILogger<UploadVideoRequestHandler> logger,
         IVideoMetadataExtractor metadataExtractor,
-        ILogger<UploadVideoRequestHandler> logger)
+        IThumbnailQueue thumbnailQueue,
+        IPublishEndpoint videoEventPublisher,
+        IVideoRepository videoRepository,
+        IVideoStorageClient videoStorageClient)
     {
         _currentUser = currentUser;
-        _videoStorageClient = videoStorageClient;
-        _videoRepository = videoRepository;
-        _thumbnailQueue = thumbnailQueue;
-        _metadataExtractor = metadataExtractor;
         _logger = logger;
+        _metadataExtractor = metadataExtractor;
+        _thumbnailQueue = thumbnailQueue;
+        _videoEventPublisher = videoEventPublisher;
+        _videoRepository = videoRepository;
+        _videoStorageClient = videoStorageClient;
     }
 
     public async Task<UploadedVideoInfo> Handle(UploadVideoRequest request, CancellationToken cancellationToken)
@@ -37,28 +45,7 @@ public sealed class UploadVideoRequestHandler : IRequestHandler<UploadVideoReque
         _logger.LogInformation("Video uploaded to blob storage: {BlobName}", blobName);
 
         // Extract metadata from uploaded video
-        VideoMetadata? metadata = null;
-        try
-        {
-            _logger.LogInformation("Extracting metadata from uploaded video: {BlobName}", blobName);
-            using var videoStream = await _videoStorageClient.DownloadAsync(blobName, cancellationToken);
-            metadata = await _metadataExtractor.ExtractMetadataAsync(videoStream, cancellationToken);
-            
-            if (metadata != null)
-            {
-                _logger.LogInformation("Video metadata extracted: {Width}x{Height}, Duration: {Duration}s for {BlobName}", 
-                    metadata.Width, metadata.Height, metadata.DurationInSeconds, blobName);
-            }
-            else
-            {
-                _logger.LogWarning("Could not extract metadata from video: {BlobName}", blobName);
-            }
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error extracting metadata from video: {BlobName}", blobName);
-            // Continue with database save even if metadata extraction fails
-        }
+        var metadata = await ExtractMetadataAsync(blobName, cancellationToken);
 
         // Get content type
         var contentType = GetContentType(request.File.FileName);
@@ -91,8 +78,34 @@ public sealed class UploadVideoRequestHandler : IRequestHandler<UploadVideoReque
             blobName, _currentUser.UserId, metadata?.Width, metadata?.Height, metadata?.DurationInSeconds);
 
         // Queue video for thumbnail generation
-        await _thumbnailQueue.EnqueueAsync(blobName, cancellationToken);
-        _logger.LogInformation("Video queued for thumbnail generation: {BlobName}", blobName);
+        //await _thumbnailQueue.EnqueueAsync(blobName, cancellationToken);
+        //_logger.LogInformation("Video queued for thumbnail generation: {BlobName}", blobName);
+
+        // Publish VideoUploaded event to Service Bus
+        var videoUploadedEvent = new VideoUploadedEvent
+        {
+            VideoId = video.Id,
+            BlobName = video.BlobName,
+            Title = video.Title,
+            Description = video.Description,
+            OwnerId = video.OwnerId,
+            FileName = video.FileName,
+            ContentType = video.ContentType,
+            SizeInBytes = video.SizeInBytes,
+            UploadedAt = video.UploadedAt,
+            Width = video.Width,
+            Height = video.Height,
+            DurationInSeconds = video.DurationInSeconds
+        };
+
+        await _videoEventPublisher.Publish(videoUploadedEvent, cancellationToken);
+
+        /*var sender = _serviceBus.CreateSender(ServiceNames.ServiceBusVideosTopic);
+        await sender.SendMessageAsync(new ServiceBusMessage(BinaryData.FromString(JsonSerializer.Serialize(videoUploadedEvent)))
+        {
+            Subject = nameof(VideoUploadedEvent),
+            ContentType = "application/json"
+        }, cancellationToken);*/
 
         return new UploadedVideoInfo
         {
@@ -113,5 +126,33 @@ public sealed class UploadVideoRequestHandler : IRequestHandler<UploadVideoReque
             ".wmv" => "video/x-ms-wmv",
             _ => "application/octet-stream"
         };
+    }
+
+    private async Task<VideoMetadata?> ExtractMetadataAsync(string blobName, CancellationToken cancellationToken)
+    {
+        try
+        {
+            _logger.LogInformation("Extracting metadata from uploaded video: {BlobName}", blobName);
+            using var videoStream = await _videoStorageClient.DownloadAsync(blobName, cancellationToken);
+            var metadata = await _metadataExtractor.ExtractMetadataAsync(videoStream, cancellationToken);
+
+            if (metadata != null)
+            {
+                _logger.LogInformation("Video metadata extracted: {Width}x{Height}, Duration: {Duration}s for {BlobName}",
+                    metadata.Width, metadata.Height, metadata.DurationInSeconds, blobName);
+            }
+            else
+            {
+                _logger.LogWarning("Could not extract metadata from video: {BlobName}", blobName);
+            }
+
+            return metadata;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error extracting metadata from video: {BlobName}", blobName);
+            // Continue with database save even if metadata extraction fails
+            return null;
+        }
     }
 }

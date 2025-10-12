@@ -17,8 +17,7 @@ var blinkWebApi = builder.AddProject<Projects.Blink_WebApi>(ServiceNames.BlinkWe
     .WithAwaitedReference(blinkDatabase)
     .WithAwaitedReference(keycloak)
     .WithAwaitedReference(storage.Blobs)
-    .WithAwaitedReference(storage.Queues)
-    .WithAwaitedReference(serviceBus.VideosTopic);
+    .WithAwaitedReference(storage.Queues);
 
 var blinkWebApp = builder
     .AddProject<Projects.Blink_WebApp>(ServiceNames.BlinkWebApp)
