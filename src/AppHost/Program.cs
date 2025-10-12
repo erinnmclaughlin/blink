@@ -5,7 +5,6 @@ var builder = DistributedApplication.CreateBuilder(args);
 
 var keycloak = builder.AddAndConfigureKeycloak();
 
-var serviceBus = builder.AddAndConfigureServiceBus();
 var storage = builder.AddAndConfigureAzureStorage();
 
 var blinkDatabase = builder
