@@ -1,3 +1,5 @@
+using Blink.Messaging;
+
 namespace Blink.WebApi.Videos;
 
 /// <summary>
@@ -29,6 +31,11 @@ public interface IVideoRepository
     /// Updates an existing video record
     /// </summary>
     Task<bool> UpdateAsync(Video video, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Updates the metadata for a video
+    /// </summary>
+    Task UpdateMetadataAsync(string blobName, VideoMetadata metadata, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Deletes a video record by blob name

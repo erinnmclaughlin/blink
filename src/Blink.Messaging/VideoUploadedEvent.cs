@@ -14,7 +14,4 @@ public sealed record VideoUploadedEvent
     public required string ContentType { get; init; }
     public long SizeInBytes { get; init; }
     public DateTime UploadedAt { get; init; }
-    public int? Width { get; init; }
-    public int? Height { get; init; }
-    public double? DurationInSeconds { get; init; }
 }

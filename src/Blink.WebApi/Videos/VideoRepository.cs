@@ -1,3 +1,4 @@
+using Blink.Messaging;
 using Dapper;
 using Npgsql;
 
@@ -131,6 +132,37 @@ public sealed class VideoRepository : IVideoRepository
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error updating video record: {BlobName}", video.BlobName);
+            throw;
+        }
+    }
+
+    public async Task UpdateMetadataAsync(string blobName, VideoMetadata metadata, CancellationToken cancellationToken = default)
+    {
+        const string sql = """
+            UPDATE videos
+            SET width = @Width,
+                height = @Height,
+                duration_in_seconds = @DurationInSeconds,
+                updated_at = @UpdatedAt
+            WHERE blob_name = @BlobName
+            """;
+        try
+        {
+            await using var connection = await _dataSource.OpenConnectionAsync(cancellationToken);
+            var rowsAffected = await connection.ExecuteAsync(sql, new 
+            { 
+                BlobName = blobName, 
+                Width = metadata.Width, 
+                Height = metadata.Height, 
+                DurationInSeconds = metadata.DurationInSeconds,
+                UpdatedAt = DateTime.UtcNow
+            });
+            
+            _logger.LogInformation("Updated video metadata: {BlobName}, Rows affected: {RowsAffected}", blobName, rowsAffected);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating video metadata: {BlobName}", blobName);
             throw;
         }
     }

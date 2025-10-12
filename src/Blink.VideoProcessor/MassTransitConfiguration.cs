@@ -1,4 +1,5 @@
-﻿using MassTransit;
+﻿using Blink.VideoProcessor.Consumers;
+using MassTransit;
 
 namespace Blink.VideoProcessor;
 
@@ -10,7 +11,8 @@ public static class MassTransitConfiguration
         {
             busConfigurator.SetKebabCaseEndpointNameFormatter();
 
-            busConfigurator.AddConsumer<VideoUploadedEventConsumer>();
+            busConfigurator.AddConsumer<VideoMetadataProcessor>();
+            busConfigurator.AddConsumer<VideoThumbnailGenerator>();
 
             busConfigurator.UsingRabbitMq((context, configurator) =>
             {

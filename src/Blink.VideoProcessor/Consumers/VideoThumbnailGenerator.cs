@@ -2,20 +2,17 @@ using Blink.Messaging;
 using Blink.Storage;
 using MassTransit;
 
-namespace Blink.VideoProcessor;
+namespace Blink.VideoProcessor.Consumers;
 
-/// <summary>
-/// Background service that processes the thumbnail generation queue
-/// </summary>
-public sealed class VideoUploadedEventConsumer : IConsumer<VideoUploadedEvent>
+public sealed class VideoThumbnailGenerator : IConsumer<VideoUploadedEvent>
 {
-    private readonly ILogger<VideoUploadedEventConsumer> _logger;
+    private readonly ILogger<VideoThumbnailGenerator> _logger;
     private readonly IPublishEndpoint _publishEndpoint;
     private readonly IThumbnailGenerator _thumbnailGenerator;
     private readonly IVideoStorageClient _videoStorageClient;
 
-    public VideoUploadedEventConsumer(
-        ILogger<VideoUploadedEventConsumer> logger,
+    public VideoThumbnailGenerator(
+        ILogger<VideoThumbnailGenerator> logger,
         IPublishEndpoint publishEndpoint,
         IThumbnailGenerator thumbnailGenerator,
         IVideoStorageClient videoStorageClient)

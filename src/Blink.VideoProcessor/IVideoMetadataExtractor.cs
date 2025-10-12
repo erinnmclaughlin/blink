@@ -1,7 +1,8 @@
+using Blink.Messaging;
 using System.Diagnostics;
 using System.Text.Json;
 
-namespace Blink.WebApi.Videos;
+namespace Blink.VideoProcessor;
 
 /// <summary>
 /// Service for extracting metadata from video files
@@ -15,16 +16,6 @@ public interface IVideoMetadataExtractor
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Video metadata including dimensions</returns>
     Task<VideoMetadata?> ExtractMetadataAsync(Stream videoStream, CancellationToken cancellationToken = default);
-}
-
-/// <summary>
-/// Video metadata extracted from the video file
-/// </summary>
-public sealed record VideoMetadata
-{
-    public int Width { get; init; }
-    public int Height { get; init; }
-    public double DurationInSeconds { get; init; }
 }
 
 /// <summary>

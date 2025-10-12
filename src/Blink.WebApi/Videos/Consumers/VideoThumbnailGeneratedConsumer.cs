@@ -1,7 +1,7 @@
 ﻿using Blink.Messaging;
 using MassTransit;
 
-namespace Blink.WebApi.Videos.Thumbnails;
+namespace Blink.WebApi.Videos.Consumers;
 
 public sealed class VideoThumbnailGeneratedConsumer : IConsumer<VideoThumbnailGenerated>
 {

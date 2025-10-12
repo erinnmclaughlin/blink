@@ -34,8 +34,6 @@ builder.Services.AddScoped<IMultipartFormFileParser, MultipartFormFileParser>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddTransient<ICurrentUser, CurrentUserAccessor>();
 
-builder.Services.AddScoped<IVideoMetadataExtractor, FFprobeMetadataExtractor>();
-
 builder.Services.AddMediatR(o =>
 {
     o.AddOpenBehavior(typeof(ValidationBehavior<,>));

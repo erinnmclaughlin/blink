@@ -1,4 +1,4 @@
-﻿using Blink.WebApi.Videos.Thumbnails;
+﻿using Blink.WebApi.Videos.Consumers;
 using MassTransit;
 
 namespace Blink.WebApi;
@@ -11,6 +11,7 @@ public static class MassTransitConfiguration
         {
             busConfigurator.SetKebabCaseEndpointNameFormatter();
 
+            busConfigurator.AddConsumer<VideoMetadataExtractedConsumer>();
             busConfigurator.AddConsumer<VideoThumbnailGeneratedConsumer>();
 
             busConfigurator.UsingRabbitMq((context, configurator) =>

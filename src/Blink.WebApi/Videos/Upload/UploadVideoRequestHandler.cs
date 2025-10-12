@@ -9,7 +9,6 @@ public sealed class UploadVideoRequestHandler : IRequestHandler<UploadVideoReque
 {
     private readonly ICurrentUser _currentUser;
     private readonly ILogger<UploadVideoRequestHandler> _logger;
-    private readonly IVideoMetadataExtractor _metadataExtractor;
     private readonly IPublishEndpoint _videoEventPublisher;
     private readonly IVideoRepository _videoRepository;
     private readonly IVideoStorageClient _videoStorageClient;
@@ -17,14 +16,12 @@ public sealed class UploadVideoRequestHandler : IRequestHandler<UploadVideoReque
     public UploadVideoRequestHandler(
         ICurrentUser currentUser,
         ILogger<UploadVideoRequestHandler> logger,
-        IVideoMetadataExtractor metadataExtractor,
         IPublishEndpoint videoEventPublisher,
         IVideoRepository videoRepository,
         IVideoStorageClient videoStorageClient)
     {
         _currentUser = currentUser;
         _logger = logger;
-        _metadataExtractor = metadataExtractor;
         _videoEventPublisher = videoEventPublisher;
         _videoRepository = videoRepository;
         _videoStorageClient = videoStorageClient;
@@ -33,49 +30,61 @@ public sealed class UploadVideoRequestHandler : IRequestHandler<UploadVideoReque
     public async Task<UploadedVideoInfo> Handle(UploadVideoRequest request, CancellationToken cancellationToken)
     {
         // Upload to blob storage first
-        using var stream = request.File.OpenReadStream();
-        var (blobName, fileSize) = await _videoStorageClient.UploadAsync(stream, request.File.FileName, cancellationToken);
-
-        _logger.LogInformation("Video uploaded to blob storage: {BlobName}", blobName);
-
-        // Extract metadata from uploaded video
-        var metadata = await ExtractMetadataAsync(blobName, cancellationToken);
-
-        // Get content type
-        var contentType = GetContentType(request.File.FileName);
+        var (blobName, fileSize) = await UploadVideoAsync(request.File, cancellationToken);
 
         // Create database record
+        var video = await SaveToDatabaseAsync(blobName, fileSize, request, cancellationToken);
+
+        // Publish VideoUploaded event to Service Bus
+        await PublishVideoUploadedEventAsync(video, cancellationToken);
+
+        return new UploadedVideoInfo
+        {
+            BlobName = blobName,
+            FileName = request.File.FileName,
+            FileSize = fileSize
+        };
+    }
+
+    private async Task<(string BlobName, long FileSize)> UploadVideoAsync(IFormFile file, CancellationToken cancellationToken)
+    {
+        using var stream = file.OpenReadStream();
+        var info = await _videoStorageClient.UploadAsync(stream, file.FileName, cancellationToken);
+
+        _logger.LogInformation("Video uploaded to blob storage: {BlobName}", info.BlobName);
+
+        return info;
+    }
+
+    private async Task<Video> SaveToDatabaseAsync(string blobName, long fileSize, UploadVideoRequest request, CancellationToken cancellationToken)
+    {
         var now = DateTime.UtcNow;
         var video = new Video
         {
             Id = Guid.NewGuid(),
             BlobName = blobName,
-            Title = !string.IsNullOrWhiteSpace(request.Title) 
-                ? request.Title 
+            Title = !string.IsNullOrWhiteSpace(request.Title)
+                ? request.Title
                 : Path.GetFileNameWithoutExtension(request.File.FileName), // Default title from filename
             Description = request.Description,
             VideoDate = request.VideoDate,
             FileName = request.File.FileName,
-            ContentType = contentType,
+            ContentType = GetContentType(request.File.FileName),
             SizeInBytes = fileSize,
             OwnerId = _currentUser.UserId,
             UploadedAt = now,
-            UpdatedAt = now,
-            Width = metadata?.Width,
-            Height = metadata?.Height,
-            DurationInSeconds = metadata?.DurationInSeconds
+            UpdatedAt = now
         };
 
         await _videoRepository.CreateAsync(video, cancellationToken);
 
-        _logger.LogInformation("Video saved to database: {BlobName}, Owner: {OwnerId}, Dimensions: {Width}x{Height}, Duration: {Duration}s", 
-            blobName, _currentUser.UserId, metadata?.Width, metadata?.Height, metadata?.DurationInSeconds);
+        _logger.LogInformation("Video saved to database: {BlobName}, Owner: {OwnerId}", blobName, _currentUser.UserId);
 
-        // Queue video for thumbnail generation
-        //await _thumbnailQueue.EnqueueAsync(blobName, cancellationToken);
-        //_logger.LogInformation("Video queued for thumbnail generation: {BlobName}", blobName);
+        return video;
+    }
 
-        // Publish VideoUploaded event to Service Bus
+    private async Task PublishVideoUploadedEventAsync(Video video, CancellationToken cancellationToken)
+    {
         var videoUploadedEvent = new VideoUploadedEvent
         {
             VideoId = video.Id,
@@ -86,27 +95,10 @@ public sealed class UploadVideoRequestHandler : IRequestHandler<UploadVideoReque
             FileName = video.FileName,
             ContentType = video.ContentType,
             SizeInBytes = video.SizeInBytes,
-            UploadedAt = video.UploadedAt,
-            Width = video.Width,
-            Height = video.Height,
-            DurationInSeconds = video.DurationInSeconds
+            UploadedAt = video.UploadedAt
         };
 
         await _videoEventPublisher.Publish(videoUploadedEvent, cancellationToken);
-
-        /*var sender = _serviceBus.CreateSender(ServiceNames.ServiceBusVideosTopic);
-        await sender.SendMessageAsync(new ServiceBusMessage(BinaryData.FromString(JsonSerializer.Serialize(videoUploadedEvent)))
-        {
-            Subject = nameof(VideoUploadedEvent),
-            ContentType = "application/json"
-        }, cancellationToken);*/
-
-        return new UploadedVideoInfo
-        {
-            BlobName = blobName,
-            FileName = request.File.FileName,
-            FileSize = fileSize
-        };
     }
 
     private static string GetContentType(string fileName)
@@ -120,33 +112,5 @@ public sealed class UploadVideoRequestHandler : IRequestHandler<UploadVideoReque
             ".wmv" => "video/x-ms-wmv",
             _ => "application/octet-stream"
         };
-    }
-
-    private async Task<VideoMetadata?> ExtractMetadataAsync(string blobName, CancellationToken cancellationToken)
-    {
-        try
-        {
-            _logger.LogInformation("Extracting metadata from uploaded video: {BlobName}", blobName);
-            using var videoStream = await _videoStorageClient.DownloadAsync(blobName, cancellationToken);
-            var metadata = await _metadataExtractor.ExtractMetadataAsync(videoStream, cancellationToken);
-
-            if (metadata != null)
-            {
-                _logger.LogInformation("Video metadata extracted: {Width}x{Height}, Duration: {Duration}s for {BlobName}",
-                    metadata.Width, metadata.Height, metadata.DurationInSeconds, blobName);
-            }
-            else
-            {
-                _logger.LogWarning("Could not extract metadata from video: {BlobName}", blobName);
-            }
-
-            return metadata;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error extracting metadata from video: {BlobName}", blobName);
-            // Continue with database save even if metadata extraction fails
-            return null;
-        }
     }
 }
