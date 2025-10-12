@@ -1,34 +1,28 @@
 ﻿using MediatR;
-using System.Security.Claims;
 
 namespace Blink.WebApi.Videos.Upload;
 
 public sealed class UploadVideoRequestHandler : IRequestHandler<UploadVideoRequest, UploadedVideoInfo>
 {
+    private readonly ICurrentUser _currentUser;
     private readonly IVideoStorageClient _videoStorageClient;
     private readonly IVideoRepository _videoRepository;
-    private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly ILogger<UploadVideoRequestHandler> _logger;
 
     public UploadVideoRequestHandler(
+        ICurrentUser currentUser,
         IVideoStorageClient videoStorageClient,
         IVideoRepository videoRepository,
-        IHttpContextAccessor httpContextAccessor,
         ILogger<UploadVideoRequestHandler> logger)
     {
+        _currentUser = currentUser;
         _videoStorageClient = videoStorageClient;
         _videoRepository = videoRepository;
-        _httpContextAccessor = httpContextAccessor;
         _logger = logger;
     }
 
     public async Task<UploadedVideoInfo> Handle(UploadVideoRequest request, CancellationToken cancellationToken)
     {
-        // Get the current user's ID from claims
-        var userId = _httpContextAccessor.HttpContext?.User.FindFirst(ClaimTypes.NameIdentifier)?.Value
-            ?? _httpContextAccessor.HttpContext?.User.FindFirst("sub")?.Value
-            ?? throw new UnauthorizedAccessException("User ID not found in claims");
-
         // Upload to blob storage
         using var stream = request.File.OpenReadStream();
         var (blobName, fileSize) = await _videoStorageClient.UploadAsync(stream, request.File.FileName, cancellationToken);
@@ -50,14 +44,14 @@ public sealed class UploadVideoRequestHandler : IRequestHandler<UploadVideoReque
             FileName = request.File.FileName,
             ContentType = contentType,
             SizeInBytes = fileSize,
-            OwnerId = userId,
+            OwnerId = _currentUser.UserId,
             UploadedAt = now,
             UpdatedAt = now
         };
 
         await _videoRepository.CreateAsync(video, cancellationToken);
 
-        _logger.LogInformation("Video uploaded and saved to database: {BlobName}, Owner: {OwnerId}", blobName, userId);
+        _logger.LogInformation("Video uploaded and saved to database: {BlobName}, Owner: {OwnerId}", blobName, _currentUser.UserId);
 
         return new UploadedVideoInfo
         {

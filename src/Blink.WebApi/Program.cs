@@ -29,6 +29,7 @@ builder.Services.AddScoped<IVideoStorageClient, VideoStorageClient>();
 builder.Services.AddScoped<IVideoRepository, VideoRepository>();
 builder.Services.AddScoped<IMultipartFormFileParser, MultipartFormFileParser>();
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddTransient<ICurrentUser, CurrentUserAccessor>();
 
 builder.Services.AddMediatR(o =>
 {
@@ -38,7 +39,6 @@ builder.Services.AddMediatR(o =>
 
 builder.Services.AddValidatorsFromAssembly(typeof(Program).Assembly);
 
-// Add global exception handler
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
 

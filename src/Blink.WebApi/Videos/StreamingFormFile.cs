@@ -1,4 +1,4 @@
-namespace Blink.WebApi;
+namespace Blink.WebApi.Videos;
 
 /// <summary>
 /// IFormFile implementation that streams file content without buffering to memory.

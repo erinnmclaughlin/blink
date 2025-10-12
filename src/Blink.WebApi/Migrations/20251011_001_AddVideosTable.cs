@@ -34,4 +34,3 @@ public sealed class AddVideosTable : Migration
         Delete.Table("videos");
     }
 }
-
