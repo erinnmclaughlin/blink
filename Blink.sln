@@ -14,9 +14,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{A9ABE576
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{A7C59F7E-8D6E-423C-896F-F39DB9CC25AA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceDefaults", "src\ServiceDefaults\ServiceDefaults.csproj", "{27A4A2BD-71B2-448B-BCDA-99CE4A11B4B9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Blink.Aspire.ServiceDefaults", "src\Blink.Aspire.ServiceDefaults\Blink.Aspire.ServiceDefaults.csproj", "{27A4A2BD-71B2-448B-BCDA-99CE4A11B4B9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AppHost", "src\AppHost\AppHost.csproj", "{CD2D1236-9A19-44AA-89BB-93FD1A6C2289}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Blink.Aspire.AppHost", "src\Blink.Aspire.AppHost\Blink.Aspire.AppHost.csproj", "{CD2D1236-9A19-44AA-89BB-93FD1A6C2289}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IntegrationTests", "tests\IntegrationTests\IntegrationTests.csproj", "{85D55076-D5F7-4716-9B39-5AE27A85FB60}"
 EndProject

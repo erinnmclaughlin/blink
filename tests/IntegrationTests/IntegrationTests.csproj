@@ -25,7 +25,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\AppHost\AppHost.csproj" />
+    <ProjectReference Include="..\..\src\Blink.Aspire.AppHost\Blink.Aspire.AppHost.csproj" />
   </ItemGroup>
 
   <ItemGroup>

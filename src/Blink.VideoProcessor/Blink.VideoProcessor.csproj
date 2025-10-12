@@ -21,6 +21,6 @@
     <ProjectReference Include="..\Blink.Messaging\Blink.Messaging.csproj" />
     <ProjectReference Include="..\Blink.ServiceNames\Blink.ServiceNames.csproj" />
     <ProjectReference Include="..\Blink.Storage\Blink.Storage.csproj" />
-    <ProjectReference Include="..\ServiceDefaults\ServiceDefaults.csproj" />
+    <ProjectReference Include="..\Blink.Aspire.ServiceDefaults\Blink.Aspire.ServiceDefaults.csproj" />
   </ItemGroup>
 </Project>
