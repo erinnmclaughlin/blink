@@ -103,12 +103,10 @@
                                    OnChange="OnFileSelected"
                                    class="form-control"
                                    id="videoFile"
-                                   accept="video/*"
+                                   accept=".mp4"
                                    disabled="@isUploading" />
                         <div class="form-text">
-                            Supported formats: MP4, WEBM, AVI, WMV (Max size: 2GB)
-                            <br />
-                            <strong>Note:</strong> MOV files are not supported due to browser compatibility. Please convert to MP4.
+                            <strong>Note:</strong> Only MP4 files are supported at this time. Other file formats will be supported in futurue updates.
                         </div>
                     </div>
 
@@ -191,7 +189,7 @@
                     <h6>Tips:</h6>
                     <ul class="small">
                         <li>Ensure your video file is under 2GB</li>
-                        <li>Supported formats include MP4, AVI, MOV, and more</li>
+                        <li>Supported formats include MP4, AVI, and more</li>
                         <li>Do not close or refresh the page during upload</li>
                         <li>Upload times vary based on file size and connection speed</li>
                     </ul>
