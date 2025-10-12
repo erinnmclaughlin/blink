@@ -7,7 +7,9 @@ public static class ServiceBusDefaults
 {
     public static AzureServiceBusResources AddAndConfigureServiceBus(this IDistributedApplicationBuilder builder)
     {
-        var serviceBus = builder.AddAzureServiceBus(ServiceNames.ServiceBus);
+        var serviceBus = builder
+            .AddAzureServiceBus(ServiceNames.ServiceBus)
+            .WithExternalHttpEndpoints();
 
         if (builder.Environment.IsDevelopment())
         {

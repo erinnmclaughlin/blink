@@ -46,8 +46,8 @@ public sealed class UploadVideoRequestHandler : IRequestHandler<UploadVideoReque
             
             if (metadata != null)
             {
-                _logger.LogInformation("Video metadata extracted: {Width}x{Height} for {BlobName}", 
-                    metadata.Width, metadata.Height, blobName);
+                _logger.LogInformation("Video metadata extracted: {Width}x{Height}, Duration: {Duration}s for {BlobName}", 
+                    metadata.Width, metadata.Height, metadata.DurationInSeconds, blobName);
             }
             else
             {
@@ -81,13 +81,14 @@ public sealed class UploadVideoRequestHandler : IRequestHandler<UploadVideoReque
             UploadedAt = now,
             UpdatedAt = now,
             Width = metadata?.Width,
-            Height = metadata?.Height
+            Height = metadata?.Height,
+            DurationInSeconds = metadata?.DurationInSeconds
         };
 
         await _videoRepository.CreateAsync(video, cancellationToken);
 
-        _logger.LogInformation("Video saved to database: {BlobName}, Owner: {OwnerId}, Dimensions: {Width}x{Height}", 
-            blobName, _currentUser.UserId, metadata?.Width, metadata?.Height);
+        _logger.LogInformation("Video saved to database: {BlobName}, Owner: {OwnerId}, Dimensions: {Width}x{Height}, Duration: {Duration}s", 
+            blobName, _currentUser.UserId, metadata?.Width, metadata?.Height, metadata?.DurationInSeconds);
 
         // Queue video for thumbnail generation
         await _thumbnailQueue.EnqueueAsync(blobName, cancellationToken);

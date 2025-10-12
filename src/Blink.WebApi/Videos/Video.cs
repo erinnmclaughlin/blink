@@ -19,5 +19,6 @@ public sealed class Video
     public string? ThumbnailBlobName { get; set; }
     public int? Width { get; set; }
     public int? Height { get; set; }
+    public double? DurationInSeconds { get; set; }
 }
 

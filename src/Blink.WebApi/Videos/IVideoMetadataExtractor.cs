@@ -24,6 +24,7 @@ public sealed record VideoMetadata
 {
     public int Width { get; init; }
     public int Height { get; init; }
+    public double DurationInSeconds { get; init; }
 }
 
 /// <summary>
@@ -53,7 +54,7 @@ public sealed class FFprobeMetadataExtractor : IVideoMetadataExtractor
 
             // Use ffprobe to extract video metadata in JSON format
             var args = 
-                $"-v error -select_streams v:0 -show_entries stream=width,height " +
+                $"-v error -select_streams v:0 -show_entries stream=width,height:format=duration " +
                 $"-of json \"{tempPath}\"";
 
             _logger.LogInformation("Running FFprobe: {Args}", args);
@@ -93,8 +94,9 @@ public sealed class FFprobeMetadataExtractor : IVideoMetadataExtractor
 
             // Parse JSON output
             var jsonDoc = JsonDocument.Parse(stdout);
-            var streams = jsonDoc.RootElement.GetProperty("streams");
             
+            // Extract width and height from streams
+            var streams = jsonDoc.RootElement.GetProperty("streams");
             if (streams.GetArrayLength() == 0)
             {
                 _logger.LogWarning("No video stream found in file");
@@ -112,12 +114,29 @@ public sealed class FFprobeMetadataExtractor : IVideoMetadataExtractor
             int width = widthProp.GetInt32();
             int height = heightProp.GetInt32();
 
-            _logger.LogInformation("Extracted video metadata: {Width}x{Height}", width, height);
+            // Extract duration from format
+            double duration = 0;
+            if (jsonDoc.RootElement.TryGetProperty("format", out var formatProp) &&
+                formatProp.TryGetProperty("duration", out var durationProp))
+            {
+                if (durationProp.ValueKind == JsonValueKind.String)
+                {
+                    double.TryParse(durationProp.GetString(), out duration);
+                }
+                else if (durationProp.ValueKind == JsonValueKind.Number)
+                {
+                    duration = durationProp.GetDouble();
+                }
+            }
+
+            _logger.LogInformation("Extracted video metadata: {Width}x{Height}, Duration: {Duration}s", 
+                width, height, duration);
 
             return new VideoMetadata
             {
                 Width = width,
-                Height = height
+                Height = height,
+                DurationInSeconds = duration
             };
         }
         catch (Exception ex)
