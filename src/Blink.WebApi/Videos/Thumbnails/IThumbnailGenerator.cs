@@ -1,3 +1,5 @@
+using System.Diagnostics;
+
 namespace Blink.WebApi.Videos.Thumbnails;
 
 /// <summary>
@@ -20,6 +22,8 @@ public interface IThumbnailGenerator
 /// </summary>
 public sealed class SimpleThumbnailGenerator : IThumbnailGenerator
 {
+    private const int JpegQuality = 15; // 2-31, lower is better quality
+
     private readonly ILogger<SimpleThumbnailGenerator> _logger;
 
     public SimpleThumbnailGenerator(ILogger<SimpleThumbnailGenerator> logger)
@@ -29,30 +33,85 @@ public sealed class SimpleThumbnailGenerator : IThumbnailGenerator
 
     public async Task<Stream> GenerateThumbnailAsync(Stream videoStream, CancellationToken cancellationToken = default)
     {
-        _logger.LogInformation("Generating thumbnail (simple implementation)");
+        // temp files
+        var inPath = Path.Combine(Path.GetTempPath(), $"thumb-in-{Guid.NewGuid():N}.bin");
+        var outPath = Path.Combine(Path.GetTempPath(), $"thumb-out-{Guid.NewGuid():N}.jpg");
 
-        // TODO: In production, use FFmpeg to extract a frame at a specific timestamp
-        // For now, create a simple 1x1 pixel JPEG as a placeholder
-        // This is a minimal valid JPEG file
-        byte[] placeholderJpeg = new byte[]
+        try
         {
-            0xFF, 0xD8, 0xFF, 0xE0, 0x00, 0x10, 0x4A, 0x46, 0x49, 0x46, 0x00, 0x01, 0x01, 0x01, 0x00, 0x48,
-            0x00, 0x48, 0x00, 0x00, 0xFF, 0xDB, 0x00, 0x43, 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-            0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-            0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-            0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-            0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xC0, 0x00, 0x0B, 0x08, 0x00,
-            0x01, 0x00, 0x01, 0x01, 0x01, 0x11, 0x00, 0xFF, 0xC4, 0x00, 0x14, 0x00, 0x01, 0x00, 0x00, 0x00,
-            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xC4, 0x00,
-            0x14, 0x10, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-            0x00, 0x00, 0x00, 0xFF, 0xDA, 0x00, 0x08, 0x01, 0x01, 0x00, 0x00, 0x3F, 0x00, 0x3F, 0xFF, 0xD9
-        };
+            _logger.LogInformation("FFmpeg thumbnail: writing input to temp file {Path}", inPath);
+            await using (var fs = new FileStream(inPath, FileMode.CreateNew, FileAccess.Write, FileShare.None, 81920, useAsync: true))
+            {
+                await videoStream.CopyToAsync(fs, cancellationToken);
+            }
 
-        var memoryStream = new MemoryStream(placeholderJpeg);
-        memoryStream.Position = 0;
+            var args =
+                $"-hide_banner -loglevel error -y " +
+                $"-ss {FormatTimestamp(TimeSpan.FromSeconds(5))} -i \"{inPath}\" " +
+                $"-frames:v 1 -q:v {JpegQuality} " +
+                $"\"{outPath}\"";
 
-        _logger.LogInformation("Thumbnail generated (placeholder)");
-        return await Task.FromResult<Stream>(memoryStream);
+            _logger.LogInformation("Running FFmpeg: {Args}", args);
+
+            var psi = new ProcessStartInfo
+            {
+                FileName = "ffmpeg",
+                Arguments = args,
+                RedirectStandardError = true,
+                RedirectStandardOutput = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            };
+
+            using var proc = new Process { StartInfo = psi, EnableRaisingEvents = true };
+            proc.Start();
+
+            // read stderr so the buffer doesn't block
+            var stderrTask = Task.Run(async () =>
+            {
+                var lines = new List<string>();
+                while (!proc.StandardError.EndOfStream)
+                {
+                    var line = await proc.StandardError.ReadLineAsync();
+                    if (line is not null) lines.Add(line);
+                }
+                return string.Join(Environment.NewLine, lines);
+            }, cancellationToken);
+
+            using (cancellationToken.Register(() =>
+            {
+                try { if (!proc.HasExited) proc.Kill(entireProcessTree: true); } catch { /* ignore */ }
+            }))
+            {
+                await proc.WaitForExitAsync(cancellationToken);
+            }
+
+            string stderr = await stderrTask;
+            if (proc.ExitCode != 0 || !File.Exists(outPath))
+            {
+                _logger.LogError("FFmpeg failed (code {Code}). Stderr:\n{Err}", proc.ExitCode, stderr);
+                throw new InvalidOperationException($"FFmpeg failed with exit code {proc.ExitCode}");
+            }
+
+            // return the JPEG as a MemoryStream
+            var ms = new MemoryStream(await File.ReadAllBytesAsync(outPath, cancellationToken));
+            ms.Position = 0;
+            _logger.LogInformation("FFmpeg thumbnail generated ({Bytes} bytes).", ms.Length);
+            return ms;
+        }
+        finally
+        {
+            // best-effort cleanup
+            TryDelete(inPath);
+            TryDelete(outPath);
+        }
+    }
+
+    private static string FormatTimestamp(TimeSpan ts)
+        => $"{(int)ts.TotalHours:00}:{ts.Minutes:00}:{ts.Seconds:00}.{ts.Milliseconds:000}";
+
+    private static void TryDelete(string path)
+    {
+        try { if (File.Exists(path)) File.Delete(path); } catch { /* ignore */ }
     }
 }
-
