@@ -1,4 +1,4 @@
-using Blink.VideosApi.Contracts.List;
+using Blink.VideosApi.Contracts.GetByBlobName;
 using Microsoft.AspNetCore.Components;
 
 namespace Blink.WebApp.Components.Pages;
@@ -10,8 +10,7 @@ public sealed partial class VideoWatch
     [Parameter]
     public string BlobName { get; set; } = string.Empty;
 
-    private string? CurrentVideoUrl { get; set; }
-    private VideoSummaryDto? Video { get; set; }
+    private VideoDetailDto? Video { get; set; }
     private bool IsLoadingVideo { get; set; } = true;
     private string? ErrorMessage { get; set; }
 
@@ -40,20 +39,12 @@ public sealed partial class VideoWatch
 
         try
         {
-            // TODO: Add "GetVideoByBlobName" API to avoid fetching all videos. This endpoint should also return the video URL.
-
-            // First, get the list of videos to find details about this video
-            var videos = await _apiClient.GetVideosAsync();
-            Video = videos.FirstOrDefault(v => v.VideoBlobName == BlobName);
+            Video = await _apiClient.GetVideoAsync(BlobName);
 
             if (Video == null)
             {
                 ErrorMessage = "Video not found.";
-                return;
             }
-
-            // Get the video URL
-            CurrentVideoUrl = await _apiClient.GetVideoUrlAsync(BlobName);
         }
         catch (Exception ex)
         {
@@ -79,7 +70,7 @@ public sealed partial class VideoWatch
         return $"{len:0.##} {sizes[order]}";
     }
 
-    private static string GetDisplayTitle(VideoSummaryDto video)
+    private static string GetDisplayTitle(VideoDetailDto video)
     {
         return !string.IsNullOrWhiteSpace(video.Title) ? video.Title : "[No Title]";
     }

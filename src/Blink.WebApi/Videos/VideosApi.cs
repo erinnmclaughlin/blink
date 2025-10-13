@@ -1,14 +1,15 @@
-using Blink.WebApi.Videos.Upload;
-using Blink.WebApi.Videos.UpdateMetadata;
-using MediatR;
-using Microsoft.AspNetCore.Mvc;
 using Blink.Storage;
-using Blink.VideosApi.Contracts.UpdateTitle;
-using Blink.VideosApi.Contracts.UpdateMetadata;
-using Blink.VideosApi.Contracts.Upload;
+using Blink.VideosApi.Contracts.Delete;
+using Blink.VideosApi.Contracts.GetByBlobName;
 using Blink.VideosApi.Contracts.GetUrl;
 using Blink.VideosApi.Contracts.List;
-using Blink.VideosApi.Contracts.Delete;
+using Blink.VideosApi.Contracts.UpdateMetadata;
+using Blink.VideosApi.Contracts.UpdateTitle;
+using Blink.VideosApi.Contracts.Upload;
+using Blink.WebApi.Videos.UpdateMetadata;
+using Blink.WebApi.Videos.Upload;
+using MediatR;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Blink.WebApi.Videos;
 
@@ -34,6 +35,14 @@ public static class VideosApi
             .WithName("ListVideos")
             .RequireAuthorization()
             .Produces<List<VideoInfo>>(StatusCodes.Status200OK)
+            .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError);
+
+        // GET /api/videos/{blobName}
+        endpoints.MapGet("/api/videos/{blobName}", HandleGetVideoByBlobNameAsync)
+            .WithName("GetVideoByBlobName")
+            .RequireAuthorization()
+            .Produces<VideoDetailDto>(StatusCodes.Status200OK)
+            .Produces<ProblemDetails>(StatusCodes.Status404NotFound)
             .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError);
 
         // GET /api/videos/{blobName}/url
@@ -129,6 +138,16 @@ public static class VideosApi
         var videos = await sender.Send(query, cancellationToken);
         
         return Results.Ok(videos);
+    }
+
+    private static async Task<IResult> HandleGetVideoByBlobNameAsync(
+        string blobName,
+        ISender sender,
+        CancellationToken cancellationToken)
+    {
+        var query = new GetVideoByBlobNameQuery(blobName);
+        var result = await sender.Send(query, cancellationToken);
+        return Results.Ok(result);
     }
 
     private static async Task<IResult> HandleGetVideoUrlAsync(

@@ -1,4 +1,5 @@
 using Blink.VideosApi.Contracts.Delete;
+using Blink.VideosApi.Contracts.GetByBlobName;
 using Blink.VideosApi.Contracts.GetUrl;
 using Blink.VideosApi.Contracts.List;
 using Blink.VideosApi.Contracts.UpdateMetadata;
@@ -66,6 +67,13 @@ public sealed class BlinkApiClient
     public async Task<List<VideoSummaryDto>> GetVideosAsync(CancellationToken cancellationToken = default)
     {
         return await _httpClient.GetFromJsonAsync<List<VideoSummaryDto>>("api/videos", cancellationToken) ?? [];
+    }
+
+    public async Task<VideoDetailDto> GetVideoAsync(string blobName, CancellationToken cancellationToken = default)
+    {
+        var encodedBlobName = Uri.EscapeDataString(blobName);
+        var response = await _httpClient.GetFromJsonAsync<VideoDetailDto>($"api/videos/{encodedBlobName}", cancellationToken);
+        return response ?? throw new InvalidOperationException("Video not found");
     }
 
     public async Task<string> GetVideoUrlAsync(string blobName, CancellationToken cancellationToken = default)
