@@ -9,7 +9,7 @@ public static class KeycloakDefaults
     {
         var keycloakPassword = builder.AddParameter("keycloak-password", secret: true);
 
-        var keycloak = builder.AddKeycloak("keycloak", adminPassword: keycloakPassword);
+        var keycloak = builder.AddKeycloak("keycloak", 8080, adminPassword: keycloakPassword);
 
         if (builder.ExecutionContext.IsRunMode)
         {

@@ -72,7 +72,6 @@ public sealed class VideoRepository : IVideoRepository
         const string sql = """
             SELECT id, blob_name, title, description, video_date, file_name, content_type, size_in_bytes, owner_id, uploaded_at, updated_at, thumbnail_blob_name, width, height, duration_in_seconds
             FROM videos
-            WHERE owner_id = @OwnerId
             ORDER BY uploaded_at DESC
             """;
 

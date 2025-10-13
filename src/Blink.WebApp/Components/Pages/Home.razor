@@ -1,6 +1,6 @@
-@page "/"
+﻿@page "/"
 @inject BlinkApiClient ApiClient
-@rendermode @(new Microsoft.AspNetCore.Components.Web.InteractiveServerRenderMode())
+@attribute [StreamRendering]
 
 <PageTitle>Home</PageTitle>
 
@@ -89,32 +89,25 @@
         {
             PublicMessage = $"Error: {ex.Message}";
         }
-    }
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
+        // Test authenticated endpoints (only after auth state is available)
+        try
         {
-            // Test authenticated endpoints (only after auth state is available)
-            try
-            {
-                AuthenticatedMessage = await ApiClient.GetAuthenticatedTestMessage();
-            }
-            catch (Exception ex)
-            {
-                AuthError = ex.Message;
-            }
+            AuthenticatedMessage = await ApiClient.GetAuthenticatedTestMessage();
+        }
+        catch (Exception ex)
+        {
+            AuthError = ex.Message;
+        }
 
-            try
-            {
-                ApiClaims = await ApiClient.GetClaims();
-            }
-            catch (Exception ex)
-            {
-                ClaimsError = ex.Message;
-            }
-
-            StateHasChanged();
+        // Test getting claims from the API
+        try
+        {
+            ApiClaims = await ApiClient.GetClaims();
+        }
+        catch (Exception ex)
+        {
+            ClaimsError = ex.Message;
         }
     }
 }

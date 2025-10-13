@@ -1,0 +1,14 @@
+@inject NavigationManager Navigation
+
+<AuthorizeView>
+    <Authorized>
+        Hello, @context.User.Claims.FirstOrDefault(x => x.Type == "name")?.Value!
+        <form action="/logout" method="post" style="display: inline;">
+            <button type="submit" class="nav-link btn btn-link">Log out</button>
+        </form>
+    </Authorized>
+    <NotAuthorized>
+        <a href="/login">Log in</a>
+    </NotAuthorized>
+</AuthorizeView>
+

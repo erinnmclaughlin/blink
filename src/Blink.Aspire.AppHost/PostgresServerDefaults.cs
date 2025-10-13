@@ -16,7 +16,7 @@ public static class PostgresServerDefaults
 
         if (builder.ExecutionContext.IsRunMode)
         {
-            postgres.RunAsContainer();
+            postgres.RunAsContainer(x => x.WithDataVolume());
         }
 
         return new PostgresServerResources
