@@ -176,17 +176,14 @@ public class VideoStorageClient : IVideoStorageClient
                     title = metadataTitle;
                 }
 
-                videos.Add(new VideoInfo(
-                    BlobName: blobItem.Name,
-                    FileName: fileName,
-                    SizeInBytes: blobItem.Properties.ContentLength ?? 0,
-                    LastModified: blobItem.Properties.LastModified,
-                    ContentType: blobItem.Properties.ContentType ?? "video/mp4",
-                    Title: title,
-                    Description: null,
-                    VideoDate: null,
-                    OwnerId: string.Empty // Legacy method - owner info not available in blob storage
-                ));
+                videos.Add(new VideoInfo
+                {
+                    BlobName = blobItem.Name,
+                    FileName = fileName,
+                    SizeInBytes = blobItem.Properties.ContentLength ?? 0,
+                    LastModified = blobItem.Properties.LastModified,
+                    ContentType = blobItem.Properties.ContentType ?? "video/mp4"
+               });
             }
 
             _logger.LogInformation("Retrieved {Count} videos from blob storage", videos.Count);
@@ -428,16 +425,3 @@ public class VideoStorageClient : IVideoStorageClient
         };
     }
 }
-
-public record VideoInfo(
-    string BlobName,
-    string FileName,
-    long SizeInBytes,
-    DateTimeOffset? LastModified,
-    string ContentType,
-    string? Title,
-    string? Description,
-    DateTime? VideoDate,
-    string OwnerId,
-    string? ThumbnailBlobName = null
-);

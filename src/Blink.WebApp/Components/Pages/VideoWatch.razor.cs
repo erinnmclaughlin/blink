@@ -10,7 +10,7 @@ public sealed partial class VideoWatch
     public string BlobName { get; set; } = string.Empty;
 
     private string? CurrentVideoUrl { get; set; }
-    private VideoInfo? Video { get; set; }
+    private VideoSummaryDto? Video { get; set; }
     private bool IsLoadingVideo { get; set; } = true;
     private string? ErrorMessage { get; set; }
 
@@ -43,7 +43,7 @@ public sealed partial class VideoWatch
 
             // First, get the list of videos to find details about this video
             var videos = await _apiClient.GetVideosAsync();
-            Video = videos.FirstOrDefault(v => v.BlobName == BlobName);
+            Video = videos.FirstOrDefault(v => v.VideoBlobName == BlobName);
 
             if (Video == null)
             {
@@ -78,8 +78,8 @@ public sealed partial class VideoWatch
         return $"{len:0.##} {sizes[order]}";
     }
 
-    private static string GetDisplayTitle(VideoInfo video)
+    private static string GetDisplayTitle(VideoSummaryDto video)
     {
-        return !string.IsNullOrWhiteSpace(video.Title) ? video.Title : video.FileName;
+        return !string.IsNullOrWhiteSpace(video.Title) ? video.Title : "[No Title]";
     }
 }

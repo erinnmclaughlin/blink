@@ -40,10 +40,10 @@
                         <div class="d-flex justify-content-between align-items-start">
                             <div>
                                 <h3 class="mb-0">@GetDisplayTitle(Video)</h3>
-                                <small class="text-muted">
-                                    @FormatFileSize(Video.SizeInBytes) •
+                                @*<small class="text-muted">
+                                    @FormatFileSize() •
                                     @(Video.LastModified?.LocalDateTime.ToString("g") ?? "Unknown")
-                                </small>
+                                </small>*@
                             </div>
                         </div>
                     </div>
@@ -52,28 +52,17 @@
                         {
                             <div class="ratio ratio-16x9">
                                 <video controls autoplay preload="metadata" class="w-100">
-                                    <source src="@CurrentVideoUrl" type="@Video.ContentType">
+                                    <source src="@CurrentVideoUrl" type="video/mp4">
                                     Your browser does not support the video tag.
                                 </video>
                             </div>
+                        }
+                        @if (!string.IsNullOrEmpty(Video.Description))
+                        {
                             <div class="p-3">
-                                <small class="text-muted">If the video doesn't play, try clicking the play button.</small>
+                                @Video.Description
                             </div>
                         }
-                    </div>
-                    <div class="card-footer">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <small class="text-muted">
-                                    <strong>File:</strong> @Video.FileName
-                                </small>
-                            </div>
-                            <div class="col-md-6 text-md-end">
-                                <small class="text-muted">
-                                    <strong>Type:</strong> @Video.ContentType
-                                </small>
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>

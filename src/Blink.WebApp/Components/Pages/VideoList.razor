@@ -64,7 +64,7 @@
         </div>
 
         <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-            @foreach (var video in Videos.OrderByDescending(v => v.LastModified))
+            @foreach (var video in Videos)
             {
                 <div class="col">
                     <div class="card h-100 shadow-sm">
@@ -114,9 +114,6 @@
                                         </p>
                                     }
                                 </div>
-                                <span class="badge bg-secondary ms-2">
-                                    @GetVideoIcon(video.ContentType)
-                                </span>
                             </div>
                         </div>
                         <div class="card-footer bg-transparent">
@@ -132,88 +129,3 @@
         </div>
     }
 </div>
-
-@code {
-    private List<VideoInfo> Videos { get; set; } = [];
-    private bool IsLoading { get; set; } = true;
-    private string? ErrorMessage { get; set; }
-    private Dictionary<string, string?> ThumbnailUrls { get; set; } = new();
-
-    protected override async Task OnInitializedAsync()
-    {
-        await LoadVideosAsync();
-    }
-
-    private async Task LoadVideosAsync()
-    {
-        IsLoading = true;
-        ErrorMessage = null;
-        await InvokeAsync(StateHasChanged);
-
-        try
-        {
-            Videos = await ApiClient.GetVideosAsync();
-            Logger.LogInformation("Loaded {Count} videos", Videos.Count);
-
-            // Load thumbnail URLs for videos that have thumbnails
-            ThumbnailUrls.Clear();
-            foreach (var video in Videos.Where(v => !string.IsNullOrEmpty(v.ThumbnailBlobName)))
-            {
-                try
-                {
-                    var urlResponse = await ApiClient.GetVideoUrlWithThumbnailAsync(video.BlobName);
-                    ThumbnailUrls[video.BlobName] = urlResponse.ThumbnailUrl;
-                }
-                catch (Exception ex)
-                {
-                    Logger.LogWarning(ex, "Failed to load thumbnail URL for video {BlobName}", video.BlobName);
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            ErrorMessage = $"Failed to load videos: {ex.Message}";
-            Logger.LogError(ex, "Error loading videos");
-        }
-        finally
-        {
-            IsLoading = false;
-            await InvokeAsync(StateHasChanged);
-        }
-    }
-
-    private string GetDisplayTitle(VideoInfo video)
-    {
-        return !string.IsNullOrWhiteSpace(video.Title) ? video.Title : video.FileName;
-    }
-
-    private string GetWatchUrl(VideoInfo video)
-    {
-        return $"/videos/watch/{Uri.EscapeDataString(video.BlobName)}";
-    }
-
-    private string GetVideoIcon(string contentType)
-    {
-        return contentType.ToLower() switch
-        {
-            "video/mp4" => "MP4",
-            "video/quicktime" => "MOV",
-            "video/x-msvideo" => "AVI",
-            "video/x-matroska" => "MKV",
-            _ => "VIDEO"
-        };
-    }
-
-    private bool HasThumbnail(VideoInfo video)
-    {
-        return !string.IsNullOrEmpty(video.ThumbnailBlobName);
-    }
-
-    private string? GetThumbnailUrl(VideoInfo video)
-    {
-        if (string.IsNullOrEmpty(video.ThumbnailBlobName))
-            return null;
-
-        return ThumbnailUrls.GetValueOrDefault(video.BlobName);
-    }
-}
