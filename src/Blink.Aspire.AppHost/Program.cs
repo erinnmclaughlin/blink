@@ -3,16 +3,15 @@ using Blink.AppHost;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
-var keycloak = builder.AddAndConfigureKeycloak();
+var postgres = builder.AddAndConfigurePostgresServer();
+
+var keycloak = builder.AddAndConfigureKeycloak(postgres);
 
 var storage = builder.AddAndConfigureAzureStorage();
 
-var messaging = builder
-    .AddRabbitMQ(ServiceNames.Messaging);
+var messaging = builder.AddRabbitMQ(ServiceNames.Messaging);
 
-var blinkDatabase = builder
-    .AddAndConfigurePostgresServer()
-    .AddDatabase(ServiceNames.BlinkDatabase);
+var blinkDatabase = postgres.Server.AddDatabase(ServiceNames.BlinkDatabase);
 
 var blinkWebApi = builder.AddProject<Projects.Blink_WebApi>(ServiceNames.BlinkWebApi)
     .WithExternalHttpEndpoints()

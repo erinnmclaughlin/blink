@@ -29,7 +29,8 @@ builder.Services
             options.ClientId = "blink-webapp";
             options.ResponseType = OpenIdConnectResponseType.Code;
             options.SaveTokens = true;
-            options.RequireHttpsMetadata = builder.Environment.IsProduction();
+            options.RequireHttpsMetadata = false;
+            // TODO: options.RequireHttpsMetadata = builder.Environment.IsProduction();
             options.GetClaimsFromUserInfoEndpoint = true;
             
             // Add required scopes
@@ -45,7 +46,7 @@ builder.Services.AddHttpContextAccessor();
 
 // Configure HTTP client for Blink API with authentication
 var apiBaseAddress = builder.Configuration[$"services:{ServiceNames.BlinkWebApi}:https:0"] ?? 
-                     builder.Configuration[$"services:{ServiceNames.BlinkWebApp}:http:0"] ??
+                     builder.Configuration[$"services:{ServiceNames.BlinkWebApi}:http:0"] ??
                      "localhost";
 
 builder.Services.AddHttpClient<BlinkApiClient>((sp, client) =>

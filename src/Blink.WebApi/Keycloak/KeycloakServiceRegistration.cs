@@ -1,4 +1,5 @@
 ﻿using Blink.WebApi.Keycloak;
+using MassTransit.Configuration;
 using Microsoft.Extensions.Options;
 
 namespace Microsoft.Extensions.DependencyInjection;
@@ -13,7 +14,8 @@ public static class KeycloakServiceRegistration
             .AddKeycloakJwtBearer("keycloak", "blink", o =>
             {
                 o.Audience = "account";
-                o.RequireHttpsMetadata = builder.Environment.IsProduction();
+                o.RequireHttpsMetadata = false;
+                // TODO: o.RequireHttpsMetadata = builder.Environment.IsProduction();
             });
     }
 
@@ -35,3 +37,4 @@ public static class KeycloakServiceRegistration
         });
     }
 }
+

@@ -1,5 +1,4 @@
 ﻿using Aspire.Hosting.Azure;
-using Microsoft.Extensions.Hosting;
 
 namespace Blink.AppHost;
 
@@ -7,9 +6,11 @@ public static class AzureStorageDefaults
 {
     public static AzureStorageResources AddAndConfigureAzureStorage(this IDistributedApplicationBuilder builder)
     {
-        var storage = builder.AddAzureStorage(ServiceNames.AzureStorage);
+        var storage = builder
+            .AddAzureStorage(ServiceNames.AzureStorage)
+            .;
 
-        if (builder.Environment.IsDevelopment())
+        if (builder.ExecutionContext.IsRunMode)
         {
             storage.RunAsEmulator(azurite => azurite.WithDataVolume());
         }

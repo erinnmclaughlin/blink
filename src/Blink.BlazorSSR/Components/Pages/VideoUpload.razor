@@ -258,7 +258,10 @@
             _ = SimulateProgress();
 
             // Get the API base address
-            var apiBaseAddress = Configuration["BlinkApi:BaseAddress"]?.TrimEnd('/');
+            var apiBaseAddress = Configuration[$"services:{ServiceNames.BlinkWebApi}:https:0"] 
+                ?? Configuration[$"services:{ServiceNames.BlinkWebApi}:http:0"] 
+                ?? "localhost";
+
             if (string.IsNullOrEmpty(apiBaseAddress))
             {
                 errorMessage = "API base address not configured";
