@@ -206,7 +206,7 @@ public class VideoStorageClient : IVideoStorageClient
     private async Task<BlobClient> GetBlobClientAsync(string blobName, CancellationToken cancellationToken)
     {
         var containerClient = _blobServiceClient.GetBlobContainerClient("videos");
-        await containerClient.CreateIfNotExistsAsync(PublicAccessType.None, cancellationToken: cancellationToken);
+        await containerClient.CreateIfNotExistsAsync(cancellationToken: cancellationToken);
         return containerClient.GetBlobClient(blobName);
     }
 
@@ -251,7 +251,7 @@ public class VideoStorageClient : IVideoStorageClient
         try
         {
             var containerClient = _blobServiceClient.GetBlobContainerClient("videos");
-            await containerClient.CreateIfNotExistsAsync(PublicAccessType.None, cancellationToken: cancellationToken);
+            await containerClient.CreateIfNotExistsAsync(cancellationToken: cancellationToken);
             var blobClient = containerClient.GetBlobClient(thumbnailBlobName);
 
             await blobClient.UploadAsync(

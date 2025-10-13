@@ -7,8 +7,7 @@ public static class AzureStorageDefaults
     public static AzureStorageResources AddAndConfigureAzureStorage(this IDistributedApplicationBuilder builder)
     {
         var storage = builder
-            .AddAzureStorage(ServiceNames.AzureStorage)
-            .;
+            .AddAzureStorage(ServiceNames.AzureStorage);
 
         if (builder.ExecutionContext.IsRunMode)
         {
