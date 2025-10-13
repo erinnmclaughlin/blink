@@ -20,14 +20,6 @@ var blinkWebApi = builder.AddProject<Projects.Blink_WebApi>(ServiceNames.BlinkWe
     .WithAwaitedReference(messaging)
     .WithAwaitedReference(storage.Blobs);
 
-/*
-var blinkWebApp = builder
-    .AddProject<Projects.Blink_BlazorSSR>(ServiceNames.BlinkWebApp)
-    .WithExternalHttpEndpoints()
-    .WithAwaitedReference(blinkWebApi)
-    .WithAwaitedReference(keycloak);
-*/
-
 var blinkWebApp = builder.AddProject<Projects.Blink_WebApp>(ServiceNames.BlinkWebApp)
     .WithExternalHttpEndpoints()
     .WithAwaitedReference(blinkWebApi)
@@ -40,6 +32,5 @@ builder
     .AddDockerfile("blink-video-processor", "../..", "src/Blink.VideoProcessor/Dockerfile")
     .WithReference(messaging)
     .WithReference(storage.Blobs);
-
 
 builder.Build().Run();
