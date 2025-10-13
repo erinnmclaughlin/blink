@@ -17,6 +17,7 @@
     <ProjectReference Include="..\Blink.VideoProcessor\Blink.VideoProcessor.csproj" />
     <ProjectReference Include="..\Blink.WebApi\Blink.WebApi.csproj" />
     <ProjectReference Include="..\Blink.WebApp\Blink.WebApp.csproj" />
+    <ProjectReference Include="..\Blink.BlazorSSR\Blink.BlazorSSR.csproj" />
   </ItemGroup>
 
   <ItemGroup>

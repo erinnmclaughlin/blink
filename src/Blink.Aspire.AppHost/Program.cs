@@ -27,6 +27,12 @@ var blinkWebApp = builder
     .WithExternalHttpEndpoints()
     .WithAwaitedReference(blinkWebApi);
 
+var blinkBlazorSSR = builder
+    .AddProject<Projects.Blink_BlazorSSR>("blink-blazor-ssr")
+    .WithExternalHttpEndpoints()
+    .WithAwaitedReference(blinkWebApi)
+    .WithAwaitedReference(keycloak);
+
 blinkWebApi.WithReference(blinkWebApp);
 
 builder
