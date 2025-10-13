@@ -4,10 +4,19 @@ namespace Blink.WebApp.Components.Pages;
 
 public sealed partial class VideoList
 {
+    private readonly BlinkApiClient _apiClient;
+    private readonly ILogger<VideoList> _logger;
+
     private List<VideoSummaryDto> Videos { get; set; } = [];
     private bool IsLoading { get; set; } = true;
     private string? ErrorMessage { get; set; }
     private Dictionary<string, string?> ThumbnailUrls { get; set; } = new();
+
+    public VideoList(BlinkApiClient apiClient, ILogger<VideoList> logger)
+    {
+        _apiClient = apiClient;
+        _logger = logger;
+    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -22,8 +31,8 @@ public sealed partial class VideoList
 
         try
         {
-            Videos = await ApiClient.GetVideosAsync();
-            Logger.LogInformation("Loaded {Count} videos", Videos.Count);
+            Videos = await _apiClient.GetVideosAsync();
+            _logger.LogInformation("Loaded {Count} videos", Videos.Count);
 
             // Load thumbnail URLs for videos that have thumbnails
             ThumbnailUrls.Clear();
@@ -31,19 +40,19 @@ public sealed partial class VideoList
             {
                 try
                 {
-                    var urlResponse = await ApiClient.GetVideoUrlWithThumbnailAsync(video.VideoBlobName);
+                    var urlResponse = await _apiClient.GetVideoUrlWithThumbnailAsync(video.VideoBlobName);
                     ThumbnailUrls[video.VideoBlobName] = urlResponse.ThumbnailUrl;
                 }
                 catch (Exception ex)
                 {
-                    Logger.LogWarning(ex, "Failed to load thumbnail URL for video {BlobName}", video.VideoBlobName);
+                    _logger.LogWarning(ex, "Failed to load thumbnail URL for video {BlobName}", video.VideoBlobName);
                 }
             }
         }
         catch (Exception ex)
         {
             ErrorMessage = $"Failed to load videos: {ex.Message}";
-            Logger.LogError(ex, "Error loading videos");
+            _logger.LogError(ex, "Error loading videos");
         }
         finally
         {
@@ -52,29 +61,17 @@ public sealed partial class VideoList
         }
     }
 
-    private string GetDisplayTitle(VideoSummaryDto video)
+    private static string GetDisplayTitle(VideoSummaryDto video)
     {
         return !string.IsNullOrWhiteSpace(video.Title) ? video.Title : "[No Title]";
     }
 
-    private string GetWatchUrl(VideoSummaryDto video)
+    private static string GetWatchUrl(VideoSummaryDto video)
     {
         return $"/videos/watch/{Uri.EscapeDataString(video.VideoBlobName)}";
     }
 
-    private string GetVideoIcon(string contentType)
-    {
-        return contentType.ToLower() switch
-        {
-            "video/mp4" => "MP4",
-            "video/quicktime" => "MOV",
-            "video/x-msvideo" => "AVI",
-            "video/x-matroska" => "MKV",
-            _ => "VIDEO"
-        };
-    }
-
-    private bool HasThumbnail(VideoSummaryDto video)
+    private static bool HasThumbnail(VideoSummaryDto video)
     {
         return !string.IsNullOrEmpty(video.ThumbnailBlobName);
     }

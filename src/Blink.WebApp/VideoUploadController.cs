@@ -22,13 +22,13 @@ public class VideoUploadController : Controller
         if (videoFile == null || videoFile.Length == 0)
         {
             TempData["ErrorMessage"] = "No file selected.";
-            return RedirectToAction("UploadPage"); // redirect back
+            return RedirectToAction("/videos/upload");
         }
 
         if (videoFile.Length > 2_000_000_000)
         {
             TempData["ErrorMessage"] = "File size exceeds 2GB.";
-            return RedirectToAction("UploadPage");
+            return Redirect("/videos/upload");
         }
 
         var stream = videoFile.OpenReadStream();
