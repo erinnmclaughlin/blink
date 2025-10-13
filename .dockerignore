@@ -1,0 +1,35 @@
+# Build outputs
+**/bin/
+**/obj/
+
+# IDE and editor files
+**/.vs/
+**/.vscode/
+**/.idea/
+**/*.user
+**/*.suo
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Documentation
+**/*.md
+README.md
+LICENSE.txt
+
+# Azure and deployment
+.azure/
+azure.yaml
+infra/
+
+# Tests
+tests/
+
+# Other
+**/node_modules/
+**/.env
+**/.dockerignore
+**/Dockerfile
+
