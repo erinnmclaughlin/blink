@@ -1,0 +1,40 @@
+﻿<div class="card h-100 shadow-sm">
+
+    @if (!string.IsNullOrEmpty(ThumbnailUrl))
+    {
+        <img src="@ThumbnailUrl" class="card-img-top" alt="@GetDisplayTitle()" style="height: 180px; object-fit: cover;">
+    }
+    else
+    {
+        <div class="card-img-top bg-secondary bg-opacity-10 d-flex align-items-center justify-content-center" style="height: 180px;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="currentColor" class="bi bi-camera-video text-secondary" viewBox="0 0 16 16">
+                <path fill-rule="evenodd" d="M0 5a2 2 0 0 1 2-2h7.5a2 2 0 0 1 1.983 1.738l3.11-1.382A1 1 0 0 1 16 4.269v7.462a1 1 0 0 1-1.406.913l-3.111-1.382A2 2 0 0 1 9.5 13H2a2 2 0 0 1-2-2V5zm11.5 5.175 3.5 1.556V4.269l-3.5 1.556v4.35zM2 4a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h7.5a1 1 0 0 0 1-1V5a1 1 0 0 0-1-1H2z" />
+            </svg>
+        </div>
+    }
+
+    <div class="card-body">
+        <div class="d-flex align-items-start mb-2">
+            <div class="flex-grow-1" style="min-width: 0;">
+                <div class="d-flex align-items-center mb-1">
+                    <h5 class="card-title text-truncate mb-0 flex-grow-1" title="@GetDisplayTitle()">
+                        @GetDisplayTitle()
+                    </h5>
+                </div>
+                @if (Video.VideoDate.HasValue)
+                {
+                    <p class="card-text small text-muted mb-2">
+                        <span class="bi bi-calendar3"></span> @Video.VideoDate.Value.ToString("MMM d, yyyy")
+                    </p>
+                }
+            </div>
+        </div>
+    </div>
+    <div class="card-footer bg-transparent">
+        <div class="d-flex gap-2">
+            <a href="@GetWatchUrl()" class="btn btn-sm btn-primary flex-fill">
+                <span class="bi bi-play-circle"></span> Watch
+            </a>
+        </div>
+    </div>
+</div>

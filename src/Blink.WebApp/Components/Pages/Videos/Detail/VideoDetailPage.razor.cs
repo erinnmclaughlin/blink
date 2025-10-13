@@ -1,11 +1,11 @@
 using Blink.VideosApi.Contracts.GetByBlobName;
 using Microsoft.AspNetCore.Components;
 
-namespace Blink.WebApp.Components.Pages;
-public sealed partial class VideoWatch
+namespace Blink.WebApp.Components.Pages.Videos.Detail;
+public sealed partial class VideoDetailPage
 {
     private readonly BlinkApiClient _apiClient;
-    private readonly ILogger<VideoWatch> _logger;
+    private readonly ILogger<VideoDetailPage> _logger;
 
     [Parameter]
     public string BlobName { get; set; } = string.Empty;
@@ -14,7 +14,7 @@ public sealed partial class VideoWatch
     private bool IsLoadingVideo { get; set; } = true;
     private string? ErrorMessage { get; set; }
 
-    public VideoWatch(BlinkApiClient apiClient, ILogger<VideoWatch> logger)
+    public VideoDetailPage(BlinkApiClient apiClient, ILogger<VideoDetailPage> logger)
     {
         _apiClient = apiClient;
         _logger = logger;
