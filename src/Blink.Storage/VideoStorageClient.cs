@@ -34,7 +34,7 @@ public class VideoStorageClient : IVideoStorageClient
     {
         try
         {
-            var blobClient = await GetBlobClientAsync(blobName, cancellationToken);
+            var blobClient = GetBlobClient(blobName);
 
             var response = await blobClient.DeleteIfExistsAsync(cancellationToken: cancellationToken);
 
@@ -60,7 +60,7 @@ public class VideoStorageClient : IVideoStorageClient
     {
         try
         {
-            var blobClient = await GetBlobClientAsync(blobName, cancellationToken);
+            var blobClient = GetBlobClient(blobName);
 
             var response = await blobClient.DownloadAsync(cancellationToken);
 
@@ -78,7 +78,7 @@ public class VideoStorageClient : IVideoStorageClient
     {
         try
         {
-            var blobClient = await GetBlobClientAsync(blobName, cancellationToken);
+            var blobClient = GetBlobClient(blobName);
 
             // Check if blob exists
             if (!await blobClient.ExistsAsync(cancellationToken))
@@ -87,8 +87,10 @@ public class VideoStorageClient : IVideoStorageClient
             }
 
             // Generate SAS token valid for 1 hour
+            // When allowSharedKeyAccess is false (Azure production), we need user delegation SAS
             if (blobClient.CanGenerateSasUri)
             {
+                // Account key-based SAS (local development with Azurite)
                 var sasBuilder = new BlobSasBuilder
                 {
                     BlobContainerName = "videos",
@@ -101,17 +103,38 @@ public class VideoStorageClient : IVideoStorageClient
                 sasBuilder.SetPermissions(BlobSasPermissions.Read);
 
                 var sasUri = blobClient.GenerateSasUri(sasBuilder);
-                _logger.LogInformation("Generated SAS URL for video: {BlobName}", blobName);
+                _logger.LogInformation("Generated account key SAS URL for video: {BlobName}", blobName);
                 return sasUri.ToString();
             }
             else
             {
-                // If we can't generate SAS (using connection string without key), return the blob URI
-                // This scenario would need anonymous access or different auth strategy
-                _logger.LogWarning("Cannot generate SAS token for blob: {BlobName}. Returning direct URI: {Uri}", blobName, blobClient.Uri);
+                // User delegation SAS (Azure production with managed identity)
+                _logger.LogInformation("Generating user delegation SAS token for blob: {BlobName}", blobName);
                 
-                // For local development with Azurite, the URI should still work
-                return blobClient.Uri.ToString();
+                var startsOn = DateTimeOffset.UtcNow.AddMinutes(-5);
+                var expiresOn = DateTimeOffset.UtcNow.AddHours(1);
+                
+                // Get a user delegation key
+                var userDelegationKey = await _blobServiceClient.GetUserDelegationKeyAsync(startsOn, expiresOn, cancellationToken);
+                
+                var sasBuilder = new BlobSasBuilder
+                {
+                    BlobContainerName = "videos",
+                    BlobName = blobName,
+                    Resource = "b",
+                    StartsOn = startsOn,
+                    ExpiresOn = expiresOn
+                };
+                
+                sasBuilder.SetPermissions(BlobSasPermissions.Read);
+                
+                var blobUriBuilder = new BlobUriBuilder(blobClient.Uri)
+                {
+                    Sas = sasBuilder.ToSasQueryParameters(userDelegationKey.Value, _blobServiceClient.AccountName)
+                };
+                
+                _logger.LogInformation("Generated user delegation SAS URL for video: {BlobName}", blobName);
+                return blobUriBuilder.ToUri().ToString();
             }
         }
         catch (Exception ex)
@@ -184,9 +207,22 @@ public class VideoStorageClient : IVideoStorageClient
         {
             var blobClient = await GetBlobClientAsync(blobName, cancellationToken);
 
+            // Configure chunked upload for large files to prevent timeouts
+            var uploadOptions = new BlobUploadOptions 
+            { 
+                HttpHeaders = new BlobHttpHeaders { ContentType = GetContentType(fileName) },
+                TransferOptions = new Azure.Storage.StorageTransferOptions
+                {
+                    // Upload in 4MB chunks to improve reliability and prevent timeouts
+                    InitialTransferSize = 4 * 1024 * 1024, // 4MB
+                    MaximumTransferSize = 4 * 1024 * 1024,  // 4MB
+                    MaximumConcurrency = 4 // Upload up to 4 chunks in parallel
+                }
+            };
+
             var response = await blobClient.UploadAsync(
                 videoStream,
-                new BlobUploadOptions { HttpHeaders = new() { ContentType = GetContentType(fileName) } },
+                uploadOptions,
                 cancellationToken);
 
             // Get the actual uploaded size from the response
@@ -203,10 +239,42 @@ public class VideoStorageClient : IVideoStorageClient
         }
     }
 
+    /// <summary>
+    /// Gets a blob client for read operations (does not create container)
+    /// </summary>
+    private BlobClient GetBlobClient(string blobName)
+    {
+        var containerClient = _blobServiceClient.GetBlobContainerClient("videos");
+        return containerClient.GetBlobClient(blobName);
+    }
+
+    /// <summary>
+    /// Gets a blob client and ensures the container exists (for write operations)
+    /// </summary>
     private async Task<BlobClient> GetBlobClientAsync(string blobName, CancellationToken cancellationToken)
     {
         var containerClient = _blobServiceClient.GetBlobContainerClient("videos");
-        await containerClient.CreateIfNotExistsAsync(cancellationToken: cancellationToken);
+        
+        try
+        {
+            await containerClient.CreateIfNotExistsAsync(cancellationToken: cancellationToken);
+        }
+        catch (Azure.RequestFailedException ex) when (ex.Status == 409)
+        {
+            // 409 Conflict can occur when:
+            // 1. Container already exists (expected, can ignore)
+            // 2. Public access is not permitted on this storage account (expected with allowBlobPublicAccess: false)
+            // In both cases, we can safely proceed if the container exists
+            _logger.LogDebug("Received 409 when creating container (container likely already exists): {Message}", ex.Message);
+            
+            // Verify the container actually exists
+            if (!await containerClient.ExistsAsync(cancellationToken))
+            {
+                _logger.LogError("Container does not exist and cannot be created: {Message}", ex.Message);
+                throw;
+            }
+        }
+        
         return containerClient.GetBlobClient(blobName);
     }
 
@@ -214,7 +282,7 @@ public class VideoStorageClient : IVideoStorageClient
     {
         try
         {
-            var blobClient = await GetBlobClientAsync(blobName, cancellationToken);
+            var blobClient = GetBlobClient(blobName);
 
             // Check if blob exists
             if (!await blobClient.ExistsAsync(cancellationToken))
@@ -250,13 +318,16 @@ public class VideoStorageClient : IVideoStorageClient
 
         try
         {
-            var containerClient = _blobServiceClient.GetBlobContainerClient("videos");
-            await containerClient.CreateIfNotExistsAsync(cancellationToken: cancellationToken);
-            var blobClient = containerClient.GetBlobClient(thumbnailBlobName);
+            var blobClient = await GetBlobClientAsync(thumbnailBlobName, cancellationToken);
+
+            var uploadOptions = new BlobUploadOptions 
+            { 
+                HttpHeaders = new BlobHttpHeaders { ContentType = "image/jpeg" }
+            };
 
             await blobClient.UploadAsync(
                 thumbnailStream,
-                new BlobUploadOptions { HttpHeaders = new() { ContentType = "image/jpeg" } },
+                uploadOptions,
                 cancellationToken);
 
             _logger.LogInformation("Thumbnail uploaded successfully: {ThumbnailBlobName} for video: {VideoBlobName}", 
@@ -279,8 +350,7 @@ public class VideoStorageClient : IVideoStorageClient
 
         try
         {
-            var containerClient = _blobServiceClient.GetBlobContainerClient("videos");
-            var blobClient = containerClient.GetBlobClient(thumbnailBlobName);
+            var blobClient = GetBlobClient(thumbnailBlobName);
 
             // Check if blob exists
             if (!await blobClient.ExistsAsync(cancellationToken))
@@ -292,6 +362,7 @@ public class VideoStorageClient : IVideoStorageClient
             // Generate SAS token valid for 1 hour
             if (blobClient.CanGenerateSasUri)
             {
+                // Account key-based SAS (local development)
                 var sasBuilder = new BlobSasBuilder
                 {
                     BlobContainerName = "videos",
@@ -304,14 +375,37 @@ public class VideoStorageClient : IVideoStorageClient
                 sasBuilder.SetPermissions(BlobSasPermissions.Read);
 
                 var sasUri = blobClient.GenerateSasUri(sasBuilder);
-                _logger.LogInformation("Generated SAS URL for thumbnail: {ThumbnailBlobName}", thumbnailBlobName);
+                _logger.LogInformation("Generated account key SAS URL for thumbnail: {ThumbnailBlobName}", thumbnailBlobName);
                 return sasUri.ToString();
             }
             else
             {
-                _logger.LogWarning("Cannot generate SAS token for thumbnail: {ThumbnailBlobName}. Returning direct URI: {Uri}", 
-                    thumbnailBlobName, blobClient.Uri);
-                return blobClient.Uri.ToString();
+                // User delegation SAS (Azure production with managed identity)
+                _logger.LogInformation("Generating user delegation SAS token for thumbnail: {ThumbnailBlobName}", thumbnailBlobName);
+                
+                var startsOn = DateTimeOffset.UtcNow.AddMinutes(-5);
+                var expiresOn = DateTimeOffset.UtcNow.AddHours(1);
+                
+                var userDelegationKey = await _blobServiceClient.GetUserDelegationKeyAsync(startsOn, expiresOn, cancellationToken);
+                
+                var sasBuilder = new BlobSasBuilder
+                {
+                    BlobContainerName = "videos",
+                    BlobName = thumbnailBlobName,
+                    Resource = "b",
+                    StartsOn = startsOn,
+                    ExpiresOn = expiresOn
+                };
+                
+                sasBuilder.SetPermissions(BlobSasPermissions.Read);
+                
+                var blobUriBuilder = new BlobUriBuilder(blobClient.Uri)
+                {
+                    Sas = sasBuilder.ToSasQueryParameters(userDelegationKey.Value, _blobServiceClient.AccountName)
+                };
+                
+                _logger.LogInformation("Generated user delegation SAS URL for thumbnail: {ThumbnailBlobName}", thumbnailBlobName);
+                return blobUriBuilder.ToUri().ToString();
             }
         }
         catch (Exception ex)
