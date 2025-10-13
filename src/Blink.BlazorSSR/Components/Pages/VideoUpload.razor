@@ -1,6 +1,9 @@
 @page "/videos/upload"
 @inject BlinkApiClient ApiClient
 @inject ILogger<VideoUpload> Logger
+@inject IJSRuntime JS
+@inject IHttpContextAccessor HttpContextAccessor
+@inject IConfiguration Configuration
 @inject NavigationManager NavigationManager
 @attribute [Authorize]
 @rendermode @(new Microsoft.AspNetCore.Components.Web.InteractiveServerRenderMode())
@@ -97,7 +100,8 @@
 
                     <div class="mb-3">
                         <label for="videoFile" class="form-label">Select Video File</label>
-                        <InputFile OnChange="OnFileSelected"
+                        <InputFile @ref="fileInputRef"
+                                   OnChange="OnFileSelected"
                                    class="form-control"
                                    id="videoFile"
                                    accept=".mp4"
@@ -197,6 +201,7 @@
 </div>
 
 @code {
+    private InputFile? fileInputRef;
     private IBrowserFile? selectedFile;
     private bool isUploading;
     private int uploadProgress;
@@ -217,7 +222,7 @@
 
     private async Task UploadVideo()
     {
-        if (selectedFile == null)
+        if (selectedFile == null || fileInputRef == null)
             return;
 
         isUploading = true;
@@ -234,31 +239,57 @@
                 return;
             }
 
-            // Simulate progress
+            // Get access token from the authentication cookie
+            var httpContext = HttpContextAccessor.HttpContext;
+            if (httpContext == null)
+            {
+                errorMessage = "Unable to access authentication context.";
+                return;
+            }
+
+            var accessToken = await httpContext.GetTokenAsync("access_token");
+            if (string.IsNullOrEmpty(accessToken))
+            {
+                errorMessage = "Failed to get authentication token.";
+                return;
+            }
+
+            // Simulate progress (since we can't track actual upload progress easily)
             _ = SimulateProgress();
 
-            // Open a stream to read the file
-            using var stream = selectedFile.OpenReadStream(maxAllowedSize: maxFileSize);
+            // Get the API base address
+            var apiBaseAddress = Configuration["BlinkApi:BaseAddress"]?.TrimEnd('/');
+            if (string.IsNullOrEmpty(apiBaseAddress))
+            {
+                errorMessage = "API base address not configured";
+                return;
+            }
+            var uploadUrl = $"{apiBaseAddress}/api/videos/upload";
 
-            // Upload the video
-            var response = await ApiClient.UploadVideoAsync(
-                stream,
-                selectedFile.Name,
+            // Use JavaScript Fetch API for large file upload (avoids memory buffering)
+            var fileInputElement = fileInputRef.Element;
+            var response = await JS.InvokeAsync<JsonElement>("uploadLargeFile",
+                uploadUrl,
+                fileInputElement,
+                accessToken,
                 videoTitle,
                 videoDescription,
-                videoDate
-            );
+                videoDate?.ToString("yyyy-MM-dd"));
 
             uploadProgress = 100;
             await Task.Delay(500); // Brief delay to show 100%
 
-            successMessage = $"Video uploaded successfully! Blob: {response.BlobName}";
+            var blobName = response.GetProperty("blobName").GetString() ?? "";
+            var fileName = response.GetProperty("fileName").GetString() ?? selectedFile.Name;
+            var fileSize = response.GetProperty("fileSize").GetInt64();
+
+            successMessage = $"Video uploaded successfully! Blob: {blobName}";
 
             uploadedVideos.Add(new UploadedVideoInfo
             {
-                FileName = response.FileName,
-                BlobName = response.BlobName,
-                FileSize = response.FileSize,
+                FileName = fileName,
+                BlobName = blobName,
+                FileSize = fileSize,
                 UploadedAt = DateTime.Now
             });
 
@@ -267,10 +298,10 @@
             videoDescription = null;
             videoDate = null;
 
-            Logger.LogInformation("Video uploaded successfully: {FileName}", response.FileName);
+            Logger.LogInformation("Video uploaded successfully: {FileName}", fileName);
 
             // Redirect to the watch page for the uploaded video
-            NavigationManager.NavigateTo($"/videos/watch/{response.BlobName}");
+            NavigationManager.NavigateTo($"/videos/watch/{blobName}");
         }
         catch (Exception ex)
         {

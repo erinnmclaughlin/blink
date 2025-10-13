@@ -33,7 +33,9 @@ var blinkBlazorSSR = builder
     .WithAwaitedReference(blinkWebApi)
     .WithAwaitedReference(keycloak);
 
-blinkWebApi.WithReference(blinkWebApp);
+blinkWebApi
+    .WithReference(blinkWebApp)
+    .WithReference(blinkBlazorSSR);
 
 builder
     .AddProject<Projects.Blink_VideoProcessor>("blink-video-processor")
