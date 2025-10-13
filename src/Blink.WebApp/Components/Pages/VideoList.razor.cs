@@ -1,3 +1,5 @@
+using Blink.VideosApi.Contracts.List;
+
 namespace Blink.WebApp.Components.Pages;
 
 public sealed partial class VideoList

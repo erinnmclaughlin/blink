@@ -25,6 +25,7 @@
     <ProjectReference Include="..\Blink.ServiceNames\Blink.ServiceNames.csproj" />
     <ProjectReference Include="..\Blink.Storage\Blink.Storage.csproj" />
     <ProjectReference Include="..\Blink.Aspire.ServiceDefaults\Blink.Aspire.ServiceDefaults.csproj" />
+    <ProjectReference Include="..\Blink.VideosApi.Contracts\Blink.VideosApi.Contracts.csproj" />
   </ItemGroup>
 
 </Project>

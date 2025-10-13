@@ -1,3 +1,4 @@
+using Blink.VideosApi.Contracts.List;
 using MediatR;
 
 namespace Blink.WebApi.Videos.List;

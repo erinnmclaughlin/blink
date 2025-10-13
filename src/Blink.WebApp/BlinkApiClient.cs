@@ -1,3 +1,10 @@
+using Blink.VideosApi.Contracts.Delete;
+using Blink.VideosApi.Contracts.GetUrl;
+using Blink.VideosApi.Contracts.List;
+using Blink.VideosApi.Contracts.UpdateMetadata;
+using Blink.VideosApi.Contracts.UpdateTitle;
+using Blink.VideosApi.Contracts.Upload;
+
 namespace Blink.WebApp;
 
 public sealed class BlinkApiClient
@@ -28,7 +35,7 @@ public sealed class BlinkApiClient
         return await _httpClient.GetFromJsonAsync<Dictionary<string, string[]>>("claims", cancellationToken) ?? [];
     }
 
-    public async Task<VideoUploadResponse> UploadVideoAsync(
+    public async Task<UploadedVideoInfo> UploadVideoAsync(
         Stream videoStream, 
         string fileName, 
         string? title = null,
@@ -52,7 +59,7 @@ public sealed class BlinkApiClient
         var response = await _httpClient.PostAsync("api/videos/upload", content, cancellationToken);
         response.EnsureSuccessStatusCode();
         
-        return await response.Content.ReadFromJsonAsync<VideoUploadResponse>(cancellationToken) 
+        return await response.Content.ReadFromJsonAsync<UploadedVideoInfo>(cancellationToken) 
             ?? throw new InvalidOperationException("Failed to deserialize upload response");
     }
 
@@ -75,27 +82,27 @@ public sealed class BlinkApiClient
         return response ?? throw new InvalidOperationException("Failed to get video URL");
     }
 
-    public async Task<VideoDeleteResponse> DeleteVideoAsync(string blobName, CancellationToken cancellationToken = default)
+    public async Task<DeleteVideoResponse> DeleteVideoAsync(string blobName, CancellationToken cancellationToken = default)
     {
         var encodedBlobName = Uri.EscapeDataString(blobName);
         var response = await _httpClient.DeleteAsync($"api/videos/{encodedBlobName}", cancellationToken);
         response.EnsureSuccessStatusCode();
         
-        return await response.Content.ReadFromJsonAsync<VideoDeleteResponse>(cancellationToken) 
+        return await response.Content.ReadFromJsonAsync<DeleteVideoResponse>(cancellationToken) 
             ?? throw new InvalidOperationException("Failed to deserialize delete response");
     }
 
-    public async Task<VideoTitleUpdateResponse> UpdateVideoTitleAsync(string blobName, string title, CancellationToken cancellationToken = default)
+    public async Task<UpdateTitleResponse> UpdateVideoTitleAsync(string blobName, string title, CancellationToken cancellationToken = default)
     {
         var encodedBlobName = Uri.EscapeDataString(blobName);
         var response = await _httpClient.PutAsJsonAsync($"api/videos/{encodedBlobName}/title", new { Title = title }, cancellationToken);
         response.EnsureSuccessStatusCode();
         
-        return await response.Content.ReadFromJsonAsync<VideoTitleUpdateResponse>(cancellationToken) 
+        return await response.Content.ReadFromJsonAsync<UpdateTitleResponse>(cancellationToken) 
             ?? throw new InvalidOperationException("Failed to deserialize update title response");
     }
 
-    public async Task<VideoMetadataUpdateResponse> UpdateVideoMetadataAsync(
+    public async Task<UpdateMetadataResponse> UpdateVideoMetadataAsync(
         string blobName, 
         string title, 
         string? description = null, 
@@ -111,51 +118,7 @@ public sealed class BlinkApiClient
         }, cancellationToken);
         response.EnsureSuccessStatusCode();
         
-        return await response.Content.ReadFromJsonAsync<VideoMetadataUpdateResponse>(cancellationToken) 
+        return await response.Content.ReadFromJsonAsync<UpdateMetadataResponse>(cancellationToken) 
             ?? throw new InvalidOperationException("Failed to deserialize update metadata response");
     }
 }
-
-public sealed record VideoUploadResponse(
-    string Message,
-    string BlobName,
-    string FileName,
-    long FileSize
-);
-
-public sealed record VideoSummaryDto
-{
-    public required string Title { get; init; }
-    public required string? Description { get; init; }
-    public required DateTime? VideoDate { get; init; }
-    public required string? ThumbnailBlobName { get; init; }
-    public required string VideoBlobName { get; init; }
-}
-
-public sealed record VideoUrlResponse(
-    string Url,
-    string? ThumbnailUrl = null
-);
-
-public sealed record VideoDeleteResponse(
-    bool Success,
-    string Message,
-    string BlobName
-);
-
-public sealed record VideoTitleUpdateResponse(
-    bool Success,
-    string Message,
-    string BlobName,
-    string Title
-);
-
-public sealed record VideoMetadataUpdateResponse(
-    bool Success,
-    string Message,
-    string BlobName,
-    string Title,
-    string? Description,
-    DateTime? VideoDate
-);
-

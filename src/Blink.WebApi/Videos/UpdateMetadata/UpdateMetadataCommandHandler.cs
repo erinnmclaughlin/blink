@@ -1,3 +1,4 @@
+using Blink.VideosApi.Contracts.UpdateMetadata;
 using MediatR;
 
 namespace Blink.WebApi.Videos.UpdateMetadata;

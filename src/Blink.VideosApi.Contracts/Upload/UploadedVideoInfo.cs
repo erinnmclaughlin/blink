@@ -1,4 +1,4 @@
-﻿namespace Blink.WebApi.Videos.Upload;
+﻿namespace Blink.VideosApi.Contracts.Upload;
 
 public sealed record UploadedVideoInfo
 {

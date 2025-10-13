@@ -1,4 +1,4 @@
-namespace Blink.WebApi.Videos.Delete;
+﻿namespace Blink.VideosApi.Contracts.Delete;
 
 public sealed record DeleteVideoResponse
 {
@@ -6,4 +6,3 @@ public sealed record DeleteVideoResponse
     public required string Message { get; init; }
     public required string BlobName { get; init; }
 }
-

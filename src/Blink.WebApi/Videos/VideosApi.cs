@@ -1,12 +1,14 @@
-using Blink.WebApi.Videos.Delete;
-using Blink.WebApi.Videos.GetUrl;
-using Blink.WebApi.Videos.List;
 using Blink.WebApi.Videos.Upload;
-using Blink.WebApi.Videos.UpdateTitle;
 using Blink.WebApi.Videos.UpdateMetadata;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Blink.Storage;
+using Blink.VideosApi.Contracts.UpdateTitle;
+using Blink.VideosApi.Contracts.UpdateMetadata;
+using Blink.VideosApi.Contracts.Upload;
+using Blink.VideosApi.Contracts.GetUrl;
+using Blink.VideosApi.Contracts.List;
+using Blink.VideosApi.Contracts.Delete;
 
 namespace Blink.WebApi.Videos;
 

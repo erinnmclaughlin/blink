@@ -1,6 +1,4 @@
-using MediatR;
-
-namespace Blink.WebApi.Videos.UpdateMetadata;
+namespace Blink.VideosApi.Contracts.UpdateMetadata;
 
 public sealed record UpdateMetadataCommand : IRequest<UpdateMetadataResponse>
 {

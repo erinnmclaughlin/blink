@@ -1,3 +1,4 @@
+using Blink.VideosApi.Contracts.UpdateTitle;
 using MediatR;
 
 namespace Blink.WebApi.Videos.UpdateTitle;

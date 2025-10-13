@@ -1,6 +1,4 @@
-using MediatR;
-
-namespace Blink.WebApi.Videos.Delete;
+namespace Blink.VideosApi.Contracts.Delete;
 
 public sealed record DeleteVideoCommand : IRequest<DeleteVideoResponse>
 {

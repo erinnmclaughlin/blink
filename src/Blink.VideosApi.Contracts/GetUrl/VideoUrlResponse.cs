@@ -1,4 +1,4 @@
-namespace Blink.WebApi.Videos.GetUrl;
+namespace Blink.VideosApi.Contracts.GetUrl;
 
 public sealed record VideoUrlResponse
 {

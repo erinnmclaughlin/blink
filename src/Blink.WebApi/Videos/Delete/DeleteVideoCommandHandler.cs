@@ -1,4 +1,5 @@
 using Blink.Storage;
+using Blink.VideosApi.Contracts.Delete;
 using MediatR;
 
 namespace Blink.WebApi.Videos.Delete;

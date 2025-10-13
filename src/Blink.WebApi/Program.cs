@@ -1,4 +1,5 @@
 using Blink;
+using Blink.VideosApi.Contracts;
 using Blink.WebApi;
 using Blink.WebApi.Videos;
 using Blink.WebApi.Videos.Upload;
@@ -37,10 +38,10 @@ builder.Services.AddTransient<ICurrentUser, CurrentUserAccessor>();
 builder.Services.AddMediatR(o =>
 {
     o.AddOpenBehavior(typeof(ValidationBehavior<,>));
-    o.RegisterServicesFromAssembly(typeof(Program).Assembly);
+    o.RegisterServicesFromAssemblies(typeof(Program).Assembly, VideosApiContracts.Assembly);
 });
 
-builder.Services.AddValidatorsFromAssembly(typeof(Program).Assembly);
+builder.Services.AddValidatorsFromAssemblies([typeof(Program).Assembly, VideosApiContracts.Assembly], includeInternalTypes: true);
 
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();

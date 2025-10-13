@@ -1,6 +1,4 @@
-using FluentValidation;
-
-namespace Blink.WebApi.Videos.UpdateMetadata;
+namespace Blink.VideosApi.Contracts.UpdateMetadata;
 
 public sealed class UpdateMetadataCommandValidator : AbstractValidator<UpdateMetadataCommand>
 {

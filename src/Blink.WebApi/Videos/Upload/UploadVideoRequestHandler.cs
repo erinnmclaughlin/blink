@@ -1,5 +1,6 @@
 ﻿using Blink.Messaging;
 using Blink.Storage;
+using Blink.VideosApi.Contracts.Upload;
 using MassTransit;
 using MediatR;
 

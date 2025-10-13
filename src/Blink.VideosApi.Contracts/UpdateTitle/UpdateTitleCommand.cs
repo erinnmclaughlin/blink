@@ -1,6 +1,4 @@
-using MediatR;
-
-namespace Blink.WebApi.Videos.UpdateTitle;
+namespace Blink.VideosApi.Contracts.UpdateTitle;
 
 public sealed record UpdateTitleCommand : IRequest<UpdateTitleResponse>
 {
