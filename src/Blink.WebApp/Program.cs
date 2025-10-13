@@ -51,15 +51,13 @@ var apiBaseAddress = builder.Configuration[$"services:{ServiceNames.BlinkWebApi}
                      builder.Configuration[$"services:{ServiceNames.BlinkWebApi}:http:0"] ??
                      "localhost";
 
+builder.Services.AddTransient<BlinkApiAuthenticationHandler>();
 builder.Services.AddHttpClient<BlinkApiClient>((sp, client) =>
 {
     client.BaseAddress = new Uri(apiBaseAddress);
     client.Timeout = TimeSpan.FromMinutes(15); // for now, video processing can take a while
 })
-.AddHttpMessageHandler(sp =>
-{
-    return new BlinkApiAuthenticationHandler(sp);
-});
+.AddHttpMessageHandler<BlinkApiAuthenticationHandler>();
 
 builder.Services.Configure<FormOptions>(o =>
 {
@@ -88,6 +86,11 @@ app.UseAntiforgery();
 app.MapStaticAssets();
 
 app.UseAuthentication();
+
+// Add token refresh middleware after authentication but before authorization
+// This ensures tokens are refreshed before the response starts
+app.UseMiddleware<TokenRefreshMiddleware>();
+
 app.UseAuthorization();
 
 app.MapControllers();
