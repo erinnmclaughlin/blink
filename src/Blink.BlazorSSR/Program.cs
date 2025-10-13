@@ -1,3 +1,4 @@
+using Blink;
 using Blink.BlazorSSR;
 using Blink.BlazorSSR.Components;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -13,7 +14,8 @@ builder.Services
     .AddInteractiveServerComponents();
 
 // Configure Keycloak Authentication
-builder.Services.AddAuthentication(options =>
+builder.Services
+    .AddAuthentication(options =>
     {
         options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
         options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
@@ -42,7 +44,9 @@ builder.Services.AddAuthorization();
 builder.Services.AddHttpContextAccessor();
 
 // Configure HTTP client for Blink API with authentication
-var apiBaseAddress = builder.Configuration["BlinkApi:BaseAddress"] ?? "https://localhost:7254";
+var apiBaseAddress = builder.Configuration[$"services:{ServiceNames.BlinkWebApi}:https:0"] ?? 
+                     builder.Configuration[$"services:{ServiceNames.BlinkWebApp}:http:0"] ??
+                     "localhost";
 
 builder.Services.AddHttpClient<BlinkApiClient>((sp, client) =>
 {

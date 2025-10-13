@@ -4,3 +4,7 @@ obj/
 .vs/
 *.user
 .azure
+/infra
+/src/Blink.Aspire.AppHost/infra
+/azure.yaml
+/next-steps.md

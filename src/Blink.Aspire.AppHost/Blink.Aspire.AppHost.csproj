@@ -16,12 +16,12 @@
     <ProjectReference Include="..\Blink.ServiceNames\Blink.ServiceNames.csproj" IsAspireProjectResource="false" />
     <ProjectReference Include="..\Blink.VideoProcessor\Blink.VideoProcessor.csproj" />
     <ProjectReference Include="..\Blink.WebApi\Blink.WebApi.csproj" />
-    <ProjectReference Include="..\Blink.WebApp\Blink.WebApp.csproj" />
     <ProjectReference Include="..\Blink.BlazorSSR\Blink.BlazorSSR.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Aspire.Hosting.AppHost" Version="9.5.1" />
+    <PackageReference Include="Aspire.Hosting.Azure.PostgreSQL" Version="9.5.1" />
     <PackageReference Include="Aspire.Hosting.Azure.Storage" Version="9.5.1" />
     <PackageReference Include="Aspire.Hosting.Keycloak" Version="9.5.1-preview.1.25502.11" />
     <PackageReference Include="Aspire.Hosting.PostgreSQL" Version="9.5.1" />
