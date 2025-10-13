@@ -35,8 +35,8 @@ public sealed class UploadVideoRequestHandler : IRequestHandler<UploadVideoReque
         // Create database record
         var video = await SaveToDatabaseAsync(blobName, fileSize, request, cancellationToken);
 
-        // Publish VideoUploaded event to Service Bus
-        await PublishVideoUploadedEventAsync(video, cancellationToken);
+        // Publish VideoUploaded event (don't pass cancellationToken to avoid cancellation after client disconnect)
+        await PublishVideoUploadedEventAsync(video);
 
         return new UploadedVideoInfo
         {
@@ -83,7 +83,7 @@ public sealed class UploadVideoRequestHandler : IRequestHandler<UploadVideoReque
         return video;
     }
 
-    private async Task PublishVideoUploadedEventAsync(Video video, CancellationToken cancellationToken)
+    private async Task PublishVideoUploadedEventAsync(Video video)
     {
         var videoUploadedEvent = new VideoUploadedEvent
         {
@@ -98,7 +98,9 @@ public sealed class UploadVideoRequestHandler : IRequestHandler<UploadVideoReque
             UploadedAt = video.UploadedAt
         };
 
-        await _videoEventPublisher.Publish(videoUploadedEvent, cancellationToken);
+        // Use CancellationToken.None to ensure message is published even if HTTP request is cancelled
+        // This prevents "task was canceled" errors when the client disconnects after receiving the response
+        await _videoEventPublisher.Publish(videoUploadedEvent, CancellationToken.None);
     }
 
     private static string GetContentType(string fileName)

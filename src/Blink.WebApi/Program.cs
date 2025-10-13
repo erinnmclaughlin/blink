@@ -45,6 +45,9 @@ builder.Services.AddValidatorsFromAssembly(typeof(Program).Assembly);
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
 
+// Add request timeout policies for long-running operations like video uploads
+builder.Services.AddRequestTimeouts();
+
 // Configure Kestrel to allow larger request bodies (2000MB for video uploads)
 builder.Services.Configure<KestrelServerOptions>(options =>
 {
@@ -65,6 +68,9 @@ var app = builder.Build();
 app.UseExceptionHandler();
 
 app.UseHttpsRedirection();
+
+// Enable request timeout middleware
+app.UseRequestTimeouts();
 
 app.UseCors(CorsConfiguration.KnownClientPolicy);
 

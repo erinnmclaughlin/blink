@@ -13,6 +13,29 @@ builder.Services
     .AddRazorComponents()
     .AddInteractiveServerComponents();
 
+// Configure Blazor Server Circuit options for long-running operations (like video uploads)
+builder.Services.Configure<Microsoft.AspNetCore.Components.Server.CircuitOptions>(options =>
+{
+    // Increase timeout for JavaScript interop calls to 30 minutes for video uploads
+    options.JSInteropDefaultCallTimeout = TimeSpan.FromMinutes(30);
+    
+    // Keep disconnected circuits alive longer
+    options.DisconnectedCircuitRetentionPeriod = TimeSpan.FromMinutes(30);
+    options.DisconnectedCircuitMaxRetained = 100;
+});
+
+// Configure SignalR Hub options for Blazor Server
+builder.Services.Configure<Microsoft.AspNetCore.SignalR.HubOptions>(options =>
+{
+    // Increase max message size for large responses
+    options.MaximumReceiveMessageSize = 100 * 1024 * 1024; // 100MB
+    
+    // Increase timeout for client-to-server calls (like JS interop during video upload)
+    options.ClientTimeoutInterval = TimeSpan.FromMinutes(30);
+    options.HandshakeTimeout = TimeSpan.FromMinutes(1);
+    options.KeepAliveInterval = TimeSpan.FromSeconds(15);
+});
+
 // Configure Keycloak Authentication
 builder.Services
     .AddAuthentication(options =>

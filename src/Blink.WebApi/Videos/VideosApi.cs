@@ -24,7 +24,8 @@ public static class VideosApi
             .DisableAntiforgery()
             .Produces<UploadedVideoInfo>(StatusCodes.Status200OK)
             .Produces<ProblemDetails>(StatusCodes.Status400BadRequest)
-            .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError);
+            .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError)
+            .WithRequestTimeout(TimeSpan.FromMinutes(30)); // 30 minute timeout for large uploads
 
         // GET /api/videos
         endpoints.MapGet("/api/videos", HandleListVideosAsync)
