@@ -1,7 +1,9 @@
 using Blink.Storage;
+using Blink.VideosApi.Contracts.CompleteUpload;
 using Blink.VideosApi.Contracts.Delete;
 using Blink.VideosApi.Contracts.GetByBlobName;
 using Blink.VideosApi.Contracts.GetUrl;
+using Blink.VideosApi.Contracts.InitiateUpload;
 using Blink.VideosApi.Contracts.List;
 using Blink.VideosApi.Contracts.UpdateMetadata;
 using Blink.VideosApi.Contracts.UpdateTitle;
@@ -20,7 +22,23 @@ public static class VideosApi
 {
     public static IEndpointRouteBuilder MapVideosApi(this IEndpointRouteBuilder endpoints)
     {
-        // POST /api/videos/upload
+        // POST /api/videos/initiate-upload - Request SAS URL for direct upload
+        endpoints.MapPost("/api/videos/initiate-upload", HandleInitiateUploadAsync)
+            .WithName("InitiateUpload")
+            .RequireAuthorization()
+            .Produces<InitiateUploadResponse>(StatusCodes.Status200OK)
+            .Produces<ProblemDetails>(StatusCodes.Status400BadRequest)
+            .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError);
+
+        // POST /api/videos/complete-upload - Notify completion of direct upload
+        endpoints.MapPost("/api/videos/complete-upload", HandleCompleteUploadAsync)
+            .WithName("CompleteUpload")
+            .RequireAuthorization()
+            .Produces<CompleteUploadResponse>(StatusCodes.Status200OK)
+            .Produces<ProblemDetails>(StatusCodes.Status400BadRequest)
+            .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError);
+
+        // POST /api/videos/upload - Legacy upload endpoint (kept for backward compatibility)
         endpoints.MapPost("/api/videos/upload", HandleUploadAsync)
             .WithName("UploadVideo")
             .RequireAuthorization()
@@ -80,6 +98,34 @@ public static class VideosApi
             .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError);
 
         return endpoints;
+    }
+
+    private static async Task<IResult> HandleInitiateUploadAsync(
+        [FromBody] InitiateUploadRequest request,
+        ISender sender,
+        ILogger<Program> logger,
+        CancellationToken cancellationToken)
+    {
+        logger.LogInformation("Initiating upload for file: {FileName}", request.FileName);
+
+        var result = await sender.Send(request, cancellationToken);
+
+        logger.LogInformation("Generated upload URL for blob: {BlobName}", result.BlobName);
+        return Results.Ok(result);
+    }
+
+    private static async Task<IResult> HandleCompleteUploadAsync(
+        [FromBody] CompleteUploadRequest request,
+        ISender sender,
+        ILogger<Program> logger,
+        CancellationToken cancellationToken)
+    {
+        logger.LogInformation("Completing upload for blob: {BlobName}", request.BlobName);
+
+        var result = await sender.Send(request, cancellationToken);
+
+        logger.LogInformation("Upload completed for blob: {BlobName}", request.BlobName);
+        return Results.Ok(result);
     }
 
     private static async Task<IResult> HandleUploadAsync(

@@ -15,6 +15,8 @@ public interface IVideoStorageClient
     Task<bool> UpdateTitleAsync(string blobName, string title, CancellationToken cancellationToken = default);
     Task<string> UploadThumbnailAsync(Stream thumbnailStream, string videoBlobName, CancellationToken cancellationToken = default);
     Task<string?> GetThumbnailUrlAsync(string thumbnailBlobName, CancellationToken cancellationToken = default);
+    Task<(string BlobName, string UploadUrl)> GenerateUploadUrlAsync(string fileName, CancellationToken cancellationToken = default);
+    Task<long> GetBlobSizeAsync(string blobName, CancellationToken cancellationToken = default);
 }
 
 public class VideoStorageClient : IVideoStorageClient
@@ -210,10 +212,10 @@ public class VideoStorageClient : IVideoStorageClient
                 HttpHeaders = new BlobHttpHeaders { ContentType = GetContentType(fileName) },
                 TransferOptions = new Azure.Storage.StorageTransferOptions
                 {
-                    // Upload in 4MB chunks to improve reliability and prevent timeouts
-                    InitialTransferSize = 4 * 1024 * 1024, // 4MB
-                    MaximumTransferSize = 4 * 1024 * 1024,  // 4MB
-                    MaximumConcurrency = 4 // Upload up to 4 chunks in parallel
+                    // Upload in 100MB chunks for optimal performance
+                    InitialTransferSize = 100 * 1024 * 1024, // 100MB
+                    MaximumTransferSize = 100 * 1024 * 1024,  // 100MB
+                    MaximumConcurrency = 8 // Upload up to 8 chunks in parallel
                 }
             };
 
@@ -409,6 +411,93 @@ public class VideoStorageClient : IVideoStorageClient
         {
             _logger.LogError(ex, "Error generating thumbnail URL: {ThumbnailBlobName}", thumbnailBlobName);
             return null;
+        }
+    }
+
+    /// <summary>
+    /// Generates a SAS URL for direct client upload to blob storage
+    /// </summary>
+    public async Task<(string BlobName, string UploadUrl)> GenerateUploadUrlAsync(string fileName, CancellationToken cancellationToken = default)
+    {
+        var blobName = $"{Guid.NewGuid()}_{fileName}";
+
+        try
+        {
+            var blobClient = await GetBlobClientAsync(blobName, cancellationToken);
+
+            // Generate SAS token valid for 1 hour with write permissions
+            if (blobClient.CanGenerateSasUri)
+            {
+                // Account key-based SAS (local development with Azurite)
+                var sasBuilder = new BlobSasBuilder
+                {
+                    BlobContainerName = "videos",
+                    BlobName = blobName,
+                    Resource = "b",
+                    StartsOn = DateTimeOffset.UtcNow.AddMinutes(-5),
+                    ExpiresOn = DateTimeOffset.UtcNow.AddHours(1)
+                };
+
+                // Grant write permissions for upload
+                sasBuilder.SetPermissions(BlobSasPermissions.Create | BlobSasPermissions.Write);
+
+                var sasUri = blobClient.GenerateSasUri(sasBuilder);
+                _logger.LogInformation("Generated account key upload SAS URL for blob: {BlobName}", blobName);
+                return (blobName, sasUri.ToString());
+            }
+            else
+            {
+                // User delegation SAS (Azure production with managed identity)
+                _logger.LogInformation("Generating user delegation upload SAS token for blob: {BlobName}", blobName);
+                
+                var startsOn = DateTimeOffset.UtcNow.AddMinutes(-5);
+                var expiresOn = DateTimeOffset.UtcNow.AddHours(1);
+                
+                var userDelegationKey = await _blobServiceClient.GetUserDelegationKeyAsync(startsOn, expiresOn, cancellationToken);
+                
+                var sasBuilder = new BlobSasBuilder
+                {
+                    BlobContainerName = "videos",
+                    BlobName = blobName,
+                    Resource = "b",
+                    StartsOn = startsOn,
+                    ExpiresOn = expiresOn
+                };
+                
+                // Grant write permissions for upload
+                sasBuilder.SetPermissions(BlobSasPermissions.Create | BlobSasPermissions.Write);
+                
+                var blobUriBuilder = new BlobUriBuilder(blobClient.Uri)
+                {
+                    Sas = sasBuilder.ToSasQueryParameters(userDelegationKey.Value, _blobServiceClient.AccountName)
+                };
+                
+                _logger.LogInformation("Generated user delegation upload SAS URL for blob: {BlobName}", blobName);
+                return (blobName, blobUriBuilder.ToUri().ToString());
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error generating upload URL for file: {FileName}", fileName);
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// Gets the size of a blob in bytes
+    /// </summary>
+    public async Task<long> GetBlobSizeAsync(string blobName, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var blobClient = GetBlobClient(blobName);
+            var properties = await blobClient.GetPropertiesAsync(cancellationToken: cancellationToken);
+            return properties.Value.ContentLength;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting blob size: {BlobName}", blobName);
+            throw;
         }
     }
 

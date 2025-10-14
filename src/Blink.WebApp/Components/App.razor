@@ -11,11 +11,42 @@
     <ImportMap />
     <link rel="icon" type="image/png" href="favicon.png" />
     <HeadOutlet />
+    
+    @* Load Azure Storage Blob SDK from CDN - needs to be available before interactive components load *@
+    <script>
+        // Load Azure Storage Blob SDK with fallback
+        (function() {
+            var script = document.createElement('script');
+            script.src = 'https://cdn.jsdelivr.net/npm/@("@")azure/storage-blob@("@")12.17.0/dist/azure-storage-blob.min.js';
+            script.crossOrigin = 'anonymous';
+            script.onload = function() {
+                console.log('Azure Storage Blob SDK loaded successfully');
+                console.log('window.Azure:', window.Azure);
+            };
+            script.onerror = function() {
+                console.error('Failed to load Azure SDK from jsDelivr, trying unpkg...');
+                var fallbackScript = document.createElement('script');
+                fallbackScript.src = 'https://unpkg.com/@("@")azure/storage-blob@("@")12.17.0/dist/azure-storage-blob.min.js';
+                fallbackScript.crossOrigin = 'anonymous';
+                fallbackScript.onload = function() {
+                    console.log('Azure Storage Blob SDK loaded from unpkg fallback');
+                    console.log('window.Azure:', window.Azure);
+                };
+                fallbackScript.onerror = function() {
+                    console.error('Failed to load Azure SDK from both CDNs');
+                };
+                document.head.appendChild(fallbackScript);
+            };
+            document.head.appendChild(script);
+        })();
+    </script>
 </head>
 
 <body>
     <Routes />
     <script src="_framework/blazor.web.js"></script>
+    <script src="@Assets["js/directUpload.js"]"></script>
+    <script src="@Assets["js/fileHelper.js"]"></script>
     <script src="@Assets["fileUpload.js"]"></script>
 </body>
 

@@ -1,5 +1,7 @@
 @page "/videos/upload"
 @attribute [Authorize]
+@rendermode InteractiveServer
+@implements IAsyncDisposable
 
 <PageTitle>Video Upload</PageTitle>
 
@@ -13,33 +15,87 @@
                     <h5>Upload Your Video</h5>
                 </div>
                 <div class="card-body">
-                    <form method="post"
-                          enctype="multipart/form-data"
-                          action="/api/videos/upload"
-                          class="needs-validation"
-                          novalidate>
-                        <div class="mb-3">
-                            <label for="videoTitle" class="form-label">Video Title</label>
-                            <input type="text" class="form-control" name="videoTitle" />
+                    @if (!string.IsNullOrEmpty(_errorMessage))
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <strong>Error!</strong> @_errorMessage
+                            <button type="button" class="btn-close" @onclick="() => _errorMessage = null"></button>
                         </div>
+                    }
 
+                    <div class="mb-3">
+                        <label for="videoTitle" class="form-label">Video Title (Optional)</label>
+                        <input type="text" class="form-control" @bind="_videoTitle" disabled="@_isUploading" placeholder="Enter video title or leave blank to use filename" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="videoDescription" class="form-label">Description (Optional)</label>
+                        <textarea class="form-control" @bind="_videoDescription" rows="3" maxlength="2000" disabled="@_isUploading" placeholder="Add a description for your video"></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="videoDate" class="form-label">Video Date (Optional)</label>
+                        <input type="date" class="form-control" @bind="_videoDate" disabled="@_isUploading" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="videoFileInput" class="form-label">Select Video File</label>
+                        <InputFile class="form-control" 
+                                   id="videoFileInput" 
+                                   accept="video/mp4,video/webm,video/avi,video/x-ms-wmv" 
+                                   disabled="@_isUploading"
+                                   OnChange="OnFileSelected" />
+                        @if (!string.IsNullOrEmpty(_selectedFileName))
+                        {
+                            <div class="mt-2">
+                                <small class="text-muted">
+                                    Selected: <strong>@_selectedFileName</strong> (@FormatFileSize(_selectedFileSize))
+                                </small>
+                            </div>
+                        }
+                    </div>
+
+                    @if (_isUploading)
+                    {
                         <div class="mb-3">
-                            <label for="videoDescription" class="form-label">Description (Optional)</label>
-                            <textarea class="form-control" name="videoDescription" rows="3" maxlength="2000"></textarea>
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="fw-bold">@_uploadStatus</span>
+                                <span class="text-muted">@_uploadProgress%</span>
+                            </div>
+                            <div class="progress" style="height: 25px;">
+                                <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                                     role="progressbar" 
+                                     style="width: @(_uploadProgress)%"
+                                     aria-valuenow="@_uploadProgress" 
+                                     aria-valuemin="0" 
+                                     aria-valuemax="100">
+                                    @_uploadProgress%
+                                </div>
+                            </div>
+                            @if (!string.IsNullOrEmpty(_uploadSpeed))
+                            {
+                                <div class="mt-2 small text-muted">
+                                    <div class="d-flex justify-content-between">
+                                        <span>Speed: @_uploadSpeed</span>
+                                        @if (!string.IsNullOrEmpty(_estimatedTimeRemaining))
+                                        {
+                                            <span>Time remaining: ~@_estimatedTimeRemaining</span>
+                                        }
+                                    </div>
+                                </div>
+                            }
                         </div>
-
-                        <div class="mb-3">
-                            <label for="videoDate" class="form-label">Video Date (Optional)</label>
-                            <input type="date" class="form-control" name="videoDate" />
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="videoFile" class="form-label">Select Video File</label>
-                            <input type="file" class="form-control" name="videoFile" accept=".mp4" />
-                        </div>
-
-                        <button type="submit" class="btn btn-primary btn-lg">Upload Video</button>
-                    </form>
+                        <button type="button" class="btn btn-danger" @onclick="CancelUpload">Cancel Upload</button>
+                    }
+                    else
+                    {
+                        <button type="button" 
+                                class="btn btn-primary btn-lg" 
+                                @onclick="UploadVideo"
+                                disabled="@(string.IsNullOrEmpty(_selectedFileName))">
+                            <i class="bi bi-cloud-upload"></i> Upload Video
+                        </button>
+                    }
                 </div>
             </div>
         </div>
@@ -54,15 +110,16 @@
                         <li class="mb-2">Click "Choose File" to select a video from your device</li>
                         <li class="mb-2">Review the file details to ensure it's the correct video</li>
                         <li class="mb-2">Click "Upload Video" to start the upload process</li>
-                        <li class="mb-2">Wait for the upload to complete</li>
+                        <li class="mb-2">Wait for the upload to complete - you'll see real-time progress!</li>
                     </ol>
 
                     <hr />
 
                     <h6>Tips:</h6>
                     <ul class="small">
+                        <li>✨ <strong>New!</strong> Videos now upload directly to cloud storage for much faster speeds</li>
                         <li>Ensure your video file is under 2GB</li>
-                        <li>Supported formats include MP4</li>
+                        <li>Supported formats: MP4, WebM, AVI, WMV</li>
                         <li>Do not close or refresh the page during upload</li>
                         <li>Upload times vary based on file size and connection speed</li>
                     </ul>
@@ -71,3 +128,19 @@
         </div>
     </div>
 </div>
+
+@code {
+    private string FormatFileSize(long bytes)
+    {
+        if (bytes == 0) return "0 Bytes";
+        string[] sizes = { "Bytes", "KB", "MB", "GB" };
+        int i = 0;
+        double size = bytes;
+        while (size >= 1024 && i < sizes.Length - 1)
+        {
+            size /= 1024;
+            i++;
+        }
+        return $"{size:F2} {sizes[i]}";
+    }
+}

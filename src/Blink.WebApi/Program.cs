@@ -30,6 +30,9 @@ builder.AddAndConfigureServiceBus();
 
 builder.AddBlinkStorage();
 
+// Configure CORS on blob storage at startup (for local Azurite)
+builder.Services.AddHostedService<BlobStorageCorsConfigurator>();
+
 builder.Services.AddScoped<IVideoRepository, VideoRepository>();
 builder.Services.AddScoped<IMultipartFormFileParser, MultipartFormFileParser>();
 builder.Services.AddHttpContextAccessor();

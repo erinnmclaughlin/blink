@@ -11,7 +11,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
 
-builder.Services.AddRazorComponents(); 
+builder.Services.AddRazorComponents()
+    .AddInteractiveServerComponents(); 
 builder.Services.AddControllers();
 
 // Configure Keycloak Authentication
@@ -95,7 +96,8 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-app.MapRazorComponents<App>();
+app.MapRazorComponents<App>()
+    .AddInteractiveServerRenderMode();
 
 app.MapGet("/login", () => Results
     .Challenge(new AuthenticationProperties { RedirectUri = "/" }, [OpenIdConnectDefaults.AuthenticationScheme]))

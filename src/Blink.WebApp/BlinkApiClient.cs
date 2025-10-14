@@ -1,6 +1,8 @@
+using Blink.VideosApi.Contracts.CompleteUpload;
 using Blink.VideosApi.Contracts.Delete;
 using Blink.VideosApi.Contracts.GetByBlobName;
 using Blink.VideosApi.Contracts.GetUrl;
+using Blink.VideosApi.Contracts.InitiateUpload;
 using Blink.VideosApi.Contracts.List;
 using Blink.VideosApi.Contracts.UpdateMetadata;
 using Blink.VideosApi.Contracts.UpdateTitle;
@@ -36,6 +38,51 @@ public sealed class BlinkApiClient
         return await _httpClient.GetFromJsonAsync<Dictionary<string, string[]>>("claims", cancellationToken) ?? [];
     }
 
+    /// <summary>
+    /// Initiates a direct upload by requesting a SAS URL from the server
+    /// </summary>
+    public async Task<InitiateUploadResponse> InitiateUploadAsync(
+        string fileName,
+        CancellationToken cancellationToken = default)
+    {
+        var request = new InitiateUploadRequest { FileName = fileName };
+        var response = await _httpClient.PostAsJsonAsync("api/videos/initiate-upload", request, cancellationToken);
+        response.EnsureSuccessStatusCode();
+        
+        return await response.Content.ReadFromJsonAsync<InitiateUploadResponse>(cancellationToken)
+            ?? throw new InvalidOperationException("Failed to deserialize initiate upload response");
+    }
+
+    /// <summary>
+    /// Notifies the server that a direct upload has been completed
+    /// </summary>
+    public async Task<CompleteUploadResponse> CompleteUploadAsync(
+        string blobName,
+        string fileName,
+        string? title = null,
+        string? description = null,
+        DateOnly? videoDate = null,
+        CancellationToken cancellationToken = default)
+    {
+        var request = new CompleteUploadRequest
+        {
+            BlobName = blobName,
+            FileName = fileName,
+            Title = title,
+            Description = description,
+            VideoDate = videoDate?.ToDateTime(TimeOnly.MinValue)
+        };
+
+        var response = await _httpClient.PostAsJsonAsync("api/videos/complete-upload", request, cancellationToken);
+        response.EnsureSuccessStatusCode();
+        
+        return await response.Content.ReadFromJsonAsync<CompleteUploadResponse>(cancellationToken)
+            ?? throw new InvalidOperationException("Failed to deserialize complete upload response");
+    }
+
+    /// <summary>
+    /// Legacy upload method - uploads video through the server (slower)
+    /// </summary>
     public async Task<UploadedVideoInfo> UploadVideoAsync(
         Stream videoStream, 
         string fileName, 

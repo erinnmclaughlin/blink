@@ -11,7 +11,11 @@ public static class AzureStorageDefaults
 
         if (builder.ExecutionContext.IsRunMode)
         {
-            storage.RunAsEmulator(azurite => azurite.WithDataVolume());
+            storage.RunAsEmulator(azurite => 
+            {
+                azurite.WithDataVolume();
+                azurite.WithArgs("--skipApiVersionCheck");
+            });
         }
 
         return new AzureStorageResources
