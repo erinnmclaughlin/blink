@@ -6,12 +6,11 @@ namespace Blink.WebApp.Components.Pages.Videos.Upload;
 
 public sealed partial class VideoUploadPage : ComponentBase, IAsyncDisposable
 {
-    [Inject] private BlinkApiClient ApiClient { get; set; } = default!;
-    [Inject] private IJSRuntime JSRuntime { get; set; } = default!;
-    [Inject] private NavigationManager Navigation { get; set; } = default!;
-
+    private readonly BlinkApiClient _apiClient;
+    private readonly IJSRuntime _jsRuntime;
+    private readonly NavigationManager _navigationManager;
+    
     private IJSObjectReference? _uploadModule;
-    private IJSObjectReference? _uploadManager;
     private DotNetObjectReference<VideoUploadPage>? _dotNetReference;
 
     private string? _videoTitle;
@@ -28,6 +27,13 @@ public sealed partial class VideoUploadPage : ComponentBase, IAsyncDisposable
     private string? _estimatedTimeRemaining;
     private DateTime? _uploadStartTime;
 
+    public VideoUploadPage(BlinkApiClient apiClient, IJSRuntime jsRuntime, NavigationManager navigationManager)
+    {
+        _apiClient = apiClient;
+        _jsRuntime = jsRuntime;
+        _navigationManager = navigationManager;
+    }
+    
     protected override Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
@@ -44,19 +50,14 @@ public sealed partial class VideoUploadPage : ComponentBase, IAsyncDisposable
         _selectedFileName = null;
         _selectedFileSize = 0;
 
-        var file = e.File;
-        
-        if (file != null)
-        {
-            _selectedFileName = file.Name;
-            _selectedFileSize = file.Size;
+        _selectedFileName = e.File.Name;
+        _selectedFileSize = e.File.Size;
 
-            if (_selectedFileSize > 2_000_000_000) // 2GB limit
-            {
-                _errorMessage = "File size exceeds 2GB limit.";
-                _selectedFileName = null;
-                _selectedFileSize = 0;
-            }
+        if (_selectedFileSize > 2_000_000_000) // 2GB limit
+        {
+            _errorMessage = "File size exceeds 2GB limit.";
+            _selectedFileName = null;
+            _selectedFileSize = 0;
         }
     }
 
@@ -78,16 +79,15 @@ public sealed partial class VideoUploadPage : ComponentBase, IAsyncDisposable
         try
         {
             // Step 1: Request upload URL from server
-            var initiateResponse = await ApiClient.InitiateUploadAsync(_selectedFileName);
+            var initiateResponse = await _apiClient.InitiateUploadAsync(_selectedFileName);
             
             _uploadStatus = "Uploading to cloud storage...";
             StateHasChanged();
 
             // Step 2: Upload directly to blob storage using JavaScript
-            _uploadModule = await JSRuntime.InvokeAsync<IJSObjectReference>("import", "./js/directUpload.js");
-            _uploadManager = await JSRuntime.InvokeAsync<IJSObjectReference>("eval", "new DirectUploadManager()");
+            _uploadModule = await _jsRuntime.InvokeAsync<IJSObjectReference>("import", "./js/directUpload.js");
 
-            await JSRuntime.InvokeVoidAsync(
+            await _jsRuntime.InvokeVoidAsync(
                 "uploadFileDirectly",
                 "videoFileInput",
                 initiateResponse.UploadUrl,
@@ -101,7 +101,7 @@ public sealed partial class VideoUploadPage : ComponentBase, IAsyncDisposable
 
             // Step 3: Notify server that upload is complete
             DateOnly? videoDate = _videoDate.HasValue ? DateOnly.FromDateTime(_videoDate.Value) : null;
-            var completeResponse = await ApiClient.CompleteUploadAsync(
+            await _apiClient.CompleteUploadAsync(
                 initiateResponse.BlobName,
                 _selectedFileName,
                 _videoTitle,
@@ -114,7 +114,7 @@ public sealed partial class VideoUploadPage : ComponentBase, IAsyncDisposable
 
             // Redirect to video detail page
             await Task.Delay(500); // Brief delay to show success message
-            Navigation.NavigateTo($"/videos/watch/{initiateResponse.BlobName}");
+            _navigationManager.NavigateTo($"/videos/watch/{initiateResponse.BlobName}");
         }
         catch (Exception ex)
         {
@@ -183,10 +183,6 @@ public sealed partial class VideoUploadPage : ComponentBase, IAsyncDisposable
         if (_uploadModule != null)
             await _uploadModule.DisposeAsync();
         
-        if (_uploadManager != null)
-            await _uploadManager.DisposeAsync();
-
         _dotNetReference?.Dispose();
     }
 }
-

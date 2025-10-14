@@ -1,7 +1,6 @@
 @page "/videos/upload"
 @attribute [Authorize]
 @rendermode InteractiveServer
-@implements IAsyncDisposable
 
 <PageTitle>Video Upload</PageTitle>
 
@@ -25,17 +24,17 @@
 
                     <div class="mb-3">
                         <label for="videoTitle" class="form-label">Video Title (Optional)</label>
-                        <input type="text" class="form-control" @bind="_videoTitle" disabled="@_isUploading" placeholder="Enter video title or leave blank to use filename" />
+                        <input id="videoTitle" type="text" class="form-control" @bind="_videoTitle" disabled="@_isUploading" placeholder="Enter video title or leave blank to use filename" />
                     </div>
 
                     <div class="mb-3">
                         <label for="videoDescription" class="form-label">Description (Optional)</label>
-                        <textarea class="form-control" @bind="_videoDescription" rows="3" maxlength="2000" disabled="@_isUploading" placeholder="Add a description for your video"></textarea>
+                        <textarea id="videoDescription" class="form-control" @bind="_videoDescription" rows="3" maxlength="2000" disabled="@_isUploading" placeholder="Add a description for your video"></textarea>
                     </div>
 
                     <div class="mb-3">
                         <label for="videoDate" class="form-label">Video Date (Optional)</label>
-                        <input type="date" class="form-control" @bind="_videoDate" disabled="@_isUploading" />
+                        <input id="videoDate" type="date" class="form-control" @bind="_videoDate" disabled="@_isUploading" />
                     </div>
 
                     <div class="mb-3">
@@ -130,17 +129,21 @@
 </div>
 
 @code {
-    private string FormatFileSize(long bytes)
+    private static string FormatFileSize(long bytes)
     {
-        if (bytes == 0) return "0 Bytes";
+        if (bytes == 0) 
+            return "0 Bytes";
+        
         string[] sizes = { "Bytes", "KB", "MB", "GB" };
-        int i = 0;
+        
+        var i = 0;
         double size = bytes;
         while (size >= 1024 && i < sizes.Length - 1)
         {
             size /= 1024;
             i++;
         }
+        
         return $"{size:F2} {sizes[i]}";
     }
 }
