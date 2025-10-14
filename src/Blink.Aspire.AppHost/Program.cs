@@ -25,6 +25,11 @@ var blinkWebApp = builder.AddProject<Projects.Blink_WebApp>(ServiceNames.BlinkWe
     .WithAwaitedReference(blinkWebApi)
     .WithAwaitedReference(keycloak);
 
+var blinkWebApp2 = builder
+    .AddProject<Projects.Blink_Web>($"{ServiceNames.BlinkWebApp}2")
+    .WithExternalHttpEndpoints()
+    .WithAwaitedReference(keycloak);
+
 blinkWebApi
     .WithReference(blinkWebApp);
 
