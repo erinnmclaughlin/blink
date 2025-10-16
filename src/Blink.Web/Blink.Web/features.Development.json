@@ -1,0 +1,11 @@
+{
+  "feature_management": {
+    "feature_flags": [
+      { "id": "Collections", "enabled": true },
+      { "id": "ContinueWatching", "enabled": true },
+      { "id": "GlobalSearch", "enabled":  true },
+      { "id": "RecentUploads", "enabled": true },
+      { "id": "SharedWithMe", "enabled": true }
+    ]
+  }
+}

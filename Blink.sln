@@ -14,6 +14,9 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{A9ABE576-2202-4746-A24F-92E2AD09DCBC}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{A7C59F7E-8D6E-423C-896F-F39DB9CC25AA}"
+	ProjectSection(SolutionItems) = preProject
+		src\features.Development.json = src\features.Development.json
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Blink.Aspire.ServiceDefaults", "src\Blink.Aspire.ServiceDefaults\Blink.Aspire.ServiceDefaults.csproj", "{27A4A2BD-71B2-448B-BCDA-99CE4A11B4B9}"
 EndProject

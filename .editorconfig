@@ -10,3 +10,6 @@ indent_size = 2
 # IDE0290: Use primary constructor
 csharp_style_prefer_primary_constructors = false
 resharper_convert_to_primary_constructor_highlighting = none
+
+[*.{html,razor}]
+indent_size = 3

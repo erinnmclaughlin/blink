@@ -1,12 +1,17 @@
-using Blink;
 using Blink.Web;
+using Blink.Web.Client;
 using Blink.Web.Components;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.FeatureManagement;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Add features.json file from Blink.Web.Client project:
+builder.Configuration.AddJsonFile("features.json", optional: false, reloadOnChange: true);
+builder.Configuration.AddJsonFile($"features.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true);
 
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents()
@@ -21,6 +26,13 @@ builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<AuthorizationRedirectManager>();
 builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingAuthenticationStateProvider>();
+
+builder.Services.AddFeatureManagement();
+builder.Services.Configure<ConfigurationFeatureDefinitionProviderOptions>(o =>
+{
+    o.CustomConfigurationMergingEnabled = true;
+});
+builder.Services.AddScoped<IFeatureFlagManager, FeatureFlagManager>();
 
 var app = builder.Build();
 
@@ -50,6 +62,9 @@ app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode()
     .AddInteractiveWebAssemblyRenderMode()
     .AddAdditionalAssemblies(typeof(Blink.Web.Client._Imports).Assembly);
+
+app.MapGet("/api/features/{featureName}", async (string featureName, IFeatureFlagManager ffManager) => await ffManager.IsEnabledAsync(featureName))
+    .AllowAnonymous();
 
 app.MapGet("/login", () => Results
     .Challenge(new AuthenticationProperties { RedirectUri = "/" }, [OpenIdConnectDefaults.AuthenticationScheme]))
