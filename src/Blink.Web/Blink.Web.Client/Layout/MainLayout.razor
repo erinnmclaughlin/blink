@@ -1,8 +1,31 @@
 ﻿@inherits LayoutComponentBase
 
-<NavMenu />
+<!-- Dialog for mobile layout -->
+<AppDialog Id="@SidebarId" CloseButtonScreenReaderText="Close sidebar">
+    <AppSidebar />
+</AppDialog>
 
-<AuthorizeView></AuthorizeView>
+<!-- Static sidebar for desktop layout -->
+<div class="hidden dark:bg-gray-900 lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-72 lg:flex-col">
+    <div class="flex grow flex-col gap-y-5 overflow-y-auto px-6 border-r border-gray-200 bg-white dark:border-white/10 dark:bg-black/10">
+        <AppSidebar />
+    </div>
+</div>
+
+<!-- Mobile top navigation bar -->
+<div class="sticky top-0 z-40 flex items-center gap-x-6 bg-white dark:bg-gray-900 px-4 py-3 sm:px-6 lg:hidden shadow-xs dark:shadow-none dark:after:pointer-events-none dark:after:absolute dark:after:inset-0 dark:after:border-b dark:after:border-white/10 dark:after:bg-black/10">
+    <button type="button" command="show-modal" commandfor="@SidebarId" class="-m-2.5 p-2.5 text-gray-700 hover:text-gray-900 dark:hover:text-white lg:hidden">
+        <span class="sr-only">Open sidebar</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" data-slot="icon" aria-hidden="true" class="size-6">
+            <path d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+    </button>
+    <div class="flex-1"></div>
+    <a class="flex" href="auth">
+        <span class="sr-only">Your profile</span>
+        @AppIcon.AnonymousAvatar()
+    </a>
+</div>
 
 <main class="py-10 lg:pl-72">
     <div class="px-4 sm:px-6 lg:px-8">
@@ -15,3 +38,7 @@
     <a href="." class="reload">Reload</a>
     <span class="dismiss">🗙</span>
 </div>
+
+@code {
+    private const string SidebarId = "app-sidebar";
+}

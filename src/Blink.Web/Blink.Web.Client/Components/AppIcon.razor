@@ -2,9 +2,12 @@
 
     private const string DefaultCssClass = "size-6";
 
-    public static RenderFragment AnonymousAvatar(string cssClass = "")  => Svg(cssClass,
-        @<path d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z"/>
-    );
+    public static RenderFragment AnonymousAvatar() =>
+        @<span class="inline-block size-8 overflow-hidden rounded-full bg-gray-100 outline -outline-offset-1 outline-black/5 dark:bg-gray-800 dark:outline-white/10">
+            <svg viewBox="0 0 24 24" fill="currentColor" class="size-full text-gray-300 dark:text-gray-600">
+                <path d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z"/>
+            </svg>
+        </span>;
     
     public static RenderFragment Calendar(string cssClass = "") => Svg(cssClass,
         @<path d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" stroke-linecap="round" stroke-linejoin="round"/>
