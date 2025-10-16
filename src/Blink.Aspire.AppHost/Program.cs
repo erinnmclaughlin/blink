@@ -13,25 +13,25 @@ var messaging = builder.AddRabbitMQ(ServiceNames.Messaging);
 
 var blinkDatabase = postgres.Server.AddDatabase(ServiceNames.BlinkDatabase);
 
-var blinkWebApi = builder.AddProject<Projects.Blink_WebApi>(ServiceNames.BlinkWebApi)
-    .WithExternalHttpEndpoints()
-    .WithAwaitedReference(blinkDatabase)
-    .WithAwaitedReference(keycloak)
-    .WithAwaitedReference(messaging)
-    .WithAwaitedReference(storage.Blobs);
+//var blinkWebApi = builder.AddProject<Projects.Blink_WebApi>(ServiceNames.BlinkWebApi)
+//    .WithExternalHttpEndpoints()
+//    .WithAwaitedReference(blinkDatabase)
+//    .WithAwaitedReference(keycloak)
+//    .WithAwaitedReference(messaging)
+//    .WithAwaitedReference(storage.Blobs);
 
-var blinkWebApp = builder.AddProject<Projects.Blink_WebApp>(ServiceNames.BlinkWebApp)
+//var blinkWebApp = builder.AddProject<Projects.Blink_WebApp>(ServiceNames.BlinkWebApp)
+//    .WithExternalHttpEndpoints()
+//    .WithAwaitedReference(blinkWebApi)
+//    .WithAwaitedReference(keycloak);
+
+var blinkWebApp = builder
+    .AddProject<Projects.Blink_Web>(ServiceNames.BlinkWebApp)
     .WithExternalHttpEndpoints()
-    .WithAwaitedReference(blinkWebApi)
     .WithAwaitedReference(keycloak);
 
-var blinkWebApp2 = builder
-    .AddProject<Projects.Blink_Web>($"{ServiceNames.BlinkWebApp}2")
-    .WithExternalHttpEndpoints()
-    .WithAwaitedReference(keycloak);
-
-blinkWebApi
-    .WithReference(blinkWebApp);
+//blinkWebApi
+//    .WithReference(blinkWebApp);
 
 if (OperatingSystem.IsWindows())
 {

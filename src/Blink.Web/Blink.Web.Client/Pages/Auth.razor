@@ -7,20 +7,18 @@
 
 <PageTitle>Auth</PageTitle>
 
-<div class="text-gray-700 dark:text-white">
-    <h1>You are authenticated</h1>
+<h1>You are authenticated</h1>
 
-    <AppAuthorizeView>
-        Hello @context.UserName!
-    </AppAuthorizeView>
+<AppAuthorizeView>
+    Hello @context.UserName!
+</AppAuthorizeView>
     
-    <AuthorizeView>
+<AuthorizeView>
     
-        <ul>
-            @foreach (var claim in context.User.Claims)
-            {
-                <li>@claim.Type = @claim.Value</li>
-            }
-        </ul>
-    </AuthorizeView>
-</div>
+    <ul>
+        @foreach (var claim in context.User.Claims)
+        {
+            <li>@claim.Type = @claim.Value</li>
+        }
+    </ul>
+</AuthorizeView>

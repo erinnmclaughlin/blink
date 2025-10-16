@@ -10,7 +10,7 @@
                         @foreach (var navLink in EnumerateNavLinks())
                         {
                             <li>
-                                <AppNavLink Href="@navLink.Href", Match="@navLink.Match">
+                                <AppNavLink Href="@navLink.Href" Match="@navLink.Match">
                                     @navLink.Content
                                     @navLink.Text
                                 </AppNavLink>
@@ -60,7 +60,7 @@
         public NavLinkMatch Match { get; init; } = NavLinkMatch.Prefix;
         public RenderFragment? Content { get; init; }
 
-        public NavLinkInfo(string text, string? href = "", NavLinkMatch match = NavLinkMatch.Prefix)
+        public NavLinkInfo(string text, string href = "", NavLinkMatch match = NavLinkMatch.Prefix)
         {
             Text = text;
             Href = href;
