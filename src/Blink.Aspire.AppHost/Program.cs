@@ -33,9 +33,12 @@ var blinkWebApp2 = builder
 blinkWebApi
     .WithReference(blinkWebApp);
 
-builder
-    .AddDockerfile("blink-video-processor", "../..", "src/Blink.VideoProcessor/Dockerfile")
-    .WithReference(messaging)
-    .WithReference(storage.Blobs);
+if (OperatingSystem.IsWindows())
+{
+    builder
+        .AddDockerfile("blink-video-processor", "../..", "src/Blink.VideoProcessor/Dockerfile")
+        .WithReference(messaging)
+        .WithReference(storage.Blobs);
+}
 
 builder.Build().Run();

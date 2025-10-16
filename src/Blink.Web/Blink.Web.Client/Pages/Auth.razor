@@ -10,8 +10,11 @@
 <div class="text-gray-700 dark:text-white">
     <h1>You are authenticated</h1>
 
+    <AppAuthorizeView>
+        Hello @context.UserName!
+    </AppAuthorizeView>
+    
     <AuthorizeView>
-        Hello @context.User.Identity?.Name!
     
         <ul>
             @foreach (var claim in context.User.Claims)

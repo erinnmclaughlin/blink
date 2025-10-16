@@ -11,7 +11,11 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents()
     .AddInteractiveWebAssemblyComponents()
-    .AddAuthenticationStateSerialization();
+    .AddAuthenticationStateSerialization(options =>
+    {
+        // Preserve the full claim set when switching to WASM
+        options.SerializeAllClaims = true;
+    });
 
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddScoped<AuthorizationRedirectManager>();
