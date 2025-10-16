@@ -16,15 +16,18 @@ internal sealed class ListVideosQueryHandler : IRequestHandler<ListVideosQuery, 
     {
         var videos = await _videoRepository.GetAllAsync(cancellationToken);
 
-        return videos
-            .Select(v => new VideoSummaryDto
-            {
-                Title = v.Title,
-                Description = v.Description,
-                VideoDate = v.VideoDate,
-                ThumbnailBlobName = v.ThumbnailBlobName,
-                VideoBlobName = v.BlobName
-            })
-            .ToList();
+        var dtos = videos.Select(v => new VideoSummaryDto
+        {
+            Title = v.Title,
+            Description = v.Description,
+            DurationInSeconds = v.DurationInSeconds,
+            VideoDate = v.VideoDate is null ? null : DateOnly.FromDateTime(v.VideoDate.Value),
+            SizeInBytes = v.SizeInBytes,
+            ThumbnailBlobName = v.ThumbnailBlobName,
+            VideoBlobName = v.BlobName,
+            UploadedAt = DateOnly.FromDateTime(v.UploadedAt)
+        });
+
+        return [..dtos];
     }
 }

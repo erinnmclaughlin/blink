@@ -25,18 +25,18 @@ public sealed class ListVideosQueryHandler : IRequestHandler<ListVideosQuery, Li
         var videos = await _videoRepository.GetByOwnerIdAsync(_currentUser.UserId, cancellationToken);
 
         // Convert Video entities to VideoInfo DTOs
-        var videoInfoList = videos
-            .Select(v => new VideoSummaryDto
-            {
-                Title = v.Title,
-                Description = v.Description,
-                VideoDate = v.VideoDate,
-                ThumbnailBlobName = v.ThumbnailBlobName,
-                VideoBlobName = v.BlobName
-            })
-            .ToList();
+        var dtos = videos.Select(v => new VideoSummaryDto
+        {
+            Title = v.Title,
+            Description = v.Description,
+            DurationInSeconds = v.DurationInSeconds,
+            VideoDate = v.VideoDate is null ? null : DateOnly.FromDateTime(v.VideoDate.Value),
+            SizeInBytes = v.SizeInBytes,
+            ThumbnailBlobName = v.ThumbnailBlobName,
+            VideoBlobName = v.BlobName,
+            UploadedAt = DateOnly.FromDateTime(v.UploadedAt)
+        });
 
-        _logger.LogInformation("Retrieved {Count} videos for user {UserId}", videoInfoList.Count, _currentUser.UserId);
-        return videoInfoList;
+        return [.. dtos];
     }
 }
