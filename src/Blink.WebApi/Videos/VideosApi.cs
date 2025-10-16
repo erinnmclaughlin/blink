@@ -1,8 +1,5 @@
-using Blink.Storage;
 using Blink.VideosApi.Contracts.Delete;
 using Blink.VideosApi.Contracts.GetByBlobName;
-using Blink.VideosApi.Contracts.GetUrl;
-using Blink.VideosApi.Contracts.List;
 using Blink.VideosApi.Contracts.UpdateMetadata;
 using Blink.VideosApi.Contracts.UpdateTitle;
 using Blink.VideosApi.Contracts.Upload;
@@ -30,26 +27,11 @@ public static class VideosApi
             .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError)
             .WithRequestTimeout(TimeSpan.FromMinutes(30)); // 30 minute timeout for large uploads
 
-        // GET /api/videos
-        endpoints.MapGet("/api/videos", HandleListVideosAsync)
-            .WithName("ListVideos")
-            .RequireAuthorization()
-            .Produces<List<VideoInfo>>(StatusCodes.Status200OK)
-            .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError);
-
         // GET /api/videos/{blobName}
         endpoints.MapGet("/api/videos/{blobName}", HandleGetVideoByBlobNameAsync)
             .WithName("GetVideoByBlobName")
             .RequireAuthorization()
             .Produces<VideoDetailDto>(StatusCodes.Status200OK)
-            .Produces<ProblemDetails>(StatusCodes.Status404NotFound)
-            .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError);
-
-        // GET /api/videos/{blobName}/url
-        endpoints.MapGet("/api/videos/{blobName}/url", HandleGetVideoUrlAsync)
-            .WithName("GetVideoUrl")
-            .RequireAuthorization()
-            .Produces<VideoUrlResponse>(StatusCodes.Status200OK)
             .Produces<ProblemDetails>(StatusCodes.Status404NotFound)
             .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError);
 
@@ -129,17 +111,6 @@ public static class VideosApi
         return Results.Ok(result);
     }
 
-    private static async Task<IResult> HandleListVideosAsync(
-        ISender sender,
-        CancellationToken cancellationToken)
-    {
-        // Send query through MediatR pipeline
-        var query = new ListVideosQuery();
-        var videos = await sender.Send(query, cancellationToken);
-        
-        return Results.Ok(videos);
-    }
-
     private static async Task<IResult> HandleGetVideoByBlobNameAsync(
         string blobName,
         ISender sender,
@@ -147,18 +118,6 @@ public static class VideosApi
     {
         var query = new GetVideoByBlobNameQuery(blobName);
         var result = await sender.Send(query, cancellationToken);
-        return Results.Ok(result);
-    }
-
-    private static async Task<IResult> HandleGetVideoUrlAsync(
-        string blobName,
-        ISender sender,
-        CancellationToken cancellationToken)
-    {
-        // Send query through MediatR pipeline
-        var query = new GetVideoUrlQuery { BlobName = blobName };
-        var result = await sender.Send(query, cancellationToken);
-        
         return Results.Ok(result);
     }
 

@@ -4,6 +4,7 @@ using Blink.Web;
 using Blink.Web.Client;
 using Blink.Web.Components;
 using Blink.Web.Videos;
+using Dapper;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
@@ -44,6 +45,8 @@ builder.Services.AddMediatR(o =>
 
 builder.AddNpgsqlDataSource(ServiceNames.BlinkDatabase);
 builder.Services.AddScoped<IVideoRepository, VideoRepository>();
+DefaultTypeMap.MatchNamesWithUnderscores = true; 
+SqlMapper.AddTypeHandler(new DateOnlyTypeHandler());
 
 builder.AddBlinkStorage();
 

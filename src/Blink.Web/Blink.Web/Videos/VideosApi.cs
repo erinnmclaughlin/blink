@@ -1,6 +1,6 @@
 using Blink.Storage;
+using Blink.VideosApi.Contracts.GetRecentUploads;
 using Blink.VideosApi.Contracts.GetUrl;
-using Blink.VideosApi.Contracts.List;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -13,8 +13,8 @@ public static class VideosApi
 {
     public static IEndpointRouteBuilder MapVideosApi(this IEndpointRouteBuilder endpoints)
     {
-        // GET /api/videos
-        endpoints.MapGet("/api/videos", HandleListVideosAsync)
+        // GET /api/recent-uploads
+        endpoints.MapGet("/api/recent-uploads", HandleGetRecentUploads)
             .WithName("ListVideos")
             .RequireAuthorization()
             .Produces<List<VideoInfo>>(StatusCodes.Status200OK)
@@ -30,27 +30,15 @@ public static class VideosApi
         
         return endpoints;
     }
-    
-    private static async Task<IResult> HandleListVideosAsync(
+
+    private static async Task<IResult> HandleGetRecentUploads(
         ISender sender,
         CancellationToken cancellationToken)
-    {
-        // Send query through MediatR pipeline
-        var query = new ListVideosQuery();
-        var videos = await sender.Send(query, cancellationToken);
-        
-        return Results.Ok(videos);
-    }
-    
+        => Results.Ok(await sender.Send(new GetRecentUploadsQuery(), cancellationToken));
+
     private static async Task<IResult> HandleGetVideoUrlAsync(
         string blobName,
         ISender sender,
         CancellationToken cancellationToken)
-    {
-        // Send query through MediatR pipeline
-        var query = new GetVideoUrlQuery { BlobName = blobName };
-        var result = await sender.Send(query, cancellationToken);
-        
-        return Results.Ok(result);
-    }
+        => Results.Ok(await sender.Send(new GetVideoUrlQuery { BlobName = blobName }, cancellationToken));
 }

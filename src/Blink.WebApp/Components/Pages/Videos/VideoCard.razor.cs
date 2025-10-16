@@ -1,4 +1,4 @@
-using Blink.VideosApi.Contracts.List;
+using Blink.VideosApi.Contracts;
 using Microsoft.AspNetCore.Components;
 
 namespace Blink.WebApp.Components.Pages.Videos;
@@ -19,7 +19,7 @@ public sealed partial class VideoCard
 
     protected override async Task OnParametersSetAsync()
     {
-        var urlResponse = await _apiClient.GetVideoUrlWithThumbnailAsync(Video.VideoBlobName);
+        var urlResponse = await _apiClient.GetVideoUrlWithThumbnailAsync(Video.BlobName);
         ThumbnailUrl = urlResponse.ThumbnailUrl;
     }
 
@@ -30,6 +30,6 @@ public sealed partial class VideoCard
 
     private string GetWatchUrl()
     {
-        return $"/videos/watch/{Uri.EscapeDataString(Video.VideoBlobName)}";
+        return $"/videos/watch/{Uri.EscapeDataString(Video.BlobName)}";
     }
 }

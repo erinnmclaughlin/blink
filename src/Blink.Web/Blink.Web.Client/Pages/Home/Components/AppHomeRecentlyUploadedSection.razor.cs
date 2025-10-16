@@ -1,5 +1,6 @@
+using Blink.VideosApi.Contracts;
+using Blink.VideosApi.Contracts.GetRecentUploads;
 using Blink.VideosApi.Contracts.GetUrl;
-using Blink.VideosApi.Contracts.List;
 using MediatR;
 using Microsoft.AspNetCore.Components;
 using System.Text;
@@ -23,14 +24,14 @@ public sealed partial class AppHomeRecentlyUploadedSection
 
     protected override async Task OnInitializedAsync()
     {
-        Videos ??= await _sender.Send(new ListVideosQuery());
+        Videos ??= await _sender.Send(new GetRecentUploadsQuery());
 
         if (VideoUrls is null)
         {
             VideoUrls = [];
             foreach (var video in Videos)
             {
-                VideoUrls[video.VideoBlobName] = await _sender.Send(new GetVideoUrlQuery { BlobName = video.VideoBlobName });
+                VideoUrls[video.BlobName] = await _sender.Send(new GetVideoUrlQuery { BlobName = video.BlobName });
             }
         }
     }

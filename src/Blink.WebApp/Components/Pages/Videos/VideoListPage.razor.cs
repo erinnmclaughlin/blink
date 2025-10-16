@@ -1,4 +1,4 @@
-using Blink.VideosApi.Contracts.List;
+using Blink.VideosApi.Contracts;
 
 namespace Blink.WebApp.Components.Pages.Videos;
 
