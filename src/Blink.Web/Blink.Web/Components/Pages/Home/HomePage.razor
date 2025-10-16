@@ -111,7 +111,44 @@
 </FeatureGate>
 
 <FeatureGate FeatureName="@FeatureFlags.RecentUploads">
-   <AppHomeRecentlyUploadedSection />
+    <section class="mb-12">
+        <h2 class="text-xl font-semibold dark:text-white mb-3">Recent uploads</h2>
+        <RecentlyUploadedDataContext Context="videos">
+            <div class="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+                @foreach (var video in videos)
+                {
+                    <a href="video/@video.Id" class="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden bg-white dark:bg-gray-900">
+                        <div class="bg-gray-100 dark:bg-gray-800 h-50 relative">
+                            @if (!string.IsNullOrWhiteSpace(video.DurationDisplayText))
+                            {
+                                <div class="absolute right-1 bottom-1 text-xs px-2 py-1 rounded bg-black/70 text-white">
+                                    @video.DurationDisplayText
+                                </div>
+                            }
+                            @if (!string.IsNullOrWhiteSpace(video.ThumbnailUrl))
+                            {
+                                <img src="@video.ThumbnailUrl" alt="Thumbnail" class="object-cover w-full h-full" />
+                            }
+                            else
+                            {
+                                <div class="absolute inset-0 flex items-center justify-center text-gray-500 dark:text-gray-400 text-4xl">🎬</div>
+                            }
+                        </div>
+                        <div class="p-3">
+                            <div class="font-medium truncate text-gray-900 dark:text-gray-100">@video.Title</div>
+                            <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">@video.UploadedAt.ToLocalTime().ToString("M/d/yyyy h:mm tt") • @video.SizeDisplayText</div>
+                            @*<div class="mt-3 flex gap-2">
+                            <a href="@urls?.Url" class="px-3 py-1.5 rounded bg-blue-600 text-white text-sm">Play</a>
+                            <button class="px-3 py-1.5 rounded border border-gray-300 dark:border-gray-700 dark:text-gray-200 text-sm">Share</button>
+                            <button class="px-3 py-1.5 rounded border border-gray-300 dark:border-gray-700 dark:text-gray-200 text-sm">Download</button>
+                        </div>*@
+                        </div>
+                    </a>
+                }
+            </div>
+        </RecentlyUploadedDataContext>
+    </section>
+
 </FeatureGate>
 
 <FeatureGate FeatureName="@FeatureFlags.SharedWithMe">
