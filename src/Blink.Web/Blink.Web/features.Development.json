@@ -20,6 +20,10 @@
       {
         "id": "SharedWithMe",
         "enabled": false
+      },
+      {
+        "id": "VideoComments",
+        "enabled": true
       }
     ]
   }

@@ -85,5 +85,176 @@ else
                 </button>
             </div>
         </div>
+
+        <!-- Comments Section -->
+        <FeatureGate FeatureName="@FeatureFlags.VideoComments">
+            <div class="bg-white dark:bg-gray-900 rounded-lg shadow-lg p-6 mt-6">
+                <h2 class="text-2xl font-bold dark:text-white mb-6">Comments <span class="text-gray-500 dark:text-gray-400 text-lg">(12)</span></h2>
+
+                <!-- Add Comment Form -->
+                <div class="mb-8">
+                    <div class="flex gap-3">
+                        <div class="flex-shrink-0">
+                            <div class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-semibold">
+                                EM
+                            </div>
+                        </div>
+                        <div class="flex-1">
+                            <textarea placeholder="Add a comment..."
+                                  rows="3"
+                                  class="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-600 resize-none">
+                        </textarea>
+                            <div class="flex justify-end gap-2 mt-2">
+                                <button class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded">
+                                    Cancel
+                                </button>
+                                <button class="px-4 py-2 text-sm font-medium bg-blue-600 hover:bg-blue-700 text-white rounded">
+                                    Comment
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Comments List -->
+                <div class="space-y-6">
+                    <!-- Comment 1 -->
+                    <div class="flex gap-3">
+                        <div class="flex-shrink-0">
+                            <div class="w-10 h-10 rounded-full bg-green-600 flex items-center justify-center text-white font-semibold">
+                                JD
+                            </div>
+                        </div>
+                        <div class="flex-1">
+                            <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+                                <div class="flex items-center justify-between mb-2">
+                                    <div>
+                                        <span class="font-semibold text-gray-900 dark:text-gray-100">John Doe</span>
+                                        <span class="text-sm text-gray-500 dark:text-gray-400 ml-2">2 hours ago</span>
+                                    </div>
+                                    <button class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                                        <span class="text-xl">⋮</span>
+                                    </button>
+                                </div>
+                                <p class="text-gray-700 dark:text-gray-300">
+                                    Great video! The quality is amazing. Really helpful content, thanks for sharing.
+                                </p>
+                            </div>
+                            <div class="flex gap-4 mt-2 ml-4">
+                                <button class="text-sm text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 flex items-center gap-1">
+                                    <span>👍</span> <span>5</span>
+                                </button>
+                                <button class="text-sm text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400">
+                                    Reply
+                                </button>
+                            </div>
+
+                            <!-- Nested Reply -->
+                            <div class="ml-8 mt-4 flex gap-3">
+                                <div class="flex-shrink-0">
+                                    <div class="w-8 h-8 rounded-full bg-purple-600 flex items-center justify-center text-white text-sm font-semibold">
+                                        SK
+                                    </div>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-3">
+                                        <div class="flex items-center justify-between mb-2">
+                                            <div>
+                                                <span class="font-semibold text-gray-900 dark:text-gray-100 text-sm">Sarah Kim</span>
+                                                <span class="text-xs text-gray-500 dark:text-gray-400 ml-2">1 hour ago</span>
+                                            </div>
+                                        </div>
+                                        <p class="text-sm text-gray-700 dark:text-gray-300">
+                                            I agree! The production quality is top-notch.
+                                        </p>
+                                    </div>
+                                    <div class="flex gap-4 mt-2 ml-3">
+                                        <button class="text-xs text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 flex items-center gap-1">
+                                            <span>👍</span> <span>2</span>
+                                        </button>
+                                        <button class="text-xs text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400">
+                                            Reply
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Comment 2 -->
+                    <div class="flex gap-3">
+                        <div class="flex-shrink-0">
+                            <div class="w-10 h-10 rounded-full bg-orange-600 flex items-center justify-center text-white font-semibold">
+                                AM
+                            </div>
+                        </div>
+                        <div class="flex-1">
+                            <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+                                <div class="flex items-center justify-between mb-2">
+                                    <div>
+                                        <span class="font-semibold text-gray-900 dark:text-gray-100">Alex Martinez</span>
+                                        <span class="text-sm text-gray-500 dark:text-gray-400 ml-2">5 hours ago</span>
+                                    </div>
+                                    <button class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                                        <span class="text-xl">⋮</span>
+                                    </button>
+                                </div>
+                                <p class="text-gray-700 dark:text-gray-300">
+                                    Could you do a follow-up video on this topic? I'd love to see more details about the setup process.
+                                </p>
+                            </div>
+                            <div class="flex gap-4 mt-2 ml-4">
+                                <button class="text-sm text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 flex items-center gap-1">
+                                    <span>👍</span> <span>8</span>
+                                </button>
+                                <button class="text-sm text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400">
+                                    Reply
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Comment 3 -->
+                    <div class="flex gap-3">
+                        <div class="flex-shrink-0">
+                            <div class="w-10 h-10 rounded-full bg-pink-600 flex items-center justify-center text-white font-semibold">
+                                LT
+                            </div>
+                        </div>
+                        <div class="flex-1">
+                            <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+                                <div class="flex items-center justify-between mb-2">
+                                    <div>
+                                        <span class="font-semibold text-gray-900 dark:text-gray-100">Lisa Thompson</span>
+                                        <span class="text-sm text-gray-500 dark:text-gray-400 ml-2">1 day ago</span>
+                                    </div>
+                                    <button class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                                        <span class="text-xl">⋮</span>
+                                    </button>
+                                </div>
+                                <p class="text-gray-700 dark:text-gray-300">
+                                    This is exactly what I was looking for! Bookmarked for future reference. 📚
+                                </p>
+                            </div>
+                            <div class="flex gap-4 mt-2 ml-4">
+                                <button class="text-sm text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 flex items-center gap-1">
+                                    <span>👍</span> <span>3</span>
+                                </button>
+                                <button class="text-sm text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400">
+                                    Reply
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Load More Comments -->
+                <div class="mt-6 text-center">
+                    <button class="px-6 py-2 text-sm font-medium text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-gray-800 rounded-lg">
+                        Load more comments
+                    </button>
+                </div>
+            </div>
+        </FeatureGate>
     </div>
 }
