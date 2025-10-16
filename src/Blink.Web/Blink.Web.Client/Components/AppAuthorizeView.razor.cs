@@ -1,6 +1,27 @@
+using Microsoft.AspNetCore.Components;
 using System.Security.Claims;
 
 namespace Blink.Web.Client.Components;
+
+public sealed partial class AppAuthorizeView
+{
+    [Parameter]
+    public RenderFragment<CurrentUser>? ChildContent { get; set; }
+
+    [Parameter]
+    public RenderFragment<CurrentUser>? Authorized { get; set; }
+
+    [Parameter]
+    public RenderFragment? NotAuthorized { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        if (ChildContent is not null && (Authorized is not null || NotAuthorized is not null))
+        {
+            throw new InvalidOperationException($"Cannot set both {nameof(ChildContent)} and {nameof(Authorized)}/{nameof(NotAuthorized)}.");
+        }
+    }
+}
 
 public sealed record CurrentUser
 {
@@ -16,7 +37,7 @@ public sealed record CurrentUser
         var firstName = claims.FindFirstValue(ClaimTypes.GivenName);
         var lastName = claims.FindFirstValue(ClaimTypes.Surname);
         var displayName = claims.FindFirstValueOrDefault(ClaimTypes.Name, "name") ?? $"{firstName} {lastName}";
-        
+
         return new CurrentUser
         {
             Id = claims.FindFirstValue(ClaimTypes.NameIdentifier),
@@ -43,7 +64,7 @@ file static class Extensions
 
         return null;
     }
-    
+
     public static string FindFirstValue(this IList<Claim> claims, params IEnumerable<string> claimTypes)
     {
         return claims.FindFirstValueOrDefault(claimTypes) ?? string.Empty;

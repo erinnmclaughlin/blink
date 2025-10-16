@@ -2,19 +2,15 @@ using Blink.VideosApi.Contracts;
 using Blink.VideosApi.Contracts.GetRecentUploads;
 using Blink.VideosApi.Contracts.GetUrl;
 using MediatR;
-using Microsoft.AspNetCore.Components;
 using System.Text;
 
-namespace Blink.Web.Client.Pages.Home.Components;
+namespace Blink.Web.Components.Pages.Home.Components;
 
 public sealed partial class AppHomeRecentlyUploadedSection
 {
     private readonly ISender _sender;
     
-    [PersistentState]
     public List<VideoSummaryDto>? Videos { get; set; }
-    
-    [PersistentState]
     public Dictionary<string, VideoUrlResponse?>? VideoUrls { get; set; }
     
     public AppHomeRecentlyUploadedSection(ISender sender)
