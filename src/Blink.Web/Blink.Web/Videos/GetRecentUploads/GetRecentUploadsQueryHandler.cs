@@ -25,6 +25,7 @@ internal sealed class GetRecentUploadsQueryHandler : IRequestHandler<GetRecentUp
                 description,
                 duration_in_seconds,
                 size_in_bytes,
+                thumbnail_blob_name,
                 uploaded_at,
                 video_date
             FROM videos

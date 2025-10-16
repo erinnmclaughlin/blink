@@ -1,0 +1,89 @@
+@page "/video/{videoId:guid}"
+@attribute [Authorize]
+@attribute [StreamRendering]
+
+@using Blink.VideosApi.Contracts.GetById
+
+<PageTitle>@(Video?.Title ?? "Video Details")</PageTitle>
+
+@if (Video is null)
+{
+    <div class="flex items-center justify-center min-h-screen">
+        <p class="text-gray-600 dark:text-gray-300">Loading video...</p>
+    </div>
+}
+else
+{
+    <div class="max-w-6xl mx-auto">
+        <!-- Back button -->
+        <div class="mb-4">
+            <a href="/" class="inline-flex items-center text-blue-600 dark:text-blue-400 hover:underline">
+                <span class="mr-1">←</span> Back to Home
+            </a>
+        </div>
+
+        <!-- Video Player Section -->
+        <div class="bg-white dark:bg-gray-900 rounded-lg shadow-lg overflow-hidden mb-6">
+            <div class="aspect-video bg-gray-100 dark:bg-gray-800 relative">
+                @if (!string.IsNullOrEmpty(WatchUrl))
+                {
+                    <video controls class="w-full h-full" poster="@ThumbnailUrl">
+                        <source src="@WatchUrl" type="video/mp4" />
+                        Your browser does not support the video tag.
+                    </video>
+                }
+                else
+                {
+                    <div class="absolute inset-0 flex items-center justify-center text-gray-500 dark:text-gray-400 text-6xl">
+                        🎬
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Video Information -->
+        <div class="bg-white dark:bg-gray-900 rounded-lg shadow-lg p-6 mb-6">
+            <h1 class="text-3xl font-bold dark:text-white mb-4">@Video.Title</h1>
+
+            <div class="flex flex-wrap gap-4 text-sm text-gray-600 dark:text-gray-400 mb-4">
+                @if (Video.VideoDate.HasValue)
+                {
+                    <div class="flex items-center gap-1">
+                        <span>🎥</span>
+                        <span>Recorded @Video.VideoDate.Value.ToString("MMM d, yyyy")</span>
+                    </div>
+                }
+                <div class="flex items-center gap-1">
+                    <span>📅</span>
+                    <span>Uploaded @Video.UploadedAt.ToLocalTime().ToString("MMM d, yyyy h:mm tt")</span>
+                </div>
+            </div>
+
+            @if (!string.IsNullOrEmpty(Video.Description))
+            {
+                <div class="border-t border-gray-200 dark:border-gray-700 pt-4">
+                    <h2 class="text-lg font-semibold dark:text-white mb-2">Description</h2>
+                    <p class="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">@Video.Description</p>
+                </div>
+            }
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="bg-white dark:bg-gray-900 rounded-lg shadow-lg p-6">
+            <div class="flex flex-wrap gap-3">
+                <a href="@WatchUrl" download class="px-4 py-2 rounded bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium">
+                    Download Video
+                </a>
+                <button class="px-4 py-2 rounded border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 dark:text-gray-200 text-sm font-medium">
+                    Share
+                </button>
+                <button class="px-4 py-2 rounded border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 dark:text-gray-200 text-sm font-medium">
+                    Edit Details
+                </button>
+                <button class="px-4 py-2 rounded border border-red-300 dark:border-red-700 hover:bg-red-50 dark:hover:bg-red-900 text-red-600 dark:text-red-400 text-sm font-medium ml-auto">
+                    Delete
+                </button>
+            </div>
+        </div>
+    </div>
+}

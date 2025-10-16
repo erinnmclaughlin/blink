@@ -13,13 +13,6 @@ public static class VideosApi
 {
     public static IEndpointRouteBuilder MapVideosApi(this IEndpointRouteBuilder endpoints)
     {
-        // GET /api/recent-uploads
-        endpoints.MapGet("/api/recent-uploads", HandleGetRecentUploads)
-            .WithName("ListVideos")
-            .RequireAuthorization()
-            .Produces<List<VideoInfo>>(StatusCodes.Status200OK)
-            .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError);
-
         // GET /api/videos/{blobName}/url
         endpoints.MapGet("/api/videos/{blobName}/url", HandleGetVideoUrlAsync)
             .WithName("GetVideoUrl")
@@ -30,11 +23,6 @@ public static class VideosApi
         
         return endpoints;
     }
-
-    private static async Task<IResult> HandleGetRecentUploads(
-        ISender sender,
-        CancellationToken cancellationToken)
-        => Results.Ok(await sender.Send(new GetRecentUploadsQuery(), cancellationToken));
 
     private static async Task<IResult> HandleGetVideoUrlAsync(
         string blobName,

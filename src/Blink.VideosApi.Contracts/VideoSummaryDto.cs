@@ -7,6 +7,7 @@ public sealed record VideoSummaryDto
     public required string Title { get; init; }
     public required double? DurationInSeconds { get; init; }
     public required long SizeInBytes { get; init; }
+    public required string? ThumbnailBlobName { get; init; }
     public required DateTimeOffset UploadedAt { get; init; }
     public required DateOnly? VideoDate { get; init; }
 }

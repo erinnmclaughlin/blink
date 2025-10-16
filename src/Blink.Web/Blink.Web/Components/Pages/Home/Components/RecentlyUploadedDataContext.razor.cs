@@ -1,5 +1,5 @@
+using Blink.Storage;
 using Blink.VideosApi.Contracts.GetRecentUploads;
-using Blink.VideosApi.Contracts.GetUrl;
 using MediatR;
 using Microsoft.AspNetCore.Components;
 using System.Text;
@@ -9,6 +9,7 @@ namespace Blink.Web.Components.Pages.Home.Components;
 public sealed partial class RecentlyUploadedDataContext
 {
     private readonly ISender _sender;
+    private readonly IVideoStorageClient _storageClient;
 
     private List<RecentlyUploadedVideoVm>? Videos { get; set; }
 
@@ -18,9 +19,10 @@ public sealed partial class RecentlyUploadedDataContext
     [Parameter]
     public RenderFragment? LoadingContent { get; set; }
 
-    public RecentlyUploadedDataContext(ISender sender)
+    public RecentlyUploadedDataContext(ISender sender, IVideoStorageClient storageClient)
     {
         _sender = sender;
+        _storageClient = storageClient;
     }
 
     protected override async Task OnInitializedAsync()
@@ -30,14 +32,13 @@ public sealed partial class RecentlyUploadedDataContext
         Videos = [];
         foreach (var video in videos)
         {
-            var urls = await _sender.Send(new GetVideoUrlQuery { BlobName = video.BlobName });
             Videos.Add(new RecentlyUploadedVideoVm
             {
                 Id = video.Id,
                 Title = video.Title,
                 DurationDisplayText = GetDurationDisplayText(video.DurationInSeconds),
                 SizeDisplayText = GetSizeDisplayText(video.SizeInBytes),
-                ThumbnailUrl = urls?.ThumbnailUrl,
+                ThumbnailUrl = video.ThumbnailBlobName is { Length: > 0 } thumbnailBlob ? await _storageClient.GetThumbnailUrlAsync(thumbnailBlob) : null,
                 UploadedAt = video.UploadedAt,
                 VideoDate = video.VideoDate
             });

@@ -44,7 +44,6 @@ builder.Services.AddMediatR(o =>
 });
 
 builder.AddNpgsqlDataSource(ServiceNames.BlinkDatabase);
-builder.Services.AddScoped<IVideoRepository, VideoRepository>();
 DefaultTypeMap.MatchNamesWithUnderscores = true; 
 SqlMapper.AddTypeHandler(new DateOnlyTypeHandler());
 
