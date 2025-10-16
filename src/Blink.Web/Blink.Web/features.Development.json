@@ -22,6 +22,10 @@
         "enabled": false
       },
       {
+        "id": "Uploads",
+        "enabled": true
+      },
+      {
         "id": "VideoComments",
         "enabled": true
       }

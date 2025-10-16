@@ -1,4 +1,6 @@
-﻿<div class="flex h-16 shrink-0 items-center">
+﻿@inject IFeatureFlagManager FeatureFlagManager
+
+<div class="flex h-16 shrink-0 items-center">
     <img src="https://tailwindcss.com/plus-assets/img/logos/mark.svg?color=indigo&shade=500" alt="Your Company" class="h-8 w-auto" />
 </div>
 <nav class="flex flex-1 flex-col">
@@ -32,10 +34,21 @@
 </nav>
 
 @code {
+    private bool IsUploadEnabled { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        IsUploadEnabled = await FeatureFlagManager.IsEnabledAsync(FeatureFlags.Uploads);
+    }
+
     private sealed record NavLinkInfo(string Text, string Href, RenderFragment Content, NavLinkMatch Match = NavLinkMatch.Prefix);
-    private static IEnumerable<NavLinkInfo> EnumerateNavLinks()
+    private IEnumerable<NavLinkInfo> EnumerateNavLinks()
     {
         yield return new NavLinkInfo("Dashboard", "", AppIcon.Home(), NavLinkMatch.All);
+
+        if (IsUploadEnabled)
+            yield return new NavLinkInfo("Upload", "upload", AppIcon.Upload());
+
         yield return new NavLinkInfo("Team", "weather", AppIcon.Users());
         yield return new NavLinkInfo("Projects", "projects", AppIcon.Folder());
         yield return new NavLinkInfo("Calendar", "calendar", AppIcon.Calendar());

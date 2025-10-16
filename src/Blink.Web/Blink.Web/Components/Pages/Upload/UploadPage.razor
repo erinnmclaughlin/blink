@@ -1,0 +1,159 @@
+@page "/upload"
+@attribute [Authorize]
+@rendermode InteractiveServer
+
+<PageTitle>Upload Video</PageTitle>
+
+<section class="mb-8">
+    <h1 class="text-3xl font-bold dark:text-white">Upload Video</h1>
+    <p class="text-gray-600 dark:text-gray-300 mt-2">Share your family moments by uploading a video.</p>
+</section>
+
+<div class="max-w-3xl">
+    @if (IsUploading)
+    {
+        <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-8 bg-white dark:bg-gray-900">
+            <div class="flex flex-col items-center justify-center space-y-4">
+                <div class="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600"></div>
+                <div class="text-lg font-medium dark:text-white">Uploading video...</div>
+                @if (UploadProgress > 0)
+                {
+                    <div class="w-full max-w-md">
+                        <div class="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
+                            <div class="bg-blue-600 h-2.5 rounded-full" style="width: @(UploadProgress)%"></div>
+                        </div>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mt-2 text-center">@UploadProgress%</p>
+                    </div>
+                }
+                <p class="text-sm text-gray-600 dark:text-gray-400">This may take a few minutes depending on the file size.</p>
+            </div>
+        </div>
+    }
+    else if (UploadSuccess)
+    {
+        <div class="border border-green-200 dark:border-green-700 rounded-lg p-8 bg-green-50 dark:bg-green-900/20">
+            <div class="flex flex-col items-center justify-center space-y-4">
+                <div class="text-6xl">✅</div>
+                <div class="text-lg font-medium text-green-800 dark:text-green-200">Video uploaded successfully!</div>
+                <p class="text-sm text-green-700 dark:text-green-300">Your video is being processed and will be available shortly.</p>
+                <div class="flex gap-3 mt-4">
+                    <a href="/" class="px-4 py-2 rounded bg-blue-600 text-white text-sm hover:bg-blue-700">Go to Home</a>
+                    <button @onclick="ResetForm" class="px-4 py-2 rounded border border-gray-300 dark:border-gray-700 dark:text-gray-200 text-sm hover:bg-gray-50 dark:hover:bg-gray-800">Upload Another</button>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <EditForm Model="@Model" OnValidSubmit="HandleSubmit" FormName="upload-video">
+            <DataAnnotationsValidator />
+            
+            <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-6 bg-white dark:bg-gray-900 space-y-6">
+                @if (!string.IsNullOrEmpty(ErrorMessage))
+                {
+                    <div class="border border-red-200 dark:border-red-700 rounded-lg p-4 bg-red-50 dark:bg-red-900/20">
+                        <p class="text-sm text-red-800 dark:text-red-200">@ErrorMessage</p>
+                    </div>
+                }
+
+                <!-- File Upload -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">
+                        Video File <span class="text-red-500">*</span>
+                    </label>
+                    <InputFile OnChange="HandleFileSelected" 
+                               accept=".mp4,.webm,.avi,.wmv"
+                               class="block w-full text-sm text-gray-900 dark:text-gray-100
+                                      file:mr-4 file:py-2 file:px-4
+                                      file:rounded-lg file:border-0
+                                      file:text-sm file:font-semibold
+                                      file:bg-blue-50 file:text-blue-700
+                                      hover:file:bg-blue-100
+                                      dark:file:bg-blue-900 dark:file:text-blue-200
+                                      dark:hover:file:bg-blue-800
+                                      cursor-pointer border border-gray-300 dark:border-gray-700 rounded-lg
+                                      bg-white dark:bg-gray-900" />
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                        Supported formats: MP4, WebM, AVI, WMV (max 2000MB)
+                    </p>
+                    @if (SelectedFile != null)
+                    {
+                        <div class="mt-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm font-medium text-gray-900 dark:text-gray-100">@SelectedFile.Name</p>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400">@FormatFileSize(SelectedFile.Size)</p>
+                                </div>
+                                <button type="button" @onclick="ClearFile" class="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    }
+                    <ValidationMessage For="() => Model.File" class="text-sm text-red-600 dark:text-red-400 mt-1" />
+                </div>
+
+                <!-- Title -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">
+                        Title
+                    </label>
+                    <InputText @bind-Value="Model.Title" 
+                               class="w-full border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-2 
+                                      focus:outline-none focus:ring-2 focus:ring-blue-500 
+                                      bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100" 
+                               placeholder="Enter a title for your video" />
+                    <ValidationMessage For="() => Model.Title" class="text-sm text-red-600 dark:text-red-400 mt-1" />
+                </div>
+
+                <!-- Description -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">
+                        Description
+                    </label>
+                    <InputTextArea @bind-Value="Model.Description" 
+                                   rows="4"
+                                   class="w-full border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-2 
+                                          focus:outline-none focus:ring-2 focus:ring-blue-500 
+                                          bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100" 
+                                   placeholder="Add a description (optional)" />
+                    <ValidationMessage For="() => Model.Description" class="text-sm text-red-600 dark:text-red-400 mt-1" />
+                </div>
+
+                <!-- Video Date -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">
+                        Video Date
+                    </label>
+                    <InputDate @bind-Value="Model.VideoDate" 
+                               class="w-full border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-2 
+                                      focus:outline-none focus:ring-2 focus:ring-blue-500 
+                                      bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100" />
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                        When was this video recorded?
+                    </p>
+                    <ValidationMessage For="() => Model.VideoDate" class="text-sm text-red-600 dark:text-red-400 mt-1" />
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex gap-3 pt-4">
+                    <button type="submit" 
+                            disabled="@(SelectedFile == null)"
+                            class="px-6 py-2 rounded-lg bg-blue-600 text-white font-medium 
+                                   hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 
+                                   disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors">
+                        Upload Video
+                    </button>
+                    <a href="/" class="px-6 py-2 rounded-lg border border-gray-300 dark:border-gray-700 
+                                       text-gray-700 dark:text-gray-200 font-medium 
+                                       hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                        Cancel
+                    </a>
+                </div>
+            </div>
+        </EditForm>
+    }
+</div>
+
