@@ -1,5 +1,6 @@
 bin/
 obj/
+node_modules/
 .idea/
 .vs/
 *.user
@@ -8,4 +9,3 @@ obj/
 /src/Blink.Aspire.AppHost/infra
 /azure.yaml
 /next-steps.md
-/node_modules
