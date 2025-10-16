@@ -10,13 +10,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="10.0.0-rc.1.25451.107"/>
-    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Authentication" Version="10.0.0-rc.1.25451.107"/>
+    <PackageReference Include="MediatR" Version="13.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="10.0.0-rc.2.25502.107" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Authentication" Version="10.0.0-rc.2.25502.107" />
   </ItemGroup>
 
   <ItemGroup>
-    <_ContentIncludedByDefault Remove="Pages\Home\Components\AppHomeContinueWatching.razor" />
-    <_ContentIncludedByDefault Remove="Pages\Home\Components\AppHomeGlobalSearch.razor" />
+    <ProjectReference Include="..\..\Blink.VideosApi.Contracts\Blink.VideosApi.Contracts.csproj" />
   </ItemGroup>
   
 </Project>

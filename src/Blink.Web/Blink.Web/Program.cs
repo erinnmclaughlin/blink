@@ -1,6 +1,9 @@
+using Blink;
+using Blink.VideosApi.Contracts;
 using Blink.Web;
 using Blink.Web.Client;
 using Blink.Web.Components;
+using Blink.Web.Videos;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
@@ -33,6 +36,16 @@ builder.Services.Configure<ConfigurationFeatureDefinitionProviderOptions>(o =>
     o.CustomConfigurationMergingEnabled = true;
 });
 builder.Services.AddScoped<IFeatureFlagManager, FeatureFlagManager>();
+
+builder.Services.AddMediatR(o =>
+{
+    o.RegisterServicesFromAssemblies(typeof(Program).Assembly, VideosApiContracts.Assembly);
+});
+
+builder.AddNpgsqlDataSource(ServiceNames.BlinkDatabase);
+builder.Services.AddScoped<IVideoRepository, VideoRepository>();
+
+builder.AddBlinkStorage();
 
 var app = builder.Build();
 
@@ -72,5 +85,9 @@ app.MapGet("/login", () => Results
 
 app.MapPost("/logout", () => Results.SignOut(new AuthenticationProperties { RedirectUri = "/" }, [CookieAuthenticationDefaults.AuthenticationScheme, OpenIdConnectDefaults.AuthenticationScheme]))
     .RequireAuthorization();
+
+app.MapVideosApi();
+
+app.MapDefaultEndpoints();
 
 app.Run();

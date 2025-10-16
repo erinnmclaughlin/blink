@@ -28,7 +28,9 @@ var blinkDatabase = postgres.Server.AddDatabase(ServiceNames.BlinkDatabase);
 var blinkWebApp = builder
     .AddProject<Projects.Blink_Web>(ServiceNames.BlinkWebApp)
     .WithExternalHttpEndpoints()
-    .WithAwaitedReference(keycloak);
+    .WithAwaitedReference(blinkDatabase)
+    .WithAwaitedReference(keycloak)
+    .WithAwaitedReference(storage.Blobs);
 
 //blinkWebApi
 //    .WithReference(blinkWebApp);
