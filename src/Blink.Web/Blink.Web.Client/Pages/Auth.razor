@@ -1,24 +1,43 @@
 ﻿@page "/auth"
 
-@using Microsoft.AspNetCore.Authorization
-
 @attribute [Authorize]
 @rendermode InteractiveAuto
 
 <PageTitle>Auth</PageTitle>
 
-<h1>You are authenticated</h1>
-
-<AppAuthorizeView>
-    Hello @context.UserName!
-</AppAuthorizeView>
-    
-<AuthorizeView>
-    
-    <ul>
-        @foreach (var claim in context.User.Claims)
-        {
-            <li>@claim.Type = @claim.Value</li>
-        }
-    </ul>
-</AuthorizeView>
+<div>
+  <AppAuthorizeView>
+      <div class="px-4 sm:px-0">
+          <h3 class="text-base/7 font-semibold text-gray-900 dark:text-white">Your Information</h3>
+          <p class="mt-1 max-w-2xl text-sm/6 text-gray-500 dark:text-gray-400">Personal information about you</p>
+      </div>
+      <div class="mt-6 border-t border-gray-100 dark:border-white/10">
+          <dl class="divide-y divide-gray-100 dark:divide-white/10">
+              <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
+                  <dt class="text-sm/6 font-medium text-gray-900 dark:text-gray-100">Id</dt>
+                  <dd class="mt-1 text-sm/6 text-gray-700 sm:col-span-2 sm:mt-0 dark:text-gray-400">@context.Id</dd>
+              </div>
+              <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
+                  <dt class="text-sm/6 font-medium text-gray-900 dark:text-gray-100">Display Name</dt>
+                  <dd class="mt-1 text-sm/6 text-gray-700 sm:col-span-2 sm:mt-0 dark:text-gray-400">@context.DisplayName</dd>
+              </div>
+              <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
+                  <dt class="text-sm/6 font-medium text-gray-900 dark:text-gray-100">First Name</dt>
+                  <dd class="mt-1 text-sm/6 text-gray-700 sm:col-span-2 sm:mt-0 dark:text-gray-400">@context.FirstName</dd>
+              </div>
+              <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
+                  <dt class="text-sm/6 font-medium text-gray-900 dark:text-gray-100">Last Name</dt>
+                  <dd class="mt-1 text-sm/6 text-gray-700 sm:col-span-2 sm:mt-0 dark:text-gray-400">@context.LastName</dd>
+              </div>
+              <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
+                  <dt class="text-sm/6 font-medium text-gray-900 dark:text-gray-100">Username</dt>
+                  <dd class="mt-1 text-sm/6 text-gray-700 sm:col-span-2 sm:mt-0 dark:text-gray-400">@context.UserName</dd>
+              </div>
+              <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
+                  <dt class="text-sm/6 font-medium text-gray-900 dark:text-gray-100">Email</dt>
+                  <dd class="mt-1 text-sm/6 text-gray-700 sm:col-span-2 sm:mt-0 dark:text-gray-400">@context.Email</dd>
+              </div>
+          </dl>
+      </div>
+    </AppAuthorizeView>
+</div>
