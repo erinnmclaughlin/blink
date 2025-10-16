@@ -1,0 +1,15 @@
+﻿@if (Videos is null)
+{
+    if (LoadingContent is not null)
+    {
+        @LoadingContent
+    }
+    else
+    {
+        <p><em>Loading...</em></p>
+    }
+}
+else
+{
+    @ChildContent?.Invoke(Videos)
+}
