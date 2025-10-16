@@ -1,0 +1,18 @@
+﻿<svg viewBox="0 0 24 24"
+     fill="none" 
+     stroke="currentColor" 
+     stroke-width="1.5" 
+     data-slot="icon" 
+     aria-hidden="true" 
+     class="size-6 shrink-0 text-gray-400 group-hover:text-indigo-600 dark:group-hover:text-white"
+     @attributes="@AdditionalAttributes">
+    @ChildContent
+</svg>
+
+@code {
+    [Parameter(CaptureUnmatchedValues = true)]
+    public Dictionary<string, object> AdditionalAttributes { get; set; } = [];
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+}

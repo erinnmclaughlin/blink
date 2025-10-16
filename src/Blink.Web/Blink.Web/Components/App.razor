@@ -1,23 +1,24 @@
 ﻿<!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="h-full bg-white dark:bg-gray-900">
 
 <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <base href="/"/>
     <ResourcePreloader/>
-    <link rel="stylesheet" href="@Assets["lib/bootstrap/dist/css/bootstrap.min.css"]"/>
-    <link rel="stylesheet" href="@Assets["app.css"]"/>
+    <link rel="stylesheet" href="@Assets["main.css"]"/>
+    <link rel="stylesheet" href="@Assets["blazor.css"]"/>
     <link rel="stylesheet" href="@Assets["Blink.Web.styles.css"]"/>
     <ImportMap/>
     <link rel="icon" type="image/png" href="favicon.png"/>
     <HeadOutlet/>
 </head>
 
-<body>
-<Routes/>
-<ReconnectModal/>
-<script src="@Assets["_framework/blazor.web.js"]"></script>
+<body class="h-full">
+    <Routes/>
+    <ReconnectModal/>
+    <script src="@Assets["_framework/blazor.web.js"]"></script>
+    <script src="@Assets["https://cdn.jsdelivr.net/npm/@tailwindplus/elements@1"]" type="module"></script>
 </body>
 
 </html>

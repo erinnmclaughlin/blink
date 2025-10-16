@@ -1,0 +1,19 @@
+﻿<NavLink ActiveClass="active bg-gray-50 text-indigo-600 dark:bg-white/5 dark:text-white [&>svg]:text-indigo-600 [&>svg]:dark:text-white"
+         Match="@Match" 
+         class="group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold text-gray-700 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/5 hover:text-indigo-600 dark:hover:text-white"
+         href="@Href">
+    @ChildContent
+</NavLink>
+
+@code {
+    private NavLink _navLink;
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    [Parameter]
+    public string Href { get; set; } = "";
+
+    [Parameter]
+    public NavLinkMatch Match { get; set; } = NavLinkMatch.Prefix;
+}
