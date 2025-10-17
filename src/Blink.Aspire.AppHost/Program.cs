@@ -21,19 +21,20 @@ var blinkWebApp = builder
     .WithAwaitedReference(messaging)
     .WithAwaitedReference(storage.Blobs);
 
+builder
+    .AddProject<Projects.Blink_VideoSummarizer>(ServiceNames.BlinkVideoSummarizer)
+    .WithAwaitedReference(messaging)
+    .WithAwaitedReference(storage.Blobs);
+
 if (OperatingSystem.IsWindows())
 {
     builder
-        .AddDockerfile("blink-video-processor", "../..", "src/Blink.VideoProcessor/Dockerfile")
+        .AddDockerfile(ServiceNames.BlinkVideoProcessor, "../..", "src/Blink.VideoProcessor/Dockerfile")
         .WithReference(messaging)
         .WithReference(storage.Blobs)
-        .WaitFor(messaging);
-
-    builder
-        .AddDockerfile("blink-video-summarizer", "../..", "src/Blink.VideoSummarizer/Dockerfile")
-        .WithReference(messaging)
-        .WithReference(storage.Blobs)
-        .WaitFor(messaging);
+        .WaitFor(messaging)
+        .WaitFor(storage.Blobs);
 }
+
 
 builder.Build().Run();
