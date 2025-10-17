@@ -64,8 +64,10 @@ internal sealed class RegisterUploadedVideoCommandHandler : IRequestHandler<Regi
             VideoId = video.id,
             BlobName = request.BlobName,
             Title = video.title,
+            Description = video.description,
             FileName = request.FileName,
             ContentType = video.content_type,
+            SizeInBytes = video.size_in_bytes,
             OwnerId = video.owner_id,
             UploadedAt = now
         }, cancellationToken);
