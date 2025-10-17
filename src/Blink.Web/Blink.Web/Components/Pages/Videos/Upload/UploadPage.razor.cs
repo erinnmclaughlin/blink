@@ -6,7 +6,7 @@ using MediatR;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 
-namespace Blink.Web.Components.Pages.Upload;
+namespace Blink.Web.Components.Pages.Videos.Upload;
 
 public sealed partial class UploadPage
 {
@@ -31,7 +31,7 @@ public sealed partial class UploadPage
 
     protected override async Task OnInitializedAsync()
     {
-        if (!await FeatureFlagManager.IsEnabledAsync(FeatureFlags.Uploads))
+        if (!await FeatureFlagManager.IsEnabledAsync(FeatureFlags.VideoUploads))
         {
             NavigationManager.NavigateTo("/");
         }

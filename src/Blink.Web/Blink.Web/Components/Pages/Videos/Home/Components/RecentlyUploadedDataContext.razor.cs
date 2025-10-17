@@ -4,7 +4,7 @@ using MediatR;
 using Microsoft.AspNetCore.Components;
 using System.Text;
 
-namespace Blink.Web.Components.Pages.Home.Components;
+namespace Blink.Web.Components.Pages.Videos.Home.Components;
 
 public sealed partial class RecentlyUploadedDataContext
 {

@@ -22,11 +22,11 @@
         "enabled": false
       },
       {
-        "id": "Uploads",
+        "id": "VideoComments",
         "enabled": true
       },
       {
-        "id": "VideoComments",
+        "id": "VideoUploads",
         "enabled": true
       }
     ]

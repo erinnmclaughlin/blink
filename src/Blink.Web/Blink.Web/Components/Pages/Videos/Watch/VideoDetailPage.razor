@@ -66,23 +66,28 @@ else
                     <p class="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">@Video.Description</p>
                 </div>
             }
-        </div>
 
-        <!-- Action Buttons -->
-        <div class="bg-white dark:bg-gray-900 rounded-lg shadow-lg p-6">
-            <div class="flex flex-wrap gap-3">
-                <a href="@WatchUrl" download class="px-4 py-2 rounded bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium">
-                    Download Video
-                </a>
-                <button class="px-4 py-2 rounded border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 dark:text-gray-200 text-sm font-medium">
-                    Share
-                </button>
-                <button class="px-4 py-2 rounded border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 dark:text-gray-200 text-sm font-medium">
-                    Edit Details
-                </button>
-                <button class="px-4 py-2 rounded border border-red-300 dark:border-red-700 hover:bg-red-50 dark:hover:bg-red-900 text-red-600 dark:text-red-400 text-sm font-medium ml-auto">
-                    Delete
-                </button>
+            <div class="flex flex-wrap gap-3 mt-10">
+                <FeatureGate FeatureName="@FeatureFlags.VideoDownloads">
+                    <a href="@WatchUrl" download class="px-4 py-2 rounded bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium">
+                        Download Video
+                    </a>
+                </FeatureGate>
+                <FeatureGate FeatureName="@FeatureFlags.VideoSharing">
+                    <button class="px-4 py-2 rounded border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 dark:text-gray-200 text-sm font-medium">
+                        Share
+                    </button>
+                </FeatureGate>
+                <FeatureGate FeatureName="@FeatureFlags.EditVideoDetails">
+                    <button class="px-4 py-2 rounded border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 dark:text-gray-200 text-sm font-medium">
+                        Edit Details
+                    </button>
+                </FeatureGate>
+                <FeatureGate FeatureName="@FeatureFlags.DeleteVideos">
+                    <button class="px-4 py-2 rounded border border-red-300 dark:border-red-700 hover:bg-red-50 dark:hover:bg-red-900 text-red-600 dark:text-red-400 text-sm font-medium ml-auto">
+                        Delete
+                    </button>
+                </FeatureGate>
             </div>
         </div>
 

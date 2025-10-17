@@ -1,11 +1,10 @@
 using Blink.Storage;
 using Blink.VideosApi.Contracts.GetById;
-using Blink.Web.Client;
 using MediatR;
 using Microsoft.AspNetCore.Components;
 using System.Text;
 
-namespace Blink.Web.Components.Pages.Video;
+namespace Blink.Web.Components.Pages.Videos.Watch;
 
 public sealed partial class VideoDetailPage
 {

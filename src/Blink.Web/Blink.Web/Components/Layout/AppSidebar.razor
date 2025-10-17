@@ -23,7 +23,7 @@
         </li>
         <AppAuthorizeView>
             <li class="-mx-6 mt-auto">
-                <a href="auth" class="hidden lg:flex items-center gap-x-4 px-6 py-3 text-sm/6 font-semibold text-gray-900 hover:bg-gray-50 dark:text-white dark:hover:bg-white/5 ">
+                <a href="profile" class="hidden lg:flex items-center gap-x-4 px-6 py-3 text-sm/6 font-semibold text-gray-900 hover:bg-gray-50 dark:text-white dark:hover:bg-white/5 ">
                     @AppIcon.AnonymousAvatar()
                     <span class="sr-only">Your profile</span>
                     <span aria-hidden="true">@context.DisplayName</span>
@@ -38,7 +38,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        IsUploadEnabled = await FeatureFlagManager.IsEnabledAsync(FeatureFlags.Uploads);
+        IsUploadEnabled = await FeatureFlagManager.IsEnabledAsync(FeatureFlags.VideoUploads);
     }
 
     private sealed record NavLinkInfo(string Text, string Href, RenderFragment Content, NavLinkMatch Match = NavLinkMatch.Prefix);

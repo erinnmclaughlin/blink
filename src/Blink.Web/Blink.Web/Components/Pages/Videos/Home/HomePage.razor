@@ -2,7 +2,7 @@
 @attribute [Authorize]
 @attribute [StreamRendering]
 
-@using Blink.Web.Components.Pages.Home.Components
+@using Blink.Web.Components.Pages.Videos.Home.Components
 
 <PageTitle>Home</PageTitle>
 
@@ -12,7 +12,7 @@
             <h1 class="text-3xl font-bold dark:text-white">Blink Home Videos</h1>
             <p class="text-gray-600 dark:text-gray-300 mt-2">Organize, back up, and share your family's favorite moments.</p>
         </div>
-        <FeatureGate FeatureName="@FeatureFlags.Uploads">
+        <FeatureGate FeatureName="@FeatureFlags.VideoUploads">
             <a href="/upload" class="px-6 py-3 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors flex items-center gap-2">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="w-5 h-5">
                     <path d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" stroke-linecap="round" stroke-linejoin="round" />
