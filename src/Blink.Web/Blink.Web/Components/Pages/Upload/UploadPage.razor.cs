@@ -2,6 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using Blink.Storage;
 using Blink.VideosApi.Contracts.Upload;
 using Blink.Web.Client;
+using MassTransit;
 using MediatR;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
@@ -19,6 +20,9 @@ public sealed partial class UploadPage
 
     [Inject]
     private IFeatureFlagManager FeatureFlagManager { get; set; } = default!;
+
+    [Inject]
+    private IPublishEndpoint PublishEndpoint { get; set; } = default!;
 
     [Inject]
     private IVideoStorageClient VideoStorageClient { get; set; } = default!;

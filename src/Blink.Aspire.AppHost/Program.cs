@@ -30,6 +30,7 @@ var blinkWebApp = builder
     .WithExternalHttpEndpoints()
     .WithAwaitedReference(blinkDatabase)
     .WithAwaitedReference(keycloak)
+    .WithAwaitedReference(messaging)
     .WithAwaitedReference(storage.Blobs);
 
 //blinkWebApi

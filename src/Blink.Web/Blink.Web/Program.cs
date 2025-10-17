@@ -47,6 +47,7 @@ builder.AddNpgsqlDataSource(ServiceNames.BlinkDatabase);
 DefaultTypeMap.MatchNamesWithUnderscores = true; 
 SqlMapper.AddTypeHandler(new DateOnlyTypeHandler());
 
+builder.AddAndConfigureServiceBus();
 builder.AddBlinkStorage();
 
 var app = builder.Build();
