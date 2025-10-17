@@ -1,5 +1,7 @@
+using Blink.Messaging;
 using Blink.VideosApi.Contracts.Upload;
 using Dapper;
+using MassTransit;
 using MediatR;
 using Npgsql;
 using System.Security.Claims;
@@ -10,16 +12,16 @@ public sealed class RegisterUploadedVideoCommandHandler : IRequestHandler<Regist
 {
     private readonly NpgsqlConnection _connection;
     private readonly IHttpContextAccessor _httpContextAccessor;
-    private readonly ILogger<RegisterUploadedVideoCommandHandler> _logger;
+    private readonly IPublishEndpoint _publishEndpoint;
 
     public RegisterUploadedVideoCommandHandler(
         NpgsqlDataSource dataSource,
         IHttpContextAccessor httpContextAccessor,
-        ILogger<RegisterUploadedVideoCommandHandler> logger)
+        IPublishEndpoint publishEndpoint)
     {
         _connection = dataSource.CreateConnection();
         _httpContextAccessor = httpContextAccessor;
-        _logger = logger;
+        _publishEndpoint = publishEndpoint;
     }
 
     public void Dispose()
@@ -32,7 +34,7 @@ public sealed class RegisterUploadedVideoCommandHandler : IRequestHandler<Regist
         await _connection.OpenAsync(cancellationToken);
 
         var userId = GetCurrentUserId();
-        var now = DateTime.UtcNow;
+        var now = DateTimeOffset.UtcNow;
         var videoId = Guid.NewGuid();
 
         // Determine title - use provided title or derive from filename
@@ -69,9 +71,16 @@ public sealed class RegisterUploadedVideoCommandHandler : IRequestHandler<Regist
             UpdatedAt = now
         });
 
-        _logger.LogInformation(
-            "Video registered in database: {VideoId}, BlobName: {BlobName}, Owner: {OwnerId}",
-            videoId, request.BlobName, userId);
+        await _publishEndpoint.Publish(new VideoUploadedEvent
+        {
+            VideoId = videoId,
+            BlobName = request.BlobName,
+            Title = title,
+            FileName = request.FileName,
+            ContentType = contentType,
+            OwnerId = userId,
+            UploadedAt = now
+        }, cancellationToken);
     }
 
     private string GetCurrentUserId()

@@ -22,9 +22,6 @@ public sealed partial class UploadPage
     private IFeatureFlagManager FeatureFlagManager { get; set; } = default!;
 
     [Inject]
-    private IPublishEndpoint PublishEndpoint { get; set; } = default!;
-
-    [Inject]
     private IVideoStorageClient VideoStorageClient { get; set; } = default!;
 
     [Inject]

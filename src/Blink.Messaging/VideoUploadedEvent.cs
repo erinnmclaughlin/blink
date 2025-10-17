@@ -13,5 +13,5 @@ public sealed record VideoUploadedEvent
     public required string FileName { get; init; }
     public required string ContentType { get; init; }
     public long SizeInBytes { get; init; }
-    public DateTime UploadedAt { get; init; }
+    public DateTimeOffset UploadedAt { get; init; }
 }

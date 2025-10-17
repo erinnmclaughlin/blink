@@ -41,7 +41,8 @@ if (OperatingSystem.IsWindows())
     builder
         .AddDockerfile("blink-video-processor", "../..", "src/Blink.VideoProcessor/Dockerfile")
         .WithReference(messaging)
-        .WithReference(storage.Blobs);
+        .WithReference(storage.Blobs)
+        .WaitFor(messaging);
 }
 
 builder.Build().Run();

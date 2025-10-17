@@ -33,7 +33,7 @@ public sealed class VideoThumbnailGeneratedConsumer : IConsumer<VideoThumbnailGe
         await _connection.ExecuteAsync(sql, new
         {
             BlobName = context.Message.VideoBlobName,
-            ThumbnailBlobName = context.Message.VideoBlobName,
+            ThumbnailBlobName = context.Message.ThumbnailBlobName,
             UpdatedAt = DateTimeOffset.UtcNow
         });
     }
