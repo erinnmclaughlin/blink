@@ -89,6 +89,84 @@ else
             </div>
         </div>
 
+    <FeatureGate FeatureName="@FeatureFlags.VideoPeopleTagging">
+        <!-- People Tagging Section (UI sketch only, no functionality) -->
+        <div class="bg-white dark:bg-gray-900 rounded-lg shadow-lg p-6 mt-6">
+           <h2 class="text-2xl font-bold dark:text-white mb-4">People in this video</h2>
+
+           <!-- Existing tags (examples) -->
+           <div class="flex flex-wrap gap-2 mb-4">
+              <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
+                 <span class="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-semibold">EM</span>
+                 <span>Erin McLaughlin</span>
+                 <button type="button" class="ml-1 text-blue-500 hover:text-blue-700 dark:text-blue-300 dark:hover:text-blue-200" aria-label="Remove tag">×</button>
+              </span>
+              <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-800">
+                 <span class="w-6 h-6 rounded-full bg-green-600 text-white flex items-center justify-center text-xs font-semibold">JD</span>
+                 <span>John Doe</span>
+                 <button type="button" class="ml-1 text-green-500 hover:text-green-700 dark:text-green-300 dark:hover:text-green-200" aria-label="Remove tag">×</button>
+              </span>
+              <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800">
+                 <span class="w-6 h-6 rounded-full bg-purple-600 text-white flex items-center justify-center text-xs font-semibold">SK</span>
+                 <span>Sarah Kim</span>
+                 <button type="button" class="ml-1 text-purple-500 hover:text-purple-700 dark:text-purple-300 dark:hover:text-purple-200" aria-label="Remove tag">×</button>
+              </span>
+           </div>
+
+           <!-- Add/search person input (static) -->
+           <div class="flex flex-col sm:flex-row gap-3">
+              <div class="relative flex-1">
+                 <input type="text"
+                        placeholder="Search people or enter a name..."
+                        class="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-600" />
+
+                 <!-- Static suggestion dropdown example -->
+                 <div class="absolute z-10 mt-1 w-full bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-200 dark:border-gray-700">
+                    <ul class="max-h-56 overflow-auto divide-y divide-gray-100 dark:divide-gray-700">
+                       <li class="px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer">
+                          <div class="flex items-center justify-between">
+                             <div class="flex items-center gap-2">
+                                <span class="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-semibold">EM</span>
+                                <div>
+                                   <p class="text-sm text-gray-900 dark:text-gray-100">Erin McLaughlin</p>
+                                   <p class="text-xs text-gray-500 dark:text-gray-400">Existing user</p>
+                                </div>
+                             </div>
+                             <span class="text-xs text-gray-500 dark:text-gray-400">Tap to add</span>
+                          </div>
+                       </li>
+                       <li class="px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer">
+                          <div class="flex items-center gap-2">
+                             <span class="w-6 h-6 rounded-full bg-orange-600 text-white flex items-center justify-center text-xs font-semibold">AM</span>
+                             <p class="text-sm text-gray-900 dark:text-gray-100">Alex Martinez</p>
+                          </div>
+                       </li>
+                       <li class="px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer">
+                          <p class="text-sm text-gray-700 dark:text-gray-300">Create new person: "Your typed name"</p>
+                       </li>
+                    </ul>
+                 </div>
+              </div>
+
+              <div class="flex items-center gap-2">
+                 <button type="button" class="px-4 py-2 rounded bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium">Add</button>
+                 <button type="button" class="px-4 py-2 rounded border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 dark:text-gray-200 text-sm font-medium">Create new person</button>
+              </div>
+           </div>
+
+           <!-- Optional quick roles (visual only) -->
+           <div class="mt-4">
+              <label class="text-sm text-gray-700 dark:text-gray-300">Tag role (optional)</label>
+              <div class="flex flex-wrap gap-2 mt-2">
+                 <button type="button" class="px-3 py-1 rounded-full border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 text-sm">Speaker</button>
+                 <button type="button" class="px-3 py-1 rounded-full border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 text-sm">Guest</button>
+                 <button type="button" class="px-3 py-1 rounded-full border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 text-sm">Host</button>
+                 <button type="button" class="px-3 py-1 rounded-full border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 text-sm">Cameo</button>
+              </div>
+           </div>
+        </div>
+    </FeatureGate>
+
         <!-- Comments Section -->
         <FeatureGate FeatureName="@FeatureFlags.VideoComments">
             <div class="bg-white dark:bg-gray-900 rounded-lg shadow-lg p-6 mt-6">

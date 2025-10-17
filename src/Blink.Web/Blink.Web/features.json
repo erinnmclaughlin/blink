@@ -26,6 +26,10 @@
         "enabled": false
       },
       {
+        "id": "VideoPeopleTagging",
+        "enabled": false
+      },
+      {
         "id": "VideoUploads",
         "enabled": false
       }
