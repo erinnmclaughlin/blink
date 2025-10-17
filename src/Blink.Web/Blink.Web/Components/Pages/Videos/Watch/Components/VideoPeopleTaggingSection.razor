@@ -1,0 +1,182 @@
+@rendermode InteractiveAuto
+
+<FeatureGate FeatureName="@FeatureFlags.VideoPeopleTagging">
+   <!-- People Tagging Section (UI sketch only, no functionality) -->
+   <div class="bg-white dark:bg-gray-900 rounded-lg shadow-lg p-6 mt-6">
+      <h2 class="text-2xl font-bold dark:text-white mb-4">People in this video</h2>
+
+      <!-- Existing tags (dynamic) -->
+      <div class="flex flex-wrap gap-2 mb-4">
+         @if (taggedPeople.Count == 0)
+         {
+            <span class="text-sm text-gray-500 dark:text-gray-400">No people tagged yet.</span>
+         }
+         else
+         {
+            @foreach (var person in taggedPeople)
+            {
+               <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-700">
+                  <span class="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-semibold">@person.Initials</span>
+                  <span>@person.Name
+                     @if (!string.IsNullOrWhiteSpace(person.Role))
+                     {
+                        <text> — @person.Role</text>
+                     }
+                  </span>
+                  <button type="button" class="ml-1 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200" aria-label="Remove tag" @onclick="(() => RemovePerson(person))">×</button>
+               </span>
+            }
+         }
+      </div>
+
+      <!-- Add/search person input (static) -->
+      <div class="flex flex-col sm:flex-row gap-3">
+         <div class="relative flex-1">
+            <input type="text"
+                   placeholder="Search people or enter a name..."
+                   class="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-600"
+                   @bind-value="personQuery" @bind-value:event="oninput"/>
+
+            <!-- Static suggestion dropdown example (shown when typing) -->
+            @if (!string.IsNullOrWhiteSpace(personQuery))
+            {
+               <div class="absolute z-10 mt-1 w-full bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-200 dark:border-gray-700">
+                  <ul class="max-h-56 overflow-auto divide-y divide-gray-100 dark:divide-gray-700">
+                     <li class="px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer" @onclick="@(() => AddPerson("Erin McLaughlin"))">
+                        <div class="flex items-center justify-between">
+                           <div class="flex items-center gap-2">
+                              <span class="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-semibold">EM</span>
+                              <div>
+                                 <p class="text-sm text-gray-900 dark:text-gray-100">Erin McLaughlin</p>
+                                 <p class="text-xs text-gray-500 dark:text-gray-400">Existing user</p>
+                              </div>
+                           </div>
+                           <span class="text-xs text-gray-500 dark:text-gray-400">Tap to add</span>
+                        </div>
+                     </li>
+                     <li class="px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer" @onclick="@(() => AddPerson("Alex Martinez"))">
+                        <div class="flex items-center gap-2">
+                           <span class="w-6 h-6 rounded-full bg-orange-600 text-white flex items-center justify-center text-xs font-semibold">AM</span>
+                           <p class="text-sm text-gray-900 dark:text-gray-100">Alex Martinez</p>
+                        </div>
+                     </li>
+                     <li class="px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer" @onclick="AddFromQuery">
+                        <p class="text-sm text-gray-700 dark:text-gray-300">Create new person: "@personQuery"</p>
+                     </li>
+                  </ul>
+               </div>
+            }
+         </div>
+
+         <div class="flex items-center gap-2">
+            <button type="button" class="px-4 py-2 rounded bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed" @onclick="AddFromQuery" disabled="@string.IsNullOrWhiteSpace(personQuery)">Add</button>
+            <button type="button" class="px-4 py-2 rounded border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 dark:text-gray-200 text-sm font-medium" @onclick="AddFromQuery">Create new person</button>
+         </div>
+      </div>
+
+      <!-- Optional quick roles (visual only) -->
+      <div class="mt-4">
+         <label class="text-sm text-gray-700 dark:text-gray-300">Tag role (optional)</label>
+         <div class="flex flex-wrap gap-2 mt-2">
+            <button type="button" class="@GetRoleChipClasses("Speaker")" @onclick="@(() => SelectRole("Speaker"))">Speaker</button>
+            <button type="button" class="@GetRoleChipClasses("Guest")" @onclick="@(() => SelectRole("Guest"))">Guest</button>
+            <button type="button" class="@GetRoleChipClasses("Host")" @onclick="@(() => SelectRole("Host"))">Host</button>
+            <button type="button" class="@GetRoleChipClasses("Cameo")" @onclick="@(() => SelectRole("Cameo"))">Cameo</button>
+         </div>
+      </div>
+   </div>
+</FeatureGate>
+
+@code {
+    [Parameter]
+    public required VideoDetailVm Video { get; set; } 
+    
+    private sealed class PersonTag
+    {
+        public string Name { get; set; } = string.Empty;
+        public string Initials { get; set; } = string.Empty;
+        public string? Role { get; set; }
+    }
+
+    private readonly List<PersonTag> taggedPeople = new();
+    private string personQuery = string.Empty;
+    private string? selectedRole;
+
+    private bool IsAddDisabled => string.IsNullOrWhiteSpace(personQuery);
+
+    private void AddFromQuery()
+    {
+        if (string.IsNullOrWhiteSpace(personQuery))
+        {
+            return;
+        }
+
+        AddPerson(personQuery.Trim());
+    }
+
+    private void AddPerson(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            return;
+        }
+
+        var exists = taggedPeople.Any(p => string.Equals(p.Name, name, StringComparison.OrdinalIgnoreCase));
+        if (exists)
+        {
+            personQuery = string.Empty;
+            return;
+        }
+
+        taggedPeople.Add(new PersonTag
+        {
+            Name = name,
+            Initials = GenerateInitials(name),
+            Role = selectedRole
+        });
+
+        personQuery = string.Empty;
+        StateHasChanged();
+    }
+
+    private void RemovePerson(PersonTag person)
+    {
+        taggedPeople.Remove(person);
+        StateHasChanged();
+    }
+
+    private void SelectRole(string role)
+    {
+        selectedRole = selectedRole == role ? null : role;
+    }
+
+    private string GetRoleChipClasses(string role)
+    {
+        var isSelected = string.Equals(selectedRole, role, StringComparison.Ordinal);
+        var selectedClasses = "bg-blue-600 text-white border-blue-600 hover:bg-blue-600";
+        var baseClasses = "px-3 py-1 rounded-full border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 text-sm";
+        return isSelected ? $"{baseClasses} {selectedClasses}" : baseClasses;
+    }
+
+    private static string GenerateInitials(string name)
+    {
+        var parts = name
+            .Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Take(2)
+            .ToArray();
+
+        if (parts.Length == 0)
+        {
+            return "?";
+        }
+
+        if (parts.Length == 1)
+        {
+            return new string(parts[0].Trim().Take(1).Select(char.ToUpperInvariant).ToArray());
+        }
+
+        var first = char.ToUpperInvariant(parts[0][0]);
+        var second = char.ToUpperInvariant(parts[1][0]);
+        return $"{first}{second}";
+    }
+}
