@@ -33,6 +33,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Blink.Web", "src\Blink.Web\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Blink.Web.Client", "src\Blink.Web\Blink.Web.Client\Blink.Web.Client.csproj", "{0917AF02-ADF7-48A1-B8BF-5872BA798835}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Blink.DatabaseMigrator", "src\Blink.DatabaseMigrator\Blink.DatabaseMigrator.csproj", "{735809F3-A751-49D7-AEBB-48D41A18A56A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -151,6 +153,18 @@ Global
 		{0917AF02-ADF7-48A1-B8BF-5872BA798835}.Release|x64.Build.0 = Release|Any CPU
 		{0917AF02-ADF7-48A1-B8BF-5872BA798835}.Release|x86.ActiveCfg = Release|Any CPU
 		{0917AF02-ADF7-48A1-B8BF-5872BA798835}.Release|x86.Build.0 = Release|Any CPU
+		{735809F3-A751-49D7-AEBB-48D41A18A56A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{735809F3-A751-49D7-AEBB-48D41A18A56A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{735809F3-A751-49D7-AEBB-48D41A18A56A}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{735809F3-A751-49D7-AEBB-48D41A18A56A}.Debug|x64.Build.0 = Debug|Any CPU
+		{735809F3-A751-49D7-AEBB-48D41A18A56A}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{735809F3-A751-49D7-AEBB-48D41A18A56A}.Debug|x86.Build.0 = Debug|Any CPU
+		{735809F3-A751-49D7-AEBB-48D41A18A56A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{735809F3-A751-49D7-AEBB-48D41A18A56A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{735809F3-A751-49D7-AEBB-48D41A18A56A}.Release|x64.ActiveCfg = Release|Any CPU
+		{735809F3-A751-49D7-AEBB-48D41A18A56A}.Release|x64.Build.0 = Release|Any CPU
+		{735809F3-A751-49D7-AEBB-48D41A18A56A}.Release|x86.ActiveCfg = Release|Any CPU
+		{735809F3-A751-49D7-AEBB-48D41A18A56A}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -165,6 +179,7 @@ Global
 		{1C678AA1-C1FA-4A8E-8235-50DD0E53B55A} = {A7C59F7E-8D6E-423C-896F-F39DB9CC25AA}
 		{0885222E-CC50-4E4D-8A2E-7CC91452AA6A} = {A7C59F7E-8D6E-423C-896F-F39DB9CC25AA}
 		{0917AF02-ADF7-48A1-B8BF-5872BA798835} = {A7C59F7E-8D6E-423C-896F-F39DB9CC25AA}
+		{735809F3-A751-49D7-AEBB-48D41A18A56A} = {A7C59F7E-8D6E-423C-896F-F39DB9CC25AA}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7B2AAEE5-D361-4985-9019-907C59C8BAD8}

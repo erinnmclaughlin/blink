@@ -1,6 +1,6 @@
 ﻿using FluentMigrator;
 
-namespace Blink.Web.Migrations;
+namespace Blink.DatabaseMigrator.Migrations;
 
 [Migration(20250928_001)]
 public sealed class AddUserTable : Migration

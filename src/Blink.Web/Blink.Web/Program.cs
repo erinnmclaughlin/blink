@@ -1,6 +1,5 @@
 using Blink.Web.Components;
 using Blink.Web.Configuration;
-using FluentMigrator.Runner;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
@@ -67,11 +66,5 @@ app.MapPost("/logout", () => Results.SignOut(new AuthenticationProperties { Redi
     .RequireAuthorization();
 
 app.MapDefaultEndpoints();
-
-using (var scope = app.Services.CreateScope())
-{
-    var migrator = scope.ServiceProvider.GetRequiredService<IMigrationRunner>();
-    migrator.MigrateUp();
-}
 
 app.Run();

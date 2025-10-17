@@ -1,5 +1,4 @@
-﻿using Blink.Web.Migrations;
-using Dapper;
+﻿using Dapper;
 using System.Data;
 
 namespace Blink.Web.Configuration;
@@ -9,7 +8,6 @@ public static class DatabaseConfiguration
     public static void AddAndConfigureDatabase(this WebApplicationBuilder builder)
     {
         builder.AddNpgsqlDataSource(ServiceNames.BlinkDatabase);
-        builder.AddAndConfigureFluentMigrations();
         DefaultTypeMap.MatchNamesWithUnderscores = true;
         SqlMapper.AddTypeHandler(new DateOnlyTypeHandler());
     }

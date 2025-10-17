@@ -1,11 +1,10 @@
-﻿using Blink;
-using FluentMigrator.Runner;
+﻿using FluentMigrator.Runner;
 
-namespace Blink.Web.Migrations;
+namespace Blink.DatabaseMigrator.Migrations;
 
 public static class FluentMigrationServiceRegistration
 {
-    public static void AddAndConfigureFluentMigrations(this WebApplicationBuilder builder)
+    public static void AddAndConfigureFluentMigrations(this IHostApplicationBuilder builder)
     {
         builder.Services
             .AddFluentMigratorCore()

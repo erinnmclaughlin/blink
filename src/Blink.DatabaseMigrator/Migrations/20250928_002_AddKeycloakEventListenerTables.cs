@@ -1,6 +1,6 @@
 ﻿using FluentMigrator;
 
-namespace Blink.Web.Migrations;
+namespace Blink.DatabaseMigrator.Migrations;
 
 [Migration(20250928_002)]
 public class AddKeycloakEventListenerTables : Migration

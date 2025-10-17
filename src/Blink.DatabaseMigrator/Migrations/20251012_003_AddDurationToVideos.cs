@@ -1,6 +1,6 @@
 using FluentMigrator;
 
-namespace Blink.Web.Migrations;
+namespace Blink.DatabaseMigrator.Migrations;
 
 [Migration(20241012_003)]
 public sealed class AddDurationToVideos : Migration

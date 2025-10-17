@@ -13,6 +13,10 @@ var messaging = builder.AddRabbitMQ(ServiceNames.Messaging);
 
 var blinkDatabase = postgres.Server.AddDatabase(ServiceNames.BlinkDatabase);
 
+var databaseMigrator = builder
+    .AddProject<Projects.Blink_DatabaseMigrator>(ServiceNames.BlinkDatabaseMigrator)
+    .WithAwaitedReference(blinkDatabase);
+
 var blinkWebApp = builder
     .AddProject<Projects.Blink_Web>(ServiceNames.BlinkWebApp)
     .WithExternalHttpEndpoints()
