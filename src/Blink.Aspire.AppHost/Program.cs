@@ -21,12 +21,7 @@ var blinkWebApp = builder
     .WithAwaitedReference(messaging)
     .WithAwaitedReference(storage.Blobs);
 
-builder
-    .AddProject<Projects.Blink_VideoSummarizer>(ServiceNames.BlinkVideoSummarizer)
-    .WithAwaitedReference(messaging)
-    .WithAwaitedReference(storage.Blobs);
-
-if (OperatingSystem.IsWindows())
+if (OperatingSystem.IsWindows() || OperatingSystem.IsLinux())
 {
     builder
         .AddDockerfile(ServiceNames.BlinkVideoProcessor, "../..", "src/Blink.VideoProcessor/Dockerfile")
@@ -35,6 +30,5 @@ if (OperatingSystem.IsWindows())
         .WaitFor(messaging)
         .WaitFor(storage.Blobs);
 }
-
 
 builder.Build().Run();
