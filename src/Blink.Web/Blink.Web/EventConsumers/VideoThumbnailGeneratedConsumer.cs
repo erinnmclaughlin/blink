@@ -3,7 +3,7 @@ using Dapper;
 using MassTransit;
 using Npgsql;
 
-namespace Blink.Web.Videos.Consumers;
+namespace Blink.Web.EventConsumers;
 
 public sealed class VideoThumbnailGeneratedConsumer : IConsumer<VideoThumbnailGenerated>, IDisposable
 {

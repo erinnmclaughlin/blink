@@ -2,7 +2,7 @@
 using Dapper;
 using System.Data;
 
-namespace Blink.Web;
+namespace Blink.Web.Configuration;
 
 public static class DatabaseConfiguration
 {

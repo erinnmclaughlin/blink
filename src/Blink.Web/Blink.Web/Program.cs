@@ -1,6 +1,5 @@
-using Blink.Web;
 using Blink.Web.Components;
-using Blink.Web.Videos;
+using Blink.Web.Configuration;
 using FluentMigrator.Runner;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;

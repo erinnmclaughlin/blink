@@ -1,7 +1,7 @@
-﻿using Blink.Web.Videos.Consumers;
+﻿using Blink.Web.EventConsumers;
 using MassTransit;
 
-namespace Blink.Web;
+namespace Blink.Web.Configuration;
 
 public static class MassTransitConfiguration
 {
