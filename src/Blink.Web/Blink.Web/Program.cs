@@ -67,8 +67,6 @@ app.MapGet("/login", () => Results
 app.MapPost("/logout", () => Results.SignOut(new AuthenticationProperties { RedirectUri = "/" }, [CookieAuthenticationDefaults.AuthenticationScheme, OpenIdConnectDefaults.AuthenticationScheme]))
     .RequireAuthorization();
 
-app.MapVideosApi();
-
 app.MapDefaultEndpoints();
 
 using (var scope = app.Services.CreateScope())

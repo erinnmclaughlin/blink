@@ -1,14 +1,12 @@
 using Blink.Storage;
-using Blink.VideosApi.Contracts.GetById;
 using MediatR;
 using Microsoft.AspNetCore.Components;
-using System.Text;
 
 namespace Blink.Web.Components.Pages.Videos.Watch;
 
 public sealed partial class VideoDetailPage
 {
-    private VideoDetailDto? Video { get; set; }
+    private VideoDetailVm? Video { get; set; }
     private string? ThumbnailUrl { get; set; }
     private string? WatchUrl { get; set; }
 
@@ -23,7 +21,7 @@ public sealed partial class VideoDetailPage
 
     protected override async Task OnInitializedAsync()
     {
-        Video = await Sender.Send(new GetVideoByIdQuery(VideoId));
+        Video = await Sender.Send(new GetVideoDetailQuery(VideoId));
 
         if (Video is not null)
         {
@@ -35,49 +33,4 @@ public sealed partial class VideoDetailPage
             ThumbnailUrl = await VideoStorageClient.GetThumbnailUrlAsync(Video.ThumbnailBlobName);
         }
     }
-
-    private static string GetDurationDisplayText(double durationInSeconds)
-    {
-        var ts = TimeSpan.FromSeconds(durationInSeconds);
-
-        var sb = new StringBuilder();
-
-        if (ts.Hours > 0)
-        {
-            sb.Append(ts.Hours);
-            sb.Append(':');
-            sb.Append(ts.Minutes.ToString("D2"));
-            sb.Append(':');
-            sb.Append(ts.Seconds.ToString("D2"));
-        }
-        else
-        {
-            sb.Append(ts.Minutes);
-            sb.Append(':');
-            sb.Append(ts.Seconds.ToString("D2"));
-        }
-
-        return sb.ToString();
-    }
-
-    private static string GetSizeDisplayText(long sizeInBytes)
-    {
-        if (sizeInBytes < 1024)
-        {
-            return $"{sizeInBytes} B";
-        }
-        else if (sizeInBytes < 1024 * 1024)
-        {
-            return $"{sizeInBytes / 1024.0:F2} KB";
-        }
-        else if (sizeInBytes < 1024 * 1024 * 1024)
-        {
-            return $"{sizeInBytes / (1024.0 * 1024.0):F2} MB";
-        }
-        else
-        {
-            return $"{sizeInBytes / (1024.0 * 1024.0 * 1024.0):F2} GB";
-        }
-    }
 }
-

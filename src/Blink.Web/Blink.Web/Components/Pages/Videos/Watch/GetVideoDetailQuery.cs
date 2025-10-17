@@ -1,11 +1,12 @@
-using Blink.VideosApi.Contracts.GetById;
-using Dapper;
+﻿using Dapper;
 using MediatR;
 using Npgsql;
 
-namespace Blink.Web.Videos.GetById;
+namespace Blink.Web.Components.Pages.Videos.Watch;
 
-public sealed class GetVideoByIdQueryHandler : IRequestHandler<GetVideoByIdQuery, VideoDetailDto?>, IDisposable
+public sealed record GetVideoDetailQuery(Guid VideoId) : IRequest<VideoDetailVm?>;
+
+public sealed class GetVideoByIdQueryHandler : IRequestHandler<GetVideoDetailQuery, VideoDetailVm?>, IDisposable
 {
     private readonly NpgsqlConnection _connection;
 
@@ -20,7 +21,7 @@ public sealed class GetVideoByIdQueryHandler : IRequestHandler<GetVideoByIdQuery
 
     }
 
-    public async Task<VideoDetailDto?> Handle(GetVideoByIdQuery request, CancellationToken cancellationToken)
+    public async Task<VideoDetailVm?> Handle(GetVideoDetailQuery request, CancellationToken cancellationToken)
     {
         await _connection.OpenAsync(cancellationToken);
 
@@ -34,9 +35,9 @@ public sealed class GetVideoByIdQueryHandler : IRequestHandler<GetVideoByIdQuery
                 thumbnail_blob_name,
                 uploaded_at
             FROM videos
-            WHERE id = @Id
+            WHERE id = @VideoId
             """;
 
-        return await _connection.QuerySingleOrDefaultAsync<VideoDetailDto>(sql, new { Id = request.Id });
+        return await _connection.QuerySingleOrDefaultAsync<VideoDetailVm>(sql, new { request.VideoId });
     }
 }

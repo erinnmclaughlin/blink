@@ -2,8 +2,6 @@
 @attribute [Authorize]
 @attribute [StreamRendering]
 
-@using Blink.VideosApi.Contracts.GetById
-
 <PageTitle>@(Video?.Title ?? "Video Details")</PageTitle>
 
 @if (Video is null)

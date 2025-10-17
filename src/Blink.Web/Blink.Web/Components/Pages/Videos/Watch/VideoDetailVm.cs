@@ -1,6 +1,6 @@
-namespace Blink.VideosApi.Contracts.GetById;
+﻿namespace Blink.Web.Components.Pages.Videos.Watch;
 
-public sealed record VideoDetailDto
+public sealed record VideoDetailVm
 {
     public required Guid Id { get; init; }
     public required string BlobName { get; init; }
