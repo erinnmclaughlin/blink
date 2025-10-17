@@ -1,0 +1,30 @@
+﻿@using MediatR
+@inject ISender Sender
+
+<FeatureGate FeatureName="@FeatureFlags.RecentUploads">
+    <section class="mb-12">
+        <h2 class="text-xl font-semibold dark:text-white mb-3">Recent uploads</h2>
+        @if (RecentUploads is null)
+        {
+            <p><em>Loading...</em></p>
+        }
+        else
+        {
+            <div class="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+                @foreach (var video in RecentUploads)
+                {
+                   <RecentlyUploadedVideoCard Video="video" />
+                }
+            </div>
+        }
+    </section>
+</FeatureGate>
+
+@code {
+    private List<RecentlyUploadedVideoVm>? RecentUploads { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        RecentUploads = await Sender.Send(new GetRecentUploadsQuery());
+    }
+}

@@ -1,5 +1,3 @@
-using Blink.Storage;
-using Blink.VideosApi.Contracts.GetRecentUploads;
 using Blink.VideosApi.Contracts.GetUrl;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;

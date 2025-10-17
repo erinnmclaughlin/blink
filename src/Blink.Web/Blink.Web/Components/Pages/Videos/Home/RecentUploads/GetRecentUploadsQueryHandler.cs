@@ -1,12 +1,10 @@
-using Blink.VideosApi.Contracts;
-using Blink.VideosApi.Contracts.GetRecentUploads;
 using Dapper;
 using MediatR;
 using Npgsql;
 
-namespace Blink.Web.Videos.GetRecentUploads;
+namespace Blink.Web.Components.Pages.Videos.Home.RecentUploads;
 
-internal sealed class GetRecentUploadsQueryHandler : IRequestHandler<GetRecentUploadsQuery, List<VideoSummaryDto>>
+internal sealed class GetRecentUploadsQueryHandler : IRequestHandler<GetRecentUploadsQuery, List<RecentlyUploadedVideoVm>>
 {
     private readonly NpgsqlDataSource _dataSource;
 
@@ -15,7 +13,7 @@ internal sealed class GetRecentUploadsQueryHandler : IRequestHandler<GetRecentUp
         _dataSource = dataSource;
     }
 
-    public async Task<List<VideoSummaryDto>> Handle(GetRecentUploadsQuery request, CancellationToken cancellationToken)
+    public async Task<List<RecentlyUploadedVideoVm>> Handle(GetRecentUploadsQuery request, CancellationToken cancellationToken)
     {
         const string sql = """
             SELECT
@@ -34,7 +32,7 @@ internal sealed class GetRecentUploadsQueryHandler : IRequestHandler<GetRecentUp
             """;
 
         await using var connection = await _dataSource.OpenConnectionAsync(cancellationToken);
-        var videos = await connection.QueryAsync<VideoSummaryDto>(sql);
+        var videos = await connection.QueryAsync<RecentlyUploadedVideoVm>(sql);
         return [.. videos];
     }
 }
