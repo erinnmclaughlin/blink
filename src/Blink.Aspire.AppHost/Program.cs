@@ -13,18 +13,6 @@ var messaging = builder.AddRabbitMQ(ServiceNames.Messaging);
 
 var blinkDatabase = postgres.Server.AddDatabase(ServiceNames.BlinkDatabase);
 
-//var blinkWebApi = builder.AddProject<Projects.Blink_WebApi>(ServiceNames.BlinkWebApi)
-//    .WithExternalHttpEndpoints()
-//    .WithAwaitedReference(blinkDatabase)
-//    .WithAwaitedReference(keycloak)
-//    .WithAwaitedReference(messaging)
-//    .WithAwaitedReference(storage.Blobs);
-
-//var blinkWebApp = builder.AddProject<Projects.Blink_WebApp>(ServiceNames.BlinkWebApp)
-//    .WithExternalHttpEndpoints()
-//    .WithAwaitedReference(blinkWebApi)
-//    .WithAwaitedReference(keycloak);
-
 var blinkWebApp = builder
     .AddProject<Projects.Blink_Web>(ServiceNames.BlinkWebApp)
     .WithExternalHttpEndpoints()
@@ -33,13 +21,16 @@ var blinkWebApp = builder
     .WithAwaitedReference(messaging)
     .WithAwaitedReference(storage.Blobs);
 
-//blinkWebApi
-//    .WithReference(blinkWebApp);
-
 if (OperatingSystem.IsWindows())
 {
     builder
         .AddDockerfile("blink-video-processor", "../..", "src/Blink.VideoProcessor/Dockerfile")
+        .WithReference(messaging)
+        .WithReference(storage.Blobs)
+        .WaitFor(messaging);
+
+    builder
+        .AddDockerfile("blink-video-summarizer", "../..", "src/Blink.VideoSummarizer/Dockerfile")
         .WithReference(messaging)
         .WithReference(storage.Blobs)
         .WaitFor(messaging);
