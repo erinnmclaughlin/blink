@@ -17,12 +17,7 @@
             {
                <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-700">
                   <span class="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-semibold">@person.Initials</span>
-                  <span>@person.Name
-                     @if (!string.IsNullOrWhiteSpace(person.Role))
-                     {
-                        <text> — @person.Role</text>
-                     }
-                  </span>
+                  <span>@person.Name</span>
                   <button type="button" class="ml-1 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200" aria-label="Remove tag" @onclick="(() => RemovePerson(person))">×</button>
                </span>
             }
@@ -84,12 +79,10 @@
     {
         public string Name { get; set; } = string.Empty;
         public string Initials { get; set; } = string.Empty;
-        public string? Role { get; set; }
     }
 
     private readonly List<PersonTag> taggedPeople = new();
     private string personQuery = string.Empty;
-    private string? selectedRole;
 
     private bool IsAddDisabled => string.IsNullOrWhiteSpace(personQuery);
 
@@ -120,8 +113,7 @@
         taggedPeople.Add(new PersonTag
         {
             Name = name,
-            Initials = GenerateInitials(name),
-            Role = selectedRole
+            Initials = GenerateInitials(name)
         });
 
         personQuery = string.Empty;
@@ -132,19 +124,6 @@
     {
         taggedPeople.Remove(person);
         StateHasChanged();
-    }
-
-    private void SelectRole(string role)
-    {
-        selectedRole = selectedRole == role ? null : role;
-    }
-
-    private string GetRoleChipClasses(string role)
-    {
-        var isSelected = string.Equals(selectedRole, role, StringComparison.Ordinal);
-        var selectedClasses = "bg-blue-600 text-white border-blue-600 hover:bg-blue-600";
-        var baseClasses = "px-3 py-1 rounded-full border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 text-sm";
-        return isSelected ? $"{baseClasses} {selectedClasses}" : baseClasses;
     }
 
     private static string GenerateInitials(string name)
