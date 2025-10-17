@@ -1,5 +1,4 @@
 using Blink.Messaging;
-using Blink.VideosApi.Contracts.Upload;
 using Dapper;
 using MassTransit;
 using MediatR;

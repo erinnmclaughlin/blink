@@ -1,8 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using Blink.Storage;
-using Blink.VideosApi.Contracts.Upload;
 using Blink.Web.Client;
-using MassTransit;
+using Blink.Web.Videos.RegisterUpload;
 using MediatR;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;

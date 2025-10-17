@@ -3,8 +3,10 @@ using Blink.VideosApi.Contracts;
 using Blink.Web;
 using Blink.Web.Client;
 using Blink.Web.Components;
+using Blink.Web.Migrations;
 using Blink.Web.Videos;
 using Dapper;
+using FluentMigrator.Runner;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
@@ -44,6 +46,7 @@ builder.Services.AddMediatR(o =>
 });
 
 builder.AddNpgsqlDataSource(ServiceNames.BlinkDatabase);
+builder.AddAndConfigureFluentMigrations();
 DefaultTypeMap.MatchNamesWithUnderscores = true; 
 SqlMapper.AddTypeHandler(new DateOnlyTypeHandler());
 
@@ -92,5 +95,11 @@ app.MapPost("/logout", () => Results.SignOut(new AuthenticationProperties { Redi
 app.MapVideosApi();
 
 app.MapDefaultEndpoints();
+
+using (var scope = app.Services.CreateScope())
+{
+    var migrator = scope.ServiceProvider.GetRequiredService<IMigrationRunner>();
+    migrator.MigrateUp();
+}
 
 app.Run();

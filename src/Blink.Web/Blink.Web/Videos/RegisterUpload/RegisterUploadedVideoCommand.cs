@@ -1,6 +1,6 @@
 using MediatR;
 
-namespace Blink.VideosApi.Contracts.Upload;
+namespace Blink.Web.Videos.RegisterUpload;
 
 public sealed record RegisterUploadedVideoCommand : IRequest
 {
