@@ -1,14 +1,18 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 
 namespace Blink.Web;
 
-public static class KeycloakRegistration
+public static class AuthConfiguration
 {
-    public static void AddAndConfigureKeycloak(this WebApplicationBuilder builder)
+    public static void AddAndConfigureAuth(this WebApplicationBuilder builder)
     {
         builder.Services
+            .AddCascadingAuthenticationState()
+            .AddHttpContextAccessor()
+            .AddScoped<AuthenticationStateProvider, RevalidatingAuthenticationStateProvider>()
             .AddAuthorization()
             .AddAuthentication(options =>
             {

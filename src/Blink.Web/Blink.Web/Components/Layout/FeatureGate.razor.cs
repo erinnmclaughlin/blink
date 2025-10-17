@@ -1,10 +1,11 @@
 using Microsoft.AspNetCore.Components;
+using Microsoft.FeatureManagement;
 
-namespace Blink.Web.Client.Components;
+namespace Blink.Web.Components.Layout;
 
 public sealed partial class FeatureGate
 {
-    private readonly IFeatureFlagManager _featureFlagManager;
+    private readonly IFeatureManager _featureManager;
 
     private bool IsEnabled { get; set; }
     
@@ -14,13 +15,13 @@ public sealed partial class FeatureGate
     [Parameter, EditorRequired] 
     public required string FeatureName { get; set; }
     
-    public FeatureGate(IFeatureFlagManager featureFlagManager)
+    public FeatureGate(IFeatureManager featureManager)
     {
-        _featureFlagManager = featureFlagManager;
+        _featureManager = featureManager;
     }
 
     protected override async Task OnInitializedAsync()
     {
-        IsEnabled = await _featureFlagManager.IsEnabledAsync(FeatureName);
+        IsEnabled = await _featureManager.IsEnabledAsync(FeatureName);
     }
 }

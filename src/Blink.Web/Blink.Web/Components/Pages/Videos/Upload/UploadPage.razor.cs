@@ -4,6 +4,7 @@ using Blink.Web.Client;
 using MediatR;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
+using Microsoft.FeatureManagement;
 
 namespace Blink.Web.Components.Pages.Videos.Upload;
 
@@ -17,7 +18,7 @@ public sealed partial class UploadPage
     private string? ErrorMessage { get; set; }
 
     [Inject]
-    private IFeatureFlagManager FeatureFlagManager { get; set; } = default!;
+    private IFeatureManager FeatureManager { get; set; } = default!;
 
     [Inject]
     private IVideoStorageClient VideoStorageClient { get; set; } = default!;
@@ -30,7 +31,7 @@ public sealed partial class UploadPage
 
     protected override async Task OnInitializedAsync()
     {
-        if (!await FeatureFlagManager.IsEnabledAsync(FeatureFlags.VideoUploads))
+        if (!await FeatureManager.IsEnabledAsync(FeatureFlags.VideoUploads))
         {
             NavigationManager.NavigateTo("/");
         }

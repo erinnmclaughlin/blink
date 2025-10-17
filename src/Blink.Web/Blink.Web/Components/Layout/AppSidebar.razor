@@ -1,4 +1,5 @@
-﻿@inject IFeatureFlagManager FeatureFlagManager
+﻿@using Microsoft.FeatureManagement
+@inject IFeatureManager FeatureManager
 
 <div class="flex h-16 shrink-0 items-center">
     <img src="https://tailwindcss.com/plus-assets/img/logos/mark.svg?color=indigo&shade=500" alt="Your Company" class="h-8 w-auto" />
@@ -38,7 +39,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        IsUploadEnabled = await FeatureFlagManager.IsEnabledAsync(FeatureFlags.VideoUploads);
+        IsUploadEnabled = await FeatureManager.IsEnabledAsync(FeatureFlags.VideoUploads);
     }
 
     private sealed record NavLinkInfo(string Text, string Href, RenderFragment Content, NavLinkMatch Match = NavLinkMatch.Prefix);
