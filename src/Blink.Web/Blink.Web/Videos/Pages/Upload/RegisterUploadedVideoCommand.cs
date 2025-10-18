@@ -11,7 +11,7 @@ public sealed record RegisterUploadedVideoCommand : IRequest
     public string? Title { get; init; }
     public string? Description { get; init; }
     public DateTime? VideoDate { get; init; }
-    public List<MentionTextarea.MentionData>? DescriptionMentions { get; init; }
+    public List<MentionMetadata>? DescriptionMentions { get; init; }
 
     public string GetContentType()
     {

@@ -19,7 +19,7 @@ public sealed partial class UploadPage
     private int UploadProgress { get; set; }
     private string? ErrorMessage { get; set; }
     private const string DescriptionPlaceholder = "Add a description... (Type @ to mention people)";
-    private List<MentionTextarea.MentionData> descriptionMentions = new();
+    private List<MentionMetadata> descriptionMentions = new();
     private List<MentionTextarea.MentionItem> mentionablePeople = new();
 
     [Inject]
@@ -77,7 +77,7 @@ public sealed partial class UploadPage
         Model.Description = newValue;
     }
 
-    private void OnDescriptionMentionsChanged(List<MentionTextarea.MentionData> mentions)
+    private void OnDescriptionMentionsChanged(List<MentionMetadata> mentions)
     {
         descriptionMentions = mentions;
     }

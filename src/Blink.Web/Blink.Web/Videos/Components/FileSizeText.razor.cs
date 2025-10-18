@@ -1,0 +1,21 @@
+﻿using Microsoft.AspNetCore.Components;
+
+namespace Blink.Web.Videos.Components;
+
+public sealed partial class FileSizeText
+{
+    private string DisplayText { get; set; } = "";
+
+    [Parameter] public long SizeInBytes { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        DisplayText = SizeInBytes switch
+        {
+            < 1024 => $"{SizeInBytes} B",
+            < 1024 * 1024 => $"{SizeInBytes / 1024.0:F2} KB",
+            < 1024 * 1024 * 1024 => $"{SizeInBytes / (1024.0 * 1024.0):F2} MB",
+            _ => $"{SizeInBytes / (1024.0 * 1024.0 * 1024.0):F2} GB"
+        };
+    }
+}

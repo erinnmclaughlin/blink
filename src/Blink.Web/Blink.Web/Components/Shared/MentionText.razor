@@ -13,15 +13,6 @@
     [Parameter]
     public string CssClass { get; set; } = "text-gray-700 dark:text-gray-300 whitespace-pre-wrap";
 
-    public class MentionMetadata
-    {
-        public string Id { get; set; } = string.Empty;
-        public string Name { get; set; } = string.Empty;
-        public int Position { get; set; }
-        public int Length { get; set; }
-        public bool IsNewPerson { get; set; }
-    }
-
     private string RenderTextWithMentions(string text, List<MentionMetadata>? mentions)
     {
         if (string.IsNullOrEmpty(text))

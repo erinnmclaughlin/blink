@@ -20,7 +20,6 @@ public sealed class GetVideoByIdQueryHandler : IRequestHandler<GetVideoDetailQue
     public void Dispose()
     {
         _connection.Dispose();
-
     }
 
     public async Task<VideoDetailVm?> Handle(GetVideoDetailQuery request, CancellationToken cancellationToken)
@@ -49,13 +48,13 @@ public sealed class GetVideoByIdQueryHandler : IRequestHandler<GetVideoDetailQue
         }
 
         // Deserialize mention metadata from JSON
-        List<MentionText.MentionMetadata>? mentions = null;
+        List<MentionMetadata>? mentions = null;
         if (row.description_mentions != null)
         {
             try
             {
                 var json = (string)row.description_mentions;
-                mentions = JsonSerializer.Deserialize<List<MentionText.MentionMetadata>>(json);
+                mentions = JsonSerializer.Deserialize<List<MentionMetadata>>(json);
             }
             catch
             {
