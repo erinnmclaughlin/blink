@@ -49,4 +49,3 @@ public sealed class ConvertDateTimeToDateTimeOffset : Migration
             .AlterColumn("updated_at").AsDateTime().NotNullable();
     }
 }
-

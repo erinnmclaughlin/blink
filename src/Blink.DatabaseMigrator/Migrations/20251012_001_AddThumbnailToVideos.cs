@@ -16,4 +16,3 @@ public sealed class AddThumbnailToVideos : Migration
         Delete.Column("thumbnail_blob_name").FromTable("videos");
     }
 }
-

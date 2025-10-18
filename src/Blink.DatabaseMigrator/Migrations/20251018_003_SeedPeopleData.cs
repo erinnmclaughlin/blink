@@ -68,4 +68,3 @@ public sealed class SeedPeopleData : Migration
         Delete.FromTable("people").Row(new { id = Guid.Parse("10000000-0000-0000-0000-000000000005") });
     }
 }
-

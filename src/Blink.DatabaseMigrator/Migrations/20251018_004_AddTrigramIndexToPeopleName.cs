@@ -30,4 +30,3 @@ public sealed class AddTrigramIndexToPeopleName : Migration
         // Note: We don't drop the pg_trgm extension in case other tables use it
     }
 }
-

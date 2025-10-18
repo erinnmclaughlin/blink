@@ -16,4 +16,3 @@ public sealed class AddDescriptionMentionsToVideos : Migration
         Delete.Column("description_mentions").FromTable("videos");
     }
 }
-

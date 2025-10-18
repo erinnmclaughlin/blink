@@ -18,4 +18,3 @@ public sealed class AddAspectRatioToVideos : Migration
         Delete.Column("height").FromTable("videos");
     }
 }
-

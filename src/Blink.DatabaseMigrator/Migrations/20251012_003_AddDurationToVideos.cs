@@ -16,4 +16,3 @@ public sealed class AddDurationToVideos : Migration
         Delete.Column("duration_in_seconds").FromTable("videos");
     }
 }
-

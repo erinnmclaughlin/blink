@@ -33,4 +33,3 @@ public sealed class AddPeopleTable : Migration
         Delete.Table("people");
     }
 }
-

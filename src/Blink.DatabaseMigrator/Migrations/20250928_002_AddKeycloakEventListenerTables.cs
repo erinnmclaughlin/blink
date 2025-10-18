@@ -25,5 +25,4 @@ public class AddKeycloakEventListenerTables : Migration
         Delete.Table("event_checkpoints").InSchema("keycloak");
         Delete.Schema("keycloak");
     }
-
 }

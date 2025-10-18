@@ -2,6 +2,7 @@
 using Blink.Storage;
 using Microsoft.Extensions.Hosting;
 
+// ReSharper disable once CheckNamespace
 namespace Microsoft.Extensions.DependencyInjection;
 
 public static class DependencyInjectionExtensions
