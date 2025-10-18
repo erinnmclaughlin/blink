@@ -71,6 +71,7 @@
         public string Name { get; set; } = string.Empty;
         public int Position { get; set; }
         public int Length { get; set; }
+        public bool IsNewPerson { get; set; }
     }
 
     protected override void OnParametersSet()
@@ -146,6 +147,7 @@
         }
         await MentionsChanged.InvokeAsync(mentions ?? new List<MentionData>());
     }
+
 
     public async ValueTask DisposeAsync()
     {

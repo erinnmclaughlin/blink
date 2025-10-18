@@ -1,5 +1,6 @@
 using Blink.Storage;
 using Blink.Web.Components.Shared;
+using Blink.Web.Features.People;
 using MediatR;
 using Microsoft.AspNetCore.Components;
 
@@ -12,16 +13,7 @@ public sealed partial class VideoDetailPage
     private string? WatchUrl { get; set; }
     private string commentText = string.Empty;
     private const string CommentPlaceholder = "Add a comment... (Type @ to mention someone)";
-    
-    // Sample people for mentions - in a real app, this would come from a user service
-    private readonly List<MentionTextarea.MentionItem> mentionablePeople = new()
-    {
-        new() { Id = "1", Name = "Erin McLaughlin", Subtitle = "Video Owner" },
-        new() { Id = "2", Name = "John Doe", Subtitle = "Team Member" },
-        new() { Id = "3", Name = "Alex Martinez", Subtitle = "Collaborator" },
-        new() { Id = "4", Name = "Sarah Kim", Subtitle = "Team Member" },
-        new() { Id = "5", Name = "Lisa Thompson", Subtitle = "Viewer" }
-    };
+    private List<MentionTextarea.MentionItem> mentionablePeople = new();
 
     [Parameter]
     public Guid VideoId { get; set; }
@@ -45,6 +37,9 @@ public sealed partial class VideoDetailPage
         {
             ThumbnailUrl = await VideoStorageClient.GetThumbnailUrlAsync(Video.ThumbnailBlobName);
         }
+
+        // Load mentionable people from database
+        mentionablePeople = await Sender.Send(new GetPeopleQuery());
     }
     
     private void OnCommentTextChanged(string newValue)
