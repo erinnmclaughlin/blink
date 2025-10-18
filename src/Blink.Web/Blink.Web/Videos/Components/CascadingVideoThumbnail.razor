@@ -12,9 +12,9 @@
     [Parameter, EditorRequired]
     public required string? ThumbnailBlobName { get; set; }
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+    protected override async Task OnParametersSetAsync()
     {
-        if (firstRender ||ThumbnailBlobName != _lastFetchedThumbnailBlobName)
+        if (ThumbnailBlobName != _lastFetchedThumbnailBlobName)
         {
             _thumbnailUrl = ThumbnailBlobName is null ? null : await StorageClient.GetThumbnailUrlAsync(ThumbnailBlobName);
             _lastFetchedThumbnailBlobName = ThumbnailBlobName;
