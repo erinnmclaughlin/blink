@@ -14,6 +14,7 @@
              style="min-height: calc(@Rows * 1.5em);"
              role="textbox"
              aria-multiline="true"
+             aria-label="@AriaLabel"
              @onblur="OnBlur">
         </div>
     }
@@ -24,6 +25,7 @@
                   placeholder="@Placeholder"
                   rows="@Rows"
                   class="@TextareaCssClass"
+                  aria-label="@AriaLabel"
                   @bind="currentValue"
                   @bind:event="oninput">
         </textarea>
@@ -45,6 +47,9 @@
 
     [Parameter]
     public string Placeholder { get; set; } = "Type @ to mention someone...";
+
+    [Parameter]
+    public string AriaLabel { get; set; } = "Text input";
 
     [Parameter]
     public int Rows { get; set; } = 3;

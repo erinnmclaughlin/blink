@@ -117,6 +117,7 @@
                                    ValueChanged="@OnDescriptionChanged"
                                    MentionsChanged="@OnDescriptionMentionsChanged"
                                    Placeholder="@DescriptionPlaceholder"
+                                   AriaLabel="Video description"
                                    Rows="4"
                                    MentionItems="@mentionablePeople" />
                     <ValidationMessage For="() => Model.Description" class="text-sm text-red-600 dark:text-red-400 mt-1" />
