@@ -12,6 +12,8 @@
              data-placeholder="@Placeholder"
              class="@ContentEditableCssClass"
              style="min-height: calc(@Rows * 1.5em);"
+             role="textbox"
+             aria-multiline="true"
              @onblur="OnBlur">
         </div>
     }
@@ -126,17 +128,6 @@
             }
             catch { }
         }
-    }
-
-    [JSInvokable]
-    public Task<List<MentionItem>> SearchMentions(string query)
-    {
-        // Filter mention items based on the query
-        var filtered = MentionItems
-            .Where(m => m.Name.Contains(query, StringComparison.OrdinalIgnoreCase))
-            .ToList();
-        
-        return Task.FromResult(filtered);
     }
 
 
