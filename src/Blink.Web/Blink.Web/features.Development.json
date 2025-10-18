@@ -10,6 +10,14 @@
         "enabled": false
       },
       {
+        "id": "DeleteVideos",
+        "enabled": false
+      },
+      {
+        "id": "EditVideoDetails",
+        "enabled": false
+      },
+      {
         "id": "GlobalSearch",
         "enabled": false
       },
@@ -26,8 +34,12 @@
         "enabled": true
       },
       {
-        "id": "VideoPeopleTagging",
-        "enabled": true
+        "id": "VideoDownloads",
+        "enabled": false
+      },
+      {
+        "id": "VideoSharing",
+        "enabled": false
       },
       {
         "id": "VideoUploads",

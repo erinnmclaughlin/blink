@@ -11,7 +11,6 @@ public static class FeatureFlags
     public const string SharedWithMe = nameof(SharedWithMe);
     public const string VideoComments = nameof(VideoComments);
     public const string VideoDownloads = nameof(VideoDownloads);
-    public const string VideoPeopleTagging = nameof(VideoPeopleTagging);
     public const string VideoSharing = nameof(VideoSharing);
     public const string VideoUploads = nameof(VideoUploads);
 }
