@@ -1,0 +1,36 @@
+﻿@DisplayText
+
+@code {
+    private string DisplayText { get; set; } = "";
+    
+    [Parameter]
+    public TimeSpan Duration { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        DisplayText = GetValue(Duration);
+    }
+
+    private static string GetValue(TimeSpan duration)
+    {
+        var sb = new System.Text.StringBuilder();
+
+        if (duration.Hours > 0)
+        {
+            sb.Append(duration.Hours);
+            sb.Append(':');
+            sb.Append(duration.Minutes.ToString("D2"));
+            sb.Append(':');
+            sb.Append(duration.Seconds.ToString("D2"));
+
+        }
+        else
+        {
+            sb.Append(duration.Minutes);
+            sb.Append(':');
+            sb.Append(duration.Seconds.ToString("D2"));
+        }
+
+        return sb.ToString();
+    }
+}

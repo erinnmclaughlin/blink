@@ -1,6 +1,6 @@
 ﻿using Blink.Web.Components.Shared;
 
-namespace Blink.Web.Components.Pages.Videos.Watch;
+namespace Blink.Web.Videos.Pages.Watch;
 
 public sealed record VideoDetailVm
 {

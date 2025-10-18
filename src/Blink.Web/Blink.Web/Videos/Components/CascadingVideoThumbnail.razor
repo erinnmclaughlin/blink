@@ -1,0 +1,23 @@
+﻿@inject Storage.IVideoStorageClient StorageClient
+
+@ChildContent?.Invoke(_thumbnailUrl)
+
+@code {
+    private string? _lastFetchedThumbnailBlobName;
+    private string? _thumbnailUrl;
+
+    [Parameter]
+    public RenderFragment<string?>? ChildContent { get; set; }
+    
+    [Parameter, EditorRequired]
+    public required string? ThumbnailBlobName { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (ThumbnailBlobName != _lastFetchedThumbnailBlobName)
+        {
+            _thumbnailUrl = ThumbnailBlobName is null ? null : await StorageClient.GetThumbnailUrlAsync(ThumbnailBlobName);
+            _lastFetchedThumbnailBlobName = ThumbnailBlobName;
+        }
+    }
+}

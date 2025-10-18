@@ -6,10 +6,9 @@ using Blink.Web.Features.People;
 using MediatR;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
-using Microsoft.Extensions.Logging;
 using Microsoft.FeatureManagement;
 
-namespace Blink.Web.Components.Pages.Videos.Upload;
+namespace Blink.Web.Videos.Pages.Upload;
 
 public sealed partial class UploadPage
 {
@@ -73,7 +72,7 @@ public sealed partial class UploadPage
         Model.File = null;
     }
 
-    private void OnDescriptionChanged(string newValue)
+    private void OnDescriptionChanged(string? newValue)
     {
         Model.Description = newValue;
     }

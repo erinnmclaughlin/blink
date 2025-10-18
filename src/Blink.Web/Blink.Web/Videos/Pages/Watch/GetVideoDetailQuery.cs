@@ -1,10 +1,10 @@
-﻿using Blink.Web.Components.Shared;
+﻿using System.Text.Json;
+using Blink.Web.Components.Shared;
 using Dapper;
 using MediatR;
 using Npgsql;
-using System.Text.Json;
 
-namespace Blink.Web.Components.Pages.Videos.Watch;
+namespace Blink.Web.Videos.Pages.Watch;
 
 public sealed record GetVideoDetailQuery(Guid VideoId) : IRequest<VideoDetailVm?>;
 

@@ -4,7 +4,7 @@ using Blink.Web.Features.People;
 using MediatR;
 using Microsoft.AspNetCore.Components;
 
-namespace Blink.Web.Components.Pages.Videos.Watch;
+namespace Blink.Web.Videos.Pages.Watch;
 
 public sealed partial class VideoDetailPage
 {

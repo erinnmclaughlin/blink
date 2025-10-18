@@ -1,0 +1,67 @@
+﻿@using Blink.Web.Videos.Features
+@using MediatR
+@using Blink.Web.Videos.Components
+@inject ISender Sender
+
+<FeatureGate FeatureName="@FeatureFlags.RecentUploads">
+    <section class="mb-12">
+        <h2 class="text-xl font-semibold dark:text-white mb-3">Recent uploads</h2>
+        @if (RecentUploads is null)
+        {
+            <p><em>Loading...</em></p>
+        }
+        else
+        {
+            <div class="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+                @foreach (var video in RecentUploads)
+                {
+                    <a href="video/@video.Id" class="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden bg-white dark:bg-gray-900">
+                        <div class="bg-gray-100 dark:bg-gray-800 h-50 relative">
+                            @if (GetVideoDuration(video) is { } duration)
+                            {
+                                <div class="absolute right-1 bottom-1 text-xs px-2 py-1 rounded bg-black/70 text-white">
+                                    <DurationText Duration="@duration" />
+                                </div>
+                            }
+                            <CascadingVideoThumbnail ThumbnailBlobName="@video.ThumbnailBlobName">
+                                @if (context is null)
+                                {
+                                    <div class="absolute inset-0 flex items-center justify-center text-gray-500 dark:text-gray-400 text-4xl">🎬</div>
+                                }
+                                else
+                                {
+                                    <img src="@context" alt="Thumbnail" class="object-cover w-full h-full" />
+                                }
+                            </CascadingVideoThumbnail>
+                        </div>
+                        <div class="p-3">
+                            <div class="font-medium truncate text-gray-900 dark:text-gray-100">
+                                @video.Title
+                            </div>
+                            <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                @video.UploadedAt.ToLocalTime().ToString("M/d/yyyy h:mm tt") • <FileSizeText SizeInBytes="video.SizeInBytes" />
+                            </div>
+                        </div>
+                    </a>
+                }
+            </div>
+        }
+    </section>
+</FeatureGate>
+
+@code {
+    private List<GetRecentUploads.Video>? RecentUploads { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        RecentUploads = await Sender.Send(new GetRecentUploads.Query());
+    }
+
+    private static TimeSpan? GetVideoDuration(GetRecentUploads.Video video)
+    {
+        if (video.DurationInSeconds is null)
+            return null;
+
+        return TimeSpan.FromSeconds(video.DurationInSeconds.Value);
+    }
+}

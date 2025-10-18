@@ -29,4 +29,20 @@
     <ProjectReference Include="..\Blink.Web.Client\Blink.Web.Client.csproj" />
   </ItemGroup>
   
+  <ItemGroup>
+    <Folder Include="Components\Pages\Videos\" />
+    <Folder Include="Videos\Pages\" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <AdditionalFiles Include="Videos\Pages\Home\HomePage.razor" />
+    <AdditionalFiles Include="Videos\Pages\Upload\UploadPage.razor" />
+    <AdditionalFiles Include="Videos\Pages\Watch\VideoDetailPage.razor" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <_ContentIncludedByDefault Remove="Components\Pages\Videos\Watch\VideoDetailPage.razor" />
+    <_ContentIncludedByDefault Remove="Videos\Pages\Home\SharedWithMe\SharedWithMeSection.razor" />
+  </ItemGroup>
+  
 </Project>

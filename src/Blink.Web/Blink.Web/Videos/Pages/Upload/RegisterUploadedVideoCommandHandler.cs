@@ -1,12 +1,12 @@
+using System.Security.Claims;
+using System.Text.Json;
 using Blink.Messaging;
 using Dapper;
 using MassTransit;
 using MediatR;
 using Npgsql;
-using System.Security.Claims;
-using System.Text.Json;
 
-namespace Blink.Web.Components.Pages.Videos.Upload;
+namespace Blink.Web.Videos.Pages.Upload;
 
 internal sealed class RegisterUploadedVideoCommandHandler : IRequestHandler<RegisterUploadedVideoCommand>
 {

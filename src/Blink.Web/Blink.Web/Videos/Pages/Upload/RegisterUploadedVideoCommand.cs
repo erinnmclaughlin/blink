@@ -1,7 +1,7 @@
-using MediatR;
 using Blink.Web.Components.Shared;
+using MediatR;
 
-namespace Blink.Web.Components.Pages.Videos.Upload;
+namespace Blink.Web.Videos.Pages.Upload;
 
 public sealed record RegisterUploadedVideoCommand : IRequest
 {
