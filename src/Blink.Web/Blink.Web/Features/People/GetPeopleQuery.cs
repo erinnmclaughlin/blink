@@ -11,7 +11,10 @@ public sealed record PersonListItem
     public string? Subtitle { get; init; }
 }
 
-public sealed record GetPeopleQuery(string? SearchQuery = null) : IRequest<List<PersonListItem>>;
+public sealed record GetPeopleQuery(
+    string? SearchQuery = null, 
+    int Skip = 0, 
+    int Take = 50) : IRequest<List<PersonListItem>>;
 
 internal sealed class GetPeopleQueryHandler : IRequestHandler<GetPeopleQuery, List<PersonListItem>>
 {
@@ -48,8 +51,10 @@ internal sealed class GetPeopleQueryHandler : IRequestHandler<GetPeopleQuery, Li
 
         sql += " ORDER BY name";
         
-        // Limit results to avoid returning the full table for unfiltered queries
-        sql += " LIMIT 1000";
+        // Add pagination
+        sql += " LIMIT @Take OFFSET @Skip";
+        parameters.Add("Take", request.Take);
+        parameters.Add("Skip", request.Skip);
 
         var people = await connection.QueryAsync<PersonListItem>(sql, parameters);
         return people.ToList();

@@ -10,10 +10,15 @@ public static class PeopleEndpoints
             .RequireAuthorization()
             .WithTags("People");
 
-        // Get all people (with optional search)
-        group.MapGet("/", async (ISender sender, string? search = null) =>
+        // Get all people (with optional search and pagination)
+        group.MapGet("/", async (ISender sender, string? search = null, int skip = 0, int take = 50) =>
         {
-            var people = await sender.Send(new GetPeopleQuery(search));
+            // Enforce reasonable limits
+            if (skip < 0) skip = 0;
+            if (take < 1) take = 1;
+            if (take > 100) take = 100; // Cap maximum page size
+            
+            var people = await sender.Send(new GetPeopleQuery(search, skip, take));
             return Results.Ok(people);
         })
         .WithName("GetPeople");
