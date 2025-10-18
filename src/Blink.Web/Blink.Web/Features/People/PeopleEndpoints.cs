@@ -44,7 +44,7 @@ public static class PeopleEndpoints
             };
 
             var personId = await sender.Send(command);
-            return Results.Created($"/api/people/{personId}", new { id = personId });
+            return Results.Created((string?)null, new { id = personId });
         })
         .WithName("CreatePerson");
     }
