@@ -1,5 +1,4 @@
 ﻿using Aspire.Hosting.Azure;
-using Microsoft.Extensions.Hosting;
 
 namespace Blink.AppHost;
 
@@ -18,7 +17,7 @@ public static class PostgresServerDefaults
         {
             postgres.RunAsContainer(x =>
             {
-                x.WithHostPort(58488);
+                // x.WithHostPort(58488);
                 x.WithDataVolume();
             });
         }

@@ -1,4 +1,5 @@
 @page "/videos/{videoId:guid}"
+@using Blink.Web.Videos.Pages.Watch.Components
 @attribute [Authorize]
 @attribute [StreamRendering]
 
@@ -12,7 +13,8 @@
 }
 else
 {
-    <div class="max-w-6xl mx-auto">
+    <!-- Main content container - consistent width across all sections -->
+    <div class="max-w-[1600px] mx-auto px-4">
         <!-- Back button -->
         <div class="mb-4">
             <a href="/" class="inline-flex items-center text-blue-600 dark:text-blue-400 hover:underline">
@@ -21,27 +23,28 @@ else
         </div>
 
         <!-- Video Player Section -->
-        <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden mb-6">
-            <div class="aspect-video bg-gray-100 dark:bg-gray-800 relative">
-                @if (!string.IsNullOrEmpty(WatchUrl))
-                {
-                    <video controls class="w-full h-full" poster="@ThumbnailUrl">
-                        <source src="@WatchUrl" type="video/mp4" />
-                        Your browser does not support the video tag.
-                    </video>
-                }
-                else
-                {
-                    <div class="absolute inset-0 flex items-center justify-center text-gray-500 dark:text-gray-400 text-6xl">
-                        🎬
-                    </div>
-                }
+        <div class="mb-6">
+            <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+                <div class="aspect-video bg-gray-100 dark:bg-gray-800 relative">
+                    @if (!string.IsNullOrEmpty(WatchUrl))
+                    {
+                        <video controls class="w-full h-full" poster="@ThumbnailUrl">
+                            <source src="@WatchUrl" type="video/mp4" />
+                            Your browser does not support the video tag.
+                        </video>
+                    }
+                    else
+                    {
+                        <div class="absolute inset-0 flex items-center justify-center text-gray-500 dark:text-gray-400 text-6xl">
+                            🎬
+                        </div>
+                    }
+                </div>
             </div>
         </div>
-
         <!-- Video Information -->
-        <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg p-6 mb-6">
-            <h1 class="text-3xl font-bold dark:text-white mb-4">@Video.Title</h1>
+        <h1 class="text-3xl font-bold dark:text-white mb-4">@Video.Title</h1>
+        <div class="mb-6">
 
             <div class="flex flex-wrap gap-4 text-sm text-gray-600 dark:text-gray-400 mb-4">
                 @if (Video.VideoDate.HasValue)
@@ -56,13 +59,14 @@ else
                     <span>Uploaded @Video.UploadedAt.ToLocalTime().ToString("MMM d, yyyy h:mm tt")</span>
                 </div>
             </div>
-
-            @if (!string.IsNullOrEmpty(Video.Description))
+            
+            @if (string.IsNullOrEmpty(Video.Description))
             {
-                <div class="border-t border-gray-200 dark:border-gray-700 pt-4">
-                    <h2 class="text-lg font-semibold dark:text-white mb-2">Description</h2>
-                    <MentionText Text="@Video.Description" Mentions="@Video.DescriptionMentions" />
-                </div>
+                <p class="text-gray-600 dark:text-gray-400 italic">No description has been added to this video.</p>
+            }
+            else
+            {
+                <MentionText Text="@Video.Description" Mentions="@Video.DescriptionMentions" />
             }
 
             <div class="flex flex-wrap gap-3 mt-10">
@@ -90,179 +94,6 @@ else
         </div>
         
         <!-- Comments Section -->
-        <FeatureGate FeatureName="@FeatureFlags.VideoComments">
-            <div class="rounded-lg p-6 mt-6">
-                <h2 class="text-2xl font-bold dark:text-white mb-6">Comments <span class="text-gray-500 dark:text-gray-400 text-lg">(12)</span></h2>
-
-                <!-- Add Comment Form -->
-                <div class="mb-8">
-                    <div class="flex gap-3">
-                        <div class="flex-shrink-0">
-                            <div class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-semibold">
-                                EM
-                            </div>
-                        </div>
-                        <div class="flex-1">
-                            <MentionTextarea Value="@commentText"
-                                           ValueChanged="@OnCommentTextChanged"
-                                           Placeholder="@CommentPlaceholder"
-                                           AriaLabel="Comment"
-                                           Rows="3"
-                                           MentionItems="@mentionablePeople" />
-                            <div class="flex justify-end gap-2 mt-2">
-                                <button @onclick="@(() => commentText = string.Empty)" 
-                                        class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded">
-                                    Cancel
-                                </button>
-                                <button @onclick="PostComment" 
-                                        disabled="@string.IsNullOrWhiteSpace(commentText)"
-                                        class="px-4 py-2 text-sm font-medium bg-blue-600 hover:bg-blue-700 text-white rounded disabled:opacity-50 disabled:cursor-not-allowed">
-                                    Comment
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Comments List -->
-                <div class="space-y-6">
-                    <!-- Comment 1 -->
-                    <div class="flex gap-3">
-                        <div class="flex-shrink-0">
-                            <div class="w-10 h-10 rounded-full bg-green-600 flex items-center justify-center text-white font-semibold">
-                                JD
-                            </div>
-                        </div>
-                        <div class="flex-1">
-                            <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
-                                <div class="flex items-center justify-between mb-2">
-                                    <div>
-                                        <span class="font-semibold text-gray-900 dark:text-gray-100">John Doe</span>
-                                        <span class="text-sm text-gray-500 dark:text-gray-400 ml-2">2 hours ago</span>
-                                    </div>
-                                    <button class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
-                                        <span class="text-xl">⋮</span>
-                                    </button>
-                                </div>
-                                <p class="text-gray-700 dark:text-gray-300">
-                                    Great video! The quality is amazing. Really helpful content, thanks for sharing!
-                                </p>
-                            </div>
-                            <div class="flex gap-4 mt-2 ml-4">
-                                <button class="text-sm text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 flex items-center gap-1">
-                                    <span>👍</span> <span>5</span>
-                                </button>
-                                <button class="text-sm text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400">
-                                    Reply
-                                </button>
-                            </div>
-
-                            <!-- Nested Reply -->
-                            <div class="ml-8 mt-4 flex gap-3">
-                                <div class="flex-shrink-0">
-                                    <div class="w-8 h-8 rounded-full bg-purple-600 flex items-center justify-center text-white text-sm font-semibold">
-                                        SK
-                                    </div>
-                                </div>
-                                <div class="flex-1">
-                                    <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-3">
-                                        <div class="flex items-center justify-between mb-2">
-                                            <div>
-                                                <span class="font-semibold text-gray-900 dark:text-gray-100 text-sm">Sarah Kim</span>
-                                                <span class="text-xs text-gray-500 dark:text-gray-400 ml-2">1 hour ago</span>
-                                            </div>
-                                        </div>
-                                        <p class="text-sm text-gray-700 dark:text-gray-300">
-                                            I agree! The production quality is top-notch.
-                                        </p>
-                                    </div>
-                                    <div class="flex gap-4 mt-2 ml-3">
-                                        <button class="text-xs text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 flex items-center gap-1">
-                                            <span>👍</span> <span>2</span>
-                                        </button>
-                                        <button class="text-xs text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400">
-                                            Reply
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Comment 2 -->
-                    <div class="flex gap-3">
-                        <div class="flex-shrink-0">
-                            <div class="w-10 h-10 rounded-full bg-orange-600 flex items-center justify-center text-white font-semibold">
-                                AM
-                            </div>
-                        </div>
-                        <div class="flex-1">
-                            <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
-                                <div class="flex items-center justify-between mb-2">
-                                    <div>
-                                        <span class="font-semibold text-gray-900 dark:text-gray-100">Alex Martinez</span>
-                                        <span class="text-sm text-gray-500 dark:text-gray-400 ml-2">5 hours ago</span>
-                                    </div>
-                                    <button class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
-                                        <span class="text-xl">⋮</span>
-                                    </button>
-                                </div>
-                                <p class="text-gray-700 dark:text-gray-300">
-                                    Could you do a follow-up video on this topic? I'd love to see more details about the setup process.
-                                </p>
-                            </div>
-                            <div class="flex gap-4 mt-2 ml-4">
-                                <button class="text-sm text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 flex items-center gap-1">
-                                    <span>👍</span> <span>8</span>
-                                </button>
-                                <button class="text-sm text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400">
-                                    Reply
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Comment 3 -->
-                    <div class="flex gap-3">
-                        <div class="flex-shrink-0">
-                            <div class="w-10 h-10 rounded-full bg-pink-600 flex items-center justify-center text-white font-semibold">
-                                LT
-                            </div>
-                        </div>
-                        <div class="flex-1">
-                            <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
-                                <div class="flex items-center justify-between mb-2">
-                                    <div>
-                                        <span class="font-semibold text-gray-900 dark:text-gray-100">Lisa Thompson</span>
-                                        <span class="text-sm text-gray-500 dark:text-gray-400 ml-2">1 day ago</span>
-                                    </div>
-                                    <button class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
-                                        <span class="text-xl">⋮</span>
-                                    </button>
-                                </div>
-                                <p class="text-gray-700 dark:text-gray-300">
-                                    This is exactly what I was looking for! Bookmarked for future reference. 📚
-                                </p>
-                            </div>
-                            <div class="flex gap-4 mt-2 ml-4">
-                                <button class="text-sm text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 flex items-center gap-1">
-                                    <span>👍</span> <span>3</span>
-                                </button>
-                                <button class="text-sm text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400">
-                                    Reply
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Load More Comments -->
-                <div class="mt-6 text-center">
-                    <button class="px-6 py-2 text-sm font-medium text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-gray-800 rounded-lg">
-                        Load more comments
-                    </button>
-                </div>
-            </div>
-        </FeatureGate>
-    </div>
+        <CommentSection />
+    </div> <!-- End main content container -->
 }

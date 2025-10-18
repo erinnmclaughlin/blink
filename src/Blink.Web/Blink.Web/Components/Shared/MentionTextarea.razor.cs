@@ -22,9 +22,9 @@ public sealed partial class MentionTextarea : IAsyncDisposable
 
     [Parameter] public int Rows { get; set; } = 3;
 
-    [Parameter] public string? Value { get; set; }
+    [Parameter] public string Value { get; set; } = "";
 
-    [Parameter] public EventCallback<string?> ValueChanged { get; set; }
+    [Parameter] public EventCallback<string> ValueChanged { get; set; }
 
     public MentionTextarea(IJSRuntime js)
     {
@@ -34,10 +34,7 @@ public sealed partial class MentionTextarea : IAsyncDisposable
     
     protected override void OnParametersSet()
     {
-        if (Value != _currentValue)
-        {
-            _currentValue = Value ?? string.Empty;
-        }
+        _currentValue = Value;
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
