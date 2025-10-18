@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using Blink.Storage;
 using Blink.Web.Client;
+using Blink.Web.Components.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
@@ -16,6 +17,18 @@ public sealed partial class UploadPage
     private bool UploadSuccess { get; set; }
     private int UploadProgress { get; set; }
     private string? ErrorMessage { get; set; }
+    private const string DescriptionPlaceholder = "Add a description... (Type @ to mention people)";
+    private List<MentionTextarea.MentionData> descriptionMentions = new();
+
+    // Sample people for mentions - in a real app, this would come from a user service
+    private readonly List<MentionTextarea.MentionItem> mentionablePeople = new()
+    {
+        new() { Id = "1", Name = "Erin McLaughlin", Subtitle = "Family Member" },
+        new() { Id = "2", Name = "John Doe", Subtitle = "Family Member" },
+        new() { Id = "3", Name = "Alex Martinez", Subtitle = "Friend" },
+        new() { Id = "4", Name = "Sarah Kim", Subtitle = "Family Member" },
+        new() { Id = "5", Name = "Lisa Thompson", Subtitle = "Friend" }
+    };
 
     [Inject]
     private IFeatureManager FeatureManager { get; set; } = default!;
@@ -53,6 +66,18 @@ public sealed partial class UploadPage
     {
         SelectedFile = null;
         Model.File = null;
+    }
+
+    private void OnDescriptionChanged(string newValue)
+    {
+        Model.Description = newValue;
+    }
+
+    private void OnDescriptionMentionsChanged(List<MentionTextarea.MentionData> mentions)
+    {
+        descriptionMentions = mentions;
+        // TODO: When saving to database, serialize descriptionMentions to JSON
+        // Example: JsonSerializer.Serialize(descriptionMentions)
     }
 
     private async Task HandleSubmit()
@@ -104,7 +129,8 @@ public sealed partial class UploadPage
                 SizeInBytes = fileSize,
                 Title = Model.Title,
                 Description = Model.Description,
-                VideoDate = Model.VideoDate
+                VideoDate = Model.VideoDate,
+                DescriptionMentions = descriptionMentions
             };
 
             await Sender.Send(command);

@@ -4,6 +4,7 @@ using MassTransit;
 using MediatR;
 using Npgsql;
 using System.Security.Claims;
+using System.Text.Json;
 
 namespace Blink.Web.Components.Pages.Videos.Upload;
 
@@ -27,12 +28,18 @@ internal sealed class RegisterUploadedVideoCommandHandler : IRequestHandler<Regi
     {
         var now = DateTimeOffset.UtcNow;
 
+        // Serialize mention metadata to JSON
+        var descriptionMentionsJson = request.DescriptionMentions != null && request.DescriptionMentions.Count > 0
+            ? JsonSerializer.Serialize(request.DescriptionMentions)
+            : null;
+
         var video = new
         {
             id = Guid.NewGuid(),
             blob_name = request.BlobName,
             title = !string.IsNullOrWhiteSpace(request.Title) ? request.Title : Path.GetFileNameWithoutExtension(request.FileName),
             description = request.Description,
+            description_mentions = descriptionMentionsJson,
             video_date = request.VideoDate,
             file_name = request.FileName,
             content_type = request.GetContentType(),
@@ -46,11 +53,11 @@ internal sealed class RegisterUploadedVideoCommandHandler : IRequestHandler<Regi
         {
             const string sql = """
                 INSERT INTO videos (
-                    id, blob_name, title, description, video_date, 
+                    id, blob_name, title, description, description_mentions, video_date, 
                     file_name, content_type, size_in_bytes, 
                     owner_id, uploaded_at, updated_at
                 ) VALUES (
-                    @id, @blob_name, @title, @description, @video_date,
+                    @id, @blob_name, @title, @description, @description_mentions::jsonb, @video_date,
                     @file_name, @content_type, @size_in_bytes,
                     @owner_id, @uploaded_at, @updated_at
                 )

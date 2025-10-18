@@ -9,7 +9,7 @@ var keycloak = builder.AddAndConfigureKeycloak(postgres);
 
 var storage = builder.AddAndConfigureAzureStorage();
 
-var messaging = builder.AddRabbitMQ(ServiceNames.Messaging);
+var messaging = builder.AddRabbitMQ(ServiceNames.Messaging).WithLifetime(ContainerLifetime.Persistent);
 
 var blinkDatabase = postgres.Server.AddDatabase(ServiceNames.BlinkDatabase);
 
