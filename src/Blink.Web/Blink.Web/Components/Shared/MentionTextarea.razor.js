@@ -104,30 +104,46 @@ export function initializeTribute(elementId, dotNetRef, mentionItems) {
     tribute.attach(element);
     tributeInstances[elementId] = tribute;
 
+    // Debounce timer for input changes
+    let debounceTimer = null;
+    const DEBOUNCE_MS = 150; // Adjust this value to tune responsiveness vs. performance
+
     // Listen for input changes to sync with Blazor
     element.addEventListener('input', async (e) => {
         try {
-            let value;
-            let mentions = null;
-            
-            if (element.getAttribute('contenteditable')) {
-                // For contenteditable, get the text content (without HTML)
-                value = getTextFromContentEditable(element);
-                // Extract mention metadata from the DOM
-                mentions = extractMentionsFromDOM(element);
-            } else {
-                // For textarea, use the value
-                value = e.target.value;
+            // Clear any pending debounced call
+            if (debounceTimer) {
+                clearTimeout(debounceTimer);
             }
-            
-            // Batch both updates into a single JS interop call for better performance
-            try {
-                await dotNetRef.invokeMethodAsync('OnInputChanged', value, mentions);
-            } catch (e) {
-                console.error('OnInputChanged failed:', e);
-            }
+
+            // Debounce the interop call to reduce overhead during fast typing
+            debounceTimer = setTimeout(async () => {
+                try {
+                    let value;
+                    let mentions = null;
+                    
+                    if (element.getAttribute('contenteditable')) {
+                        // For contenteditable, get the text content (without HTML)
+                        value = getTextFromContentEditable(element);
+                        // Extract mention metadata from the DOM
+                        mentions = extractMentionsFromDOM(element);
+                    } else {
+                        // For textarea, use the value
+                        value = e.target.value;
+                    }
+                    
+                    // Batch both updates into a single JS interop call for better performance
+                    try {
+                        await dotNetRef.invokeMethodAsync('OnInputChanged', value, mentions);
+                    } catch (e) {
+                        console.error('OnInputChanged failed:', e);
+                    }
+                } catch (error) {
+                    console.error('Error invoking callbacks:', error);
+                }
+            }, DEBOUNCE_MS);
         } catch (error) {
-            console.error('Error invoking callbacks:', error);
+            console.error('Error setting up debounce:', error);
         }
     });
 }
