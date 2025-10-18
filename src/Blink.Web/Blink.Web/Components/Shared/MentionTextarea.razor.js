@@ -108,7 +108,7 @@ export function initializeTribute(elementId, dotNetRef, mentionItems) {
     element.addEventListener('input', async (e) => {
         try {
             let value;
-            let mentions = [];
+            let mentions = null;
             
             if (element.getAttribute('contenteditable')) {
                 // For contenteditable, get the text content (without HTML)
@@ -120,19 +120,11 @@ export function initializeTribute(elementId, dotNetRef, mentionItems) {
                 value = e.target.value;
             }
             
+            // Batch both updates into a single JS interop call for better performance
             try {
-                await dotNetRef.invokeMethodAsync('OnTextChanged', value);
+                await dotNetRef.invokeMethodAsync('OnInputChanged', value, mentions);
             } catch (e) {
-                console.error('OnTextChanged failed:', e);
-            }
-            
-            // Update mentions metadata (always, even if empty, to keep in sync)
-            if (element.getAttribute('contenteditable')) {
-                try {
-                    await dotNetRef.invokeMethodAsync('OnMentionsChanged', mentions);
-                } catch (e) {
-                    console.error('OnMentionsChanged failed:', e);
-                }
+                console.error('OnInputChanged failed:', e);
             }
         } catch (error) {
             console.error('Error invoking callbacks:', error);

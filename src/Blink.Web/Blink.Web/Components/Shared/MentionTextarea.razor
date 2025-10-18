@@ -103,10 +103,15 @@
     }
 
     [JSInvokable]
-    public async Task OnTextChanged(string newValue)
+    public async Task OnInputChanged(string newValue, List<MentionData>? mentions)
     {
         currentValue = newValue;
         await ValueChanged.InvokeAsync(newValue);
+        
+        if (mentions != null && UseContentEditable)
+        {
+            await MentionsChanged.InvokeAsync(mentions);
+        }
     }
 
     private async Task OnBlur()
@@ -132,20 +137,6 @@
             .ToList();
         
         return Task.FromResult(filtered);
-    }
-
-    [JSInvokable]
-    public async Task OnMentionsChanged(List<MentionData> mentions)
-    {
-        Logger.LogInformation("OnMentionsChanged called with {Count} mentions", mentions?.Count ?? 0);
-        if (mentions != null)
-        {
-            foreach (var m in mentions)
-            {
-                Logger.LogInformation("  Mention: {Name} at position {Position}, length {Length}", m.Name, m.Position, m.Length);
-            }
-        }
-        await MentionsChanged.InvokeAsync(mentions ?? new List<MentionData>());
     }
 
 
