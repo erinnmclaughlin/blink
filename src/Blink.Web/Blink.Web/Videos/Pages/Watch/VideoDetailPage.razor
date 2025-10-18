@@ -21,7 +21,7 @@ else
         </div>
 
         <!-- Video Player Section -->
-        <div class="bg-white dark:bg-gray-900 rounded-lg shadow-lg overflow-hidden mb-6">
+        <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden mb-6">
             <div class="aspect-video bg-gray-100 dark:bg-gray-800 relative">
                 @if (!string.IsNullOrEmpty(WatchUrl))
                 {
@@ -40,7 +40,7 @@ else
         </div>
 
         <!-- Video Information -->
-        <div class="bg-white dark:bg-gray-900 rounded-lg shadow-lg p-6 mb-6">
+        <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg p-6 mb-6">
             <h1 class="text-3xl font-bold dark:text-white mb-4">@Video.Title</h1>
 
             <div class="flex flex-wrap gap-4 text-sm text-gray-600 dark:text-gray-400 mb-4">
@@ -91,7 +91,7 @@ else
         
         <!-- Comments Section -->
         <FeatureGate FeatureName="@FeatureFlags.VideoComments">
-            <div class="bg-white dark:bg-gray-900 rounded-lg shadow-lg p-6 mt-6">
+            <div class="rounded-lg p-6 mt-6">
                 <h2 class="text-2xl font-bold dark:text-white mb-6">Comments <span class="text-gray-500 dark:text-gray-400 text-lg">(12)</span></h2>
 
                 <!-- Add Comment Form -->
