@@ -16,7 +16,6 @@ public sealed partial class UploadPage
     private UploadVideoModel Model { get; set; } = new();
     private IBrowserFile? SelectedFile { get; set; }
     private bool IsUploading { get; set; }
-    private bool UploadSuccess { get; set; }
     private int UploadProgress { get; set; }
     private string? ErrorMessage { get; set; }
     private const string DescriptionPlaceholder = "Add a description... (Type @ to mention people)";
@@ -92,25 +91,18 @@ public sealed partial class UploadPage
 
         if (newPeople.Count == 0)
         {
-            Logger.LogInformation("No new people to create");
             return;
         }
-
-        Logger.LogInformation("Creating {Count} new people before saving video", newPeople.Count);
 
         // Create all new people in the database
         foreach (var mention in newPeople)
         {
-            Logger.LogInformation("Creating person: {Name}", mention.Name);
-            
             var command = new CreatePersonCommand
             {
                 Name = mention.Name
             };
 
             var personId = await Sender.Send(command);
-            
-            Logger.LogInformation("Person created with ID: {PersonId}", personId);
             
             // Update the mention ID from temporary to real
             mention.Id = personId.ToString();
@@ -122,6 +114,11 @@ public sealed partial class UploadPage
 
     private async Task HandleSubmit()
     {
+        if (IsUploading)
+        {
+            return;
+        }
+        
         if (SelectedFile == null)
         {
             ErrorMessage = "Please select a video file to upload.";
@@ -131,6 +128,7 @@ public sealed partial class UploadPage
         IsUploading = true;
         UploadProgress = 0;
         ErrorMessage = null;
+        await InvokeAsync(StateHasChanged);
 
         try
         {
@@ -148,7 +146,7 @@ public sealed partial class UploadPage
             }, progressCts.Token);
 
             // Upload
-            await Sender.Send(new UploadVideo.Command
+            var videoId = await Sender.Send(new UploadVideo.Command
             {
                 VideoFile = SelectedFile,
                 Title = Model.Title ?? SelectedFile.Name,
@@ -169,24 +167,15 @@ public sealed partial class UploadPage
             UploadProgress = 100;
             await InvokeAsync(StateHasChanged);
             
-            UploadSuccess = true;
             IsUploading = false;
+            
+            NavigationManager.NavigateTo($"videos/{videoId}");
         }
         catch (Exception ex)
         {
             ErrorMessage = $"An error occurred: {ex.Message}";
             IsUploading = false;
         }
-    }
-
-    private void ResetForm()
-    {
-        Model = new UploadVideoModel();
-        SelectedFile = null;
-        IsUploading = false;
-        UploadSuccess = false;
-        UploadProgress = 0;
-        ErrorMessage = null;
     }
 
     private sealed class UploadVideoModel

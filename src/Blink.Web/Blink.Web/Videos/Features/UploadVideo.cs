@@ -15,7 +15,7 @@ public static class UploadVideo
 {
     public const long MaxFileSize = 2000 * 1024 * 1024; // 2GB
 
-    public sealed record Command : IRequest
+    public sealed record Command : IRequest<Guid>
     {
         public required IBrowserFile VideoFile { get; init; }
 
@@ -25,7 +25,7 @@ public static class UploadVideo
         public DateTime? VideoDate { get; init; }
     }
 
-    public sealed class CommandHandler : IRequestHandler<Command>
+    public sealed class CommandHandler : IRequestHandler<Command, Guid>
     {
         private readonly NpgsqlDataSource _dataSource;
         private readonly IHttpContextAccessor _httpContextAccessor;
@@ -44,7 +44,7 @@ public static class UploadVideo
             _videoStorage = videoStorage;
         }
 
-        public async Task Handle(Command request, CancellationToken cancellationToken)
+        public async Task<Guid> Handle(Command request, CancellationToken cancellationToken)
         {
             // Upload to blob storage:
             var (videoId, blobName, fileSize) = await UploadVideoAsync(request.VideoFile, cancellationToken);
@@ -66,6 +66,8 @@ public static class UploadVideo
                 SizeInBytes = fileSize,
                 UploadedAt = now
             }, cancellationToken);
+
+            return videoId;
         }
 
         private async Task<(Guid videoId, string BlobName, long FileSize)> UploadVideoAsync(IBrowserFile file, CancellationToken cancellationToken)

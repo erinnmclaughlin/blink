@@ -1,6 +1,5 @@
 ﻿@using Blink.Web.Videos.Features
 @using MediatR
-@using Blink.Web.Videos.Components
 @inject ISender Sender
 
 <FeatureGate FeatureName="@FeatureFlags.RecentUploads">
@@ -15,7 +14,7 @@
             <div class="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
                 @foreach (var video in RecentUploads)
                 {
-                    <a href="video/@video.Id" class="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden bg-white dark:bg-gray-900">
+                    <a href="videos/@video.Id" class="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden bg-white dark:bg-gray-900">
                         <div class="bg-gray-100 dark:bg-gray-800 h-50 relative">
                             @if (GetVideoDuration(video) is { } duration)
                             {
