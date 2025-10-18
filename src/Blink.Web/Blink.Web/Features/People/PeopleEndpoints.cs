@@ -21,6 +21,17 @@ public static class PeopleEndpoints
         // Create a new person
         group.MapPost("/", async (ISender sender, CreatePersonRequest request) =>
         {
+            // Validate Name
+            if (string.IsNullOrWhiteSpace(request.Name))
+                return Results.BadRequest("Name is required and cannot be empty");
+            
+            if (request.Name.Length > 200)
+                return Results.BadRequest("Name must be <= 200 characters");
+            
+            // Validate LinkedUserId
+            if (request.LinkedUserId?.Length > 256)
+                return Results.BadRequest("LinkedUserId must be <= 256 characters");
+
             var command = new CreatePersonCommand
             {
                 Name = request.Name,
