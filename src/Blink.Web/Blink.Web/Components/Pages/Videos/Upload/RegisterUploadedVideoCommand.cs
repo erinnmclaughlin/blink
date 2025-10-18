@@ -1,4 +1,5 @@
 using MediatR;
+using Blink.Web.Components.Shared;
 
 namespace Blink.Web.Components.Pages.Videos.Upload;
 
@@ -10,6 +11,7 @@ public sealed record RegisterUploadedVideoCommand : IRequest
     public string? Title { get; init; }
     public string? Description { get; init; }
     public DateTime? VideoDate { get; init; }
+    public List<MentionTextarea.MentionData>? DescriptionMentions { get; init; }
 
     public string GetContentType()
     {

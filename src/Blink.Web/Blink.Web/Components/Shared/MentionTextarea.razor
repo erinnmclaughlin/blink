@@ -1,0 +1,162 @@
+@rendermode InteractiveServer
+@inject IJSRuntime JS
+@inject ILogger<MentionTextarea> Logger
+@implements IAsyncDisposable
+
+<div class="relative @CssClass">
+    @if (UseContentEditable)
+    {
+        <div @ref="textareaElement"
+             id="@elementId"
+             contenteditable="true"
+             data-placeholder="@Placeholder"
+             class="@ContentEditableCssClass"
+             style="min-height: calc(@Rows * 1.5em);"
+             role="textbox"
+             aria-multiline="true"
+             aria-label="@AriaLabel"
+             @onblur="OnBlur">
+        </div>
+    }
+    else
+    {
+        <textarea @ref="textareaElement"
+                  id="@elementId"
+                  placeholder="@Placeholder"
+                  rows="@Rows"
+                  class="@TextareaCssClass"
+                  aria-label="@AriaLabel"
+                  @bind="currentValue"
+                  @bind:event="oninput">
+        </textarea>
+    }
+</div>
+
+@code {
+    private ElementReference textareaElement;
+    private DotNetObjectReference<MentionTextarea>? dotNetRef;
+    private IJSObjectReference? tributeModule;
+    private string elementId = $"mention-textarea-{Guid.NewGuid():N}";
+    private string currentValue = string.Empty;
+
+    [Parameter]
+    public string? Value { get; set; }
+
+    [Parameter]
+    public EventCallback<string> ValueChanged { get; set; }
+
+    [Parameter]
+    public string Placeholder { get; set; } = "Type @ to mention someone...";
+
+    [Parameter]
+    public string AriaLabel { get; set; } = "Text input";
+
+    [Parameter]
+    public int Rows { get; set; } = 3;
+
+    [Parameter]
+    public string CssClass { get; set; } = "";
+
+    [Parameter]
+    public string TextareaCssClass { get; set; } = "w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-600 resize-none";
+
+    [Parameter]
+    public string ContentEditableCssClass { get; set; } = "w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-600 overflow-y-auto mention-textarea";
+
+    [Parameter]
+    public bool UseContentEditable { get; set; } = true;
+
+    [Parameter]
+    public List<MentionItem> MentionItems { get; set; } = new();
+
+    [Parameter]
+    public EventCallback<List<MentionData>> MentionsChanged { get; set; }
+
+    public class MentionData
+    {
+        public string Id { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
+        public int Position { get; set; }
+        public int Length { get; set; }
+        public bool IsNewPerson { get; set; }
+    }
+
+    protected override void OnParametersSet()
+    {
+        if (Value != currentValue)
+        {
+            currentValue = Value ?? string.Empty;
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            try
+            {
+                Logger.LogInformation("Initializing MentionTextarea for element: {ElementId}", elementId);
+                dotNetRef = DotNetObjectReference.Create(this);
+                tributeModule = await JS.InvokeAsync<IJSObjectReference>("import", "./Components/Shared/MentionTextarea.razor.js");
+                
+                await tributeModule.InvokeVoidAsync("initializeTribute", elementId, dotNetRef, MentionItems);
+                Logger.LogInformation("MentionTextarea initialized successfully for element: {ElementId}", elementId);
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "Error initializing Tribute.js for element: {ElementId}", elementId);
+            }
+        }
+    }
+
+    [JSInvokable]
+    public async Task OnInputChanged(string newValue, List<MentionData>? mentions)
+    {
+        currentValue = newValue;
+        await ValueChanged.InvokeAsync(newValue);
+        
+        if (mentions != null && UseContentEditable)
+        {
+            await MentionsChanged.InvokeAsync(mentions);
+        }
+    }
+
+    private async Task OnBlur()
+    {
+        if (tributeModule != null && UseContentEditable)
+        {
+            try
+            {
+                var value = await tributeModule.InvokeAsync<string>("getContentEditableText", elementId);
+                currentValue = value;
+                await ValueChanged.InvokeAsync(value);
+            }
+            catch { }
+        }
+    }
+
+
+    public async ValueTask DisposeAsync()
+    {
+        if (tributeModule != null)
+        {
+            try
+            {
+                await tributeModule.InvokeVoidAsync("disposeTribute", elementId);
+                await tributeModule.DisposeAsync();
+            }
+            catch { }
+        }
+
+        dotNetRef?.Dispose();
+    }
+
+    public sealed class MentionItem
+    {
+        public string Id { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
+        public string? Avatar { get; set; }
+        public string? Subtitle { get; set; }
+    }
+}
+

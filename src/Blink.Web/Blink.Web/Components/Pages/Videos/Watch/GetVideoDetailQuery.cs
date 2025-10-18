@@ -1,6 +1,8 @@
-﻿using Dapper;
+﻿using Blink.Web.Components.Shared;
+using Dapper;
 using MediatR;
 using Npgsql;
+using System.Text.Json;
 
 namespace Blink.Web.Components.Pages.Videos.Watch;
 
@@ -30,7 +32,8 @@ public sealed class GetVideoByIdQueryHandler : IRequestHandler<GetVideoDetailQue
                 id,
                 blob_name,
                 title, 
-                description, 
+                description,
+                description_mentions,
                 video_date,
                 thumbnail_blob_name,
                 uploaded_at
@@ -38,6 +41,38 @@ public sealed class GetVideoByIdQueryHandler : IRequestHandler<GetVideoDetailQue
             WHERE id = @VideoId
             """;
 
-        return await _connection.QuerySingleOrDefaultAsync<VideoDetailVm>(sql, new { request.VideoId });
+        var row = await _connection.QuerySingleOrDefaultAsync<dynamic>(sql, new { request.VideoId });
+        
+        if (row == null)
+        {
+            return null;
+        }
+
+        // Deserialize mention metadata from JSON
+        List<MentionText.MentionMetadata>? mentions = null;
+        if (row.description_mentions != null)
+        {
+            try
+            {
+                var json = (string)row.description_mentions;
+                mentions = JsonSerializer.Deserialize<List<MentionText.MentionMetadata>>(json);
+            }
+            catch
+            {
+                // If deserialization fails, mentions will be null and won't be styled
+            }
+        }
+
+        return new VideoDetailVm
+        {
+            Id = row.id,
+            BlobName = row.blob_name,
+            Title = row.title,
+            Description = row.description,
+            DescriptionMentions = mentions,
+            VideoDate = row.video_date != null ? DateOnly.FromDateTime((DateTime)row.video_date) : null,
+            ThumbnailBlobName = row.thumbnail_blob_name,
+            UploadedAt = row.uploaded_at
+        };
     }
 }

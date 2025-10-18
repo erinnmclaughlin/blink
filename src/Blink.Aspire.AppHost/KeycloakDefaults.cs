@@ -13,7 +13,7 @@ public static class KeycloakDefaults
 
         if (builder.ExecutionContext.IsRunMode)
         {
-            keycloak.WithDataVolume();
+            keycloak.WithDataVolume().WithLifetime(ContainerLifetime.Persistent);
         }
         else
         {

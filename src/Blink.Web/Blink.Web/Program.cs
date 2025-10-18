@@ -1,5 +1,6 @@
 using Blink.Web.Components;
 using Blink.Web.Configuration;
+using Blink.Web.Features.People;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
@@ -64,6 +65,8 @@ app.MapGet("/login", () => Results
 
 app.MapPost("/logout", () => Results.SignOut(new AuthenticationProperties { RedirectUri = "/" }, [CookieAuthenticationDefaults.AuthenticationScheme, OpenIdConnectDefaults.AuthenticationScheme]))
     .RequireAuthorization();
+
+app.MapPeopleEndpoints();
 
 app.MapDefaultEndpoints();
 
