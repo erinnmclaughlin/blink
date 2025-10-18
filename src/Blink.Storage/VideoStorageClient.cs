@@ -11,7 +11,7 @@ public interface IVideoStorageClient
     Task<Stream> DownloadAsync(string blobName, CancellationToken cancellationToken = default);
     Task<string> GetUrlAsync(string blobName, CancellationToken cancellationToken = default);
     Task<List<VideoInfo>> ListAsync(CancellationToken cancellationToken = default);
-    Task<(string BlobName, long FileSize)> UploadAsync(Stream videoStream, string fileName, CancellationToken cancellationToken = default);
+    Task<(Guid VideoId, string BlobName, long FileSize)> UploadAsync(Stream videoStream, string fileName, CancellationToken cancellationToken = default);
     Task<bool> UpdateTitleAsync(string blobName, string title, CancellationToken cancellationToken = default);
     Task<string> UploadThumbnailAsync(Stream thumbnailStream, string videoBlobName, CancellationToken cancellationToken = default);
     Task<string?> GetThumbnailUrlAsync(string thumbnailBlobName, CancellationToken cancellationToken = default);
@@ -196,9 +196,10 @@ public class VideoStorageClient : IVideoStorageClient
         }
     }
 
-    public async Task<(string BlobName, long FileSize)> UploadAsync(Stream videoStream, string fileName, CancellationToken cancellationToken = default)
+    public async Task<(Guid VideoId, string BlobName, long FileSize)> UploadAsync(Stream videoStream, string fileName, CancellationToken cancellationToken = default)
     {
-        var blobName = $"{Guid.NewGuid()}_{fileName}";
+        var videoId = Guid.CreateVersion7();
+        var blobName = $"{videoId}_{fileName}";
 
         try
         {
@@ -217,7 +218,7 @@ public class VideoStorageClient : IVideoStorageClient
                 }
             };
 
-            var response = await blobClient.UploadAsync(
+            await blobClient.UploadAsync(
                 videoStream,
                 uploadOptions,
                 cancellationToken);
@@ -227,7 +228,7 @@ public class VideoStorageClient : IVideoStorageClient
             var fileSize = properties.Value.ContentLength;
 
             _logger.LogInformation("Video uploaded successfully: {BlobName}, Size: {FileSize} bytes", blobName, fileSize);
-            return (blobName, fileSize);
+            return (videoId, blobName, fileSize);
         }
         catch (Exception ex)
         {

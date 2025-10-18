@@ -3,6 +3,7 @@ using Blink.Storage;
 using Blink.Web.Client;
 using Blink.Web.Components.Shared;
 using Blink.Web.Features.People;
+using Blink.Web.Videos.Features;
 using MediatR;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
@@ -135,9 +136,9 @@ public sealed partial class UploadPage
         {
             // Start progress simulation
             var progressCts = new CancellationTokenSource();
-            var progressTask = Task.Run(async () =>
+            _ = Task.Run(async () =>
             {
-                for (int i = 0; i <= 90; i += 5)
+                for (var i = 0; i <= 90; i += 5)
                 {
                     if (progressCts.Token.IsCancellationRequested) break;
                     UploadProgress = i;
@@ -146,36 +147,23 @@ public sealed partial class UploadPage
                 }
             }, progressCts.Token);
 
-            // Upload directly to Azure Storage
-            var maxFileSize = 2000L * 1024 * 1024; // 2000MB
-            using var stream = SelectedFile.OpenReadStream(maxFileSize);
-            
-            var (blobName, fileSize) = await VideoStorageClient.UploadAsync(
-                stream, 
-                SelectedFile.Name, 
-                CancellationToken.None);
+            // Upload
+            await Sender.Send(new UploadVideo.Command
+            {
+                VideoFile = SelectedFile,
+                Title = Model.Title ?? SelectedFile.Name,
+                Description = Model.Description,
+                DescriptionMentions = descriptionMentions,
+                VideoDate = Model.VideoDate
+            }, CancellationToken.None);
 
             // Stop progress simulation
-            progressCts.Cancel();
+            await progressCts.CancelAsync();
             UploadProgress = 95;
             await InvokeAsync(StateHasChanged);
 
-            // Create any new people mentioned before saving the video
+            // Create any new people mentioned
             await CreateNewPeopleAndUpdateMentions();
-
-            // Register the video in the database via the Web app's handler
-            var command = new RegisterUploadedVideoCommand
-            {
-                BlobName = blobName,
-                FileName = SelectedFile.Name,
-                SizeInBytes = fileSize,
-                Title = Model.Title,
-                Description = Model.Description,
-                VideoDate = Model.VideoDate,
-                DescriptionMentions = descriptionMentions
-            };
-
-            await Sender.Send(command);
 
             // Complete
             UploadProgress = 100;
@@ -199,18 +187,6 @@ public sealed partial class UploadPage
         UploadSuccess = false;
         UploadProgress = 0;
         ErrorMessage = null;
-    }
-
-    private static string FormatFileSize(long bytes)
-    {
-        if (bytes < 1024)
-            return $"{bytes} B";
-        else if (bytes < 1024 * 1024)
-            return $"{bytes / 1024.0:F2} KB";
-        else if (bytes < 1024 * 1024 * 1024)
-            return $"{bytes / (1024.0 * 1024.0):F2} MB";
-        else
-            return $"{bytes / (1024.0 * 1024.0 * 1024.0):F2} GB";
     }
 
     private sealed class UploadVideoModel
