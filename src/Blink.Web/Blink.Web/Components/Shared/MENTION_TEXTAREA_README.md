@@ -16,10 +16,10 @@ This is a proof-of-concept Blazor component that integrates Tribute.js to provid
    - Handles initialization, event binding, and cleanup
    - Generates initials automatically if no avatar is provided
 
-### 3. **MentionTextarea.razor.css**
-   - Custom styling for Tribute dropdown to match dark/light themes
+### 3. **Styles/main.css**
+   - Custom styling for Tribute.js dropdown to match dark/light themes
    - Uses Tailwind CSS classes for consistency
-
+   - Styles are processed by Tailwind and compiled into `wwwroot/main.css`
 ## Integration Points
 
 ### Dependencies Added
