@@ -12,13 +12,11 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddJsonFile("features.json", optional: false, reloadOnChange: true);
 builder.Configuration.AddJsonFile($"features.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true);
 
-builder.Services.AddRazorComponents()
+builder.Services
+    .AddRazorComponents()
     .AddInteractiveServerComponents()
     .AddInteractiveWebAssemblyComponents()
-    .AddAuthenticationStateSerialization(options =>
-    {
-        options.SerializeAllClaims = true;
-    });
+    .AddAuthenticationStateSerialization(o => o.SerializeAllClaims = true);
 
 builder.AddAndConfigureAuth();
 builder.AddAndConfigureDatabase();

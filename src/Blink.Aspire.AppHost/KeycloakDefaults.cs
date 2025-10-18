@@ -1,7 +1,4 @@
-﻿using Aspire.Hosting.Azure;
-using Microsoft.Extensions.Hosting;
-
-namespace Blink.AppHost;
+﻿namespace Blink.AppHost;
 
 public static class KeycloakDefaults
 {
@@ -9,8 +6,8 @@ public static class KeycloakDefaults
     {
         var keycloakPassword = builder.AddParameter("keycloak-password", secret: true);
 
-        var keycloak = builder.AddKeycloak("keycloak", 8080, adminPassword: keycloakPassword);
-
+        var keycloak = builder.AddKeycloak("keycloak", adminPassword: keycloakPassword);
+        
         if (builder.ExecutionContext.IsRunMode)
         {
             keycloak.WithDataVolume().WithLifetime(ContainerLifetime.Persistent);
