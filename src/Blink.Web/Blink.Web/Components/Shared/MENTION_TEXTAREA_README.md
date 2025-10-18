@@ -17,20 +17,19 @@ This is a proof-of-concept Blazor component that integrates Tribute.js to provid
    - Generates initials automatically if no avatar is provided
 
 ### 3. **Styles/main.css**
-   - Custom styling for Tribute.js dropdown to match dark/light themes
+   - Custom styling for the mention dropdown to match dark/light themes
    - Uses Tailwind CSS classes for consistency
    - Styles are processed by Tailwind and compiled into `wwwroot/main.css`
 ## Integration Points
 
 ### Dependencies Added
-- **App.razor**: Added Tribute.js CDN links (CSS and JS)
+- **App.razor**: Added Tribute.js CDN link
   ```html
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tributejs@5.1.3/dist/tribute.css" />
   <script src="https://cdn.jsdelivr.net/npm/tributejs@5.1.3/dist/tribute.min.js"></script>
   ```
 
 ### Styles
-- **Styles/main.css**: Added custom Tribute.js styles using Tailwind's `@apply` directives
+- **Styles/main.css**: Added custom styles for the mention dropdown using Tailwind's `@apply` directives
   - Styles are processed by Tailwind and compiled into `wwwroot/main.css`
   - Includes both light and dark mode support using `dark:` variants
   - Uses media query-based dark mode (`prefers-color-scheme`)
@@ -140,7 +139,7 @@ It replaces the static textarea with full mention functionality.
 **Styling issues:**
 - Check if dark mode is working correctly
 - Verify Tailwind CSS is compiling the custom styles
-- Inspect the `.tribute-container` element
+- Inspect the mention dropdown element in browser DevTools
 
 **Data binding issues:**
 - Ensure `ValueChanged` callback is implemented
