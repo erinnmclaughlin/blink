@@ -47,6 +47,9 @@ internal sealed class GetPeopleQueryHandler : IRequestHandler<GetPeopleQuery, Li
         }
 
         sql += " ORDER BY name";
+        
+        // Limit results to avoid returning the full table for unfiltered queries
+        sql += " LIMIT 1000";
 
         var people = await connection.QueryAsync<PersonListItem>(sql, parameters);
         return people.ToList();
