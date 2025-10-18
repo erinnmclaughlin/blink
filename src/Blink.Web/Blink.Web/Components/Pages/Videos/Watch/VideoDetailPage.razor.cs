@@ -39,7 +39,13 @@ public sealed partial class VideoDetailPage
         }
 
         // Load mentionable people from database
-        mentionablePeople = await Sender.Send(new GetPeopleQuery());
+        var people = await Sender.Send(new GetPeopleQuery());
+        mentionablePeople = people.Select(p => new MentionTextarea.MentionItem
+        {
+            Id = p.Id,
+            Name = p.Name,
+            Subtitle = p.Subtitle
+        }).ToList();
     }
     
     private void OnCommentTextChanged(string newValue)

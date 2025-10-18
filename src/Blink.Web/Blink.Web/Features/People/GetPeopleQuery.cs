@@ -1,13 +1,19 @@
-using Blink.Web.Components.Shared;
 using Dapper;
 using MediatR;
 using Npgsql;
 
 namespace Blink.Web.Features.People;
 
-public sealed record GetPeopleQuery(string? SearchQuery = null) : IRequest<List<MentionTextarea.MentionItem>>;
+public sealed record PersonListItem
+{
+    public string Id { get; init; } = string.Empty;
+    public string Name { get; init; } = string.Empty;
+    public string? Subtitle { get; init; }
+}
 
-internal sealed class GetPeopleQueryHandler : IRequestHandler<GetPeopleQuery, List<MentionTextarea.MentionItem>>
+public sealed record GetPeopleQuery(string? SearchQuery = null) : IRequest<List<PersonListItem>>;
+
+internal sealed class GetPeopleQueryHandler : IRequestHandler<GetPeopleQuery, List<PersonListItem>>
 {
     private readonly NpgsqlDataSource _dataSource;
 
@@ -16,7 +22,7 @@ internal sealed class GetPeopleQueryHandler : IRequestHandler<GetPeopleQuery, Li
         _dataSource = dataSource;
     }
 
-    public async Task<List<MentionTextarea.MentionItem>> Handle(GetPeopleQuery request, CancellationToken cancellationToken)
+    public async Task<List<PersonListItem>> Handle(GetPeopleQuery request, CancellationToken cancellationToken)
     {
         await using var connection = await _dataSource.OpenConnectionAsync(cancellationToken);
 
@@ -42,7 +48,7 @@ internal sealed class GetPeopleQueryHandler : IRequestHandler<GetPeopleQuery, Li
 
         sql += " ORDER BY name";
 
-        var people = await connection.QueryAsync<MentionTextarea.MentionItem>(sql, parameters);
+        var people = await connection.QueryAsync<PersonListItem>(sql, parameters);
         return people.ToList();
     }
 }
