@@ -115,7 +115,6 @@ export function initializeTribute(elementId, dotNetRef, mentionItems) {
                 value = getTextFromContentEditable(element);
                 // Extract mention metadata from the DOM
                 mentions = extractMentionsFromDOM(element);
-                console.log('Extracted mentions from DOM:', mentions);
             } else {
                 // For textarea, use the value
                 value = e.target.value;
@@ -123,17 +122,14 @@ export function initializeTribute(elementId, dotNetRef, mentionItems) {
             
             try {
                 await dotNetRef.invokeMethodAsync('OnTextChanged', value);
-                console.log('OnTextChanged succeeded');
             } catch (e) {
                 console.error('OnTextChanged failed:', e);
             }
             
             // Update mentions metadata (always, even if empty, to keep in sync)
             if (element.getAttribute('contenteditable')) {
-                console.log('Calling OnMentionsChanged with:', mentions);
                 try {
                     await dotNetRef.invokeMethodAsync('OnMentionsChanged', mentions);
-                    console.log('OnMentionsChanged succeeded');
                 } catch (e) {
                     console.error('OnMentionsChanged failed:', e);
                 }
@@ -142,8 +138,6 @@ export function initializeTribute(elementId, dotNetRef, mentionItems) {
             console.error('Error invoking callbacks:', error);
         }
     });
-
-    console.log(`Tribute.js initialized for ${elementId}`);
 }
 
 export function getContentEditableText(elementId) {
