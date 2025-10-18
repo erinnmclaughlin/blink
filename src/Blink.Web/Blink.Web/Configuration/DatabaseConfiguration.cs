@@ -31,7 +31,7 @@ public static class DatabaseConfiguration
 
         public override void SetValue(IDbDataParameter parameter, DateOnly value)
         {
-            parameter.Value = value.ToDateTime(TimeOnly.MinValue); // Convert DateOnly to DateTime for Dapper
+            parameter.Value = value.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc);
             parameter.DbType = DbType.Date;
         }
     }

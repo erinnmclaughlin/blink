@@ -6,7 +6,7 @@ public sealed record VideoDetailVm
     public required string BlobName { get; init; }
     public required string Title { get; init; }
     public string? Description { get; init; }
-    public DateTime? VideoDate { get; init; }
+    public DateOnly? VideoDate { get; init; }
     public string? ThumbnailBlobName { get; init; }
-    public DateTime UploadedAt { get; init; }
+    public DateTimeOffset UploadedAt { get; init; }
 }
