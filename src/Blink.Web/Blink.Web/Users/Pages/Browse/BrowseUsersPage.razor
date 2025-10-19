@@ -1,0 +1,27 @@
+@using Blink.Web.Users.Features
+@using MediatR
+@inject ISender Sender
+@page "/users"
+
+@if (Users is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <ul>
+        @foreach (var user in Users)
+        {
+            <li>@user.UserName</li>
+        }
+    </ul>
+}
+
+@code {
+    private List<GetUsers.User>? Users { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        Users = await Sender.Send(new GetUsers.Query());
+    }
+}
