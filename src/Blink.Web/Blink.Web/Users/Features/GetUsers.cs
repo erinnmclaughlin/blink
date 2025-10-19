@@ -11,6 +11,8 @@ public static class GetUsers
     public sealed record User
     {
         public required string Id { get; init; }
+        public required string FirstName { get; init; }
+        public required string LastName { get; init; }
         public required string UserName { get; init; }
         public required string EmailAddress { get; init; }
     }
@@ -30,6 +32,8 @@ public static class GetUsers
             var sql = """
                       SELECT 
                           id as Id,
+                          first_name as FirstName,
+                          last_name as LastName,
                           username as UserName,
                           email as EmailAddress
                       FROM users

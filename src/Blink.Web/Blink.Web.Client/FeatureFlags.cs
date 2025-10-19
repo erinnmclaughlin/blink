@@ -13,4 +13,6 @@ public static class FeatureFlags
     public const string VideoDownloads = nameof(VideoDownloads);
     public const string VideoSharing = nameof(VideoSharing);
     public const string VideoUploads = nameof(VideoUploads);
+    public const string UserCreation = nameof(UserCreation);
+    public const string UserEditing = nameof(UserEditing);
 }
