@@ -1,7 +1,7 @@
 @using Blink.Web.Users.Features
 @using MediatR
 @inject ISender Sender
-@rendermode InteractiveServer
+@attribute [StreamRendering]
 @page "/users"
 
 @if (Users is null)
@@ -31,7 +31,7 @@ else
             </FeatureGate>
         </div>
 
-        @if (!FilteredUsers.Any())
+        @if (Users.Count == 0)
         {
             <div class="text-sm text-gray-500">No users found.</div>
         }
@@ -72,26 +72,6 @@ else
 
 @code {
     private List<GetUsers.User>? Users { get; set; }
-    private string? SearchText { get; set; }
-
-    private IEnumerable<GetUsers.User> FilteredUsers
-    {
-        get
-        {
-            if (Users is null)
-            {
-                return [];
-            }
-
-            if (string.IsNullOrWhiteSpace(SearchText))
-            {
-                return Users;
-            }
-
-            return Users.Where(u => !string.IsNullOrWhiteSpace(u.UserName) &&
-                                    u.UserName.Contains(SearchText, StringComparison.OrdinalIgnoreCase));
-        }
-    }
 
     protected override async Task OnInitializedAsync()
     {
