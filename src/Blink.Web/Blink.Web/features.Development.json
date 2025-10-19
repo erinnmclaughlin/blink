@@ -30,6 +30,10 @@
         "enabled": false
       },
       {
+        "id": "UserCreation",
+        "enabled": true
+      },
+      {
         "id": "VideoComments",
         "enabled": true
       },
