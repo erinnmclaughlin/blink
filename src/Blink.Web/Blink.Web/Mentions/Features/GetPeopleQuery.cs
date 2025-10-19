@@ -2,7 +2,7 @@ using Dapper;
 using MediatR;
 using Npgsql;
 
-namespace Blink.Web.Features.People;
+namespace Blink.Web.Mentions.Features;
 
 public sealed record PersonListItem
 {

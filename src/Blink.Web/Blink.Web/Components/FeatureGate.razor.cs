@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.FeatureManagement;
 
-namespace Blink.Web.Components.Layout;
+namespace Blink.Web.Components;
 
 public sealed partial class FeatureGate
 {

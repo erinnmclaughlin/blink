@@ -1,9 +1,9 @@
+using System.Security.Claims;
 using Dapper;
 using MediatR;
 using Npgsql;
-using System.Security.Claims;
 
-namespace Blink.Web.Features.People;
+namespace Blink.Web.Mentions.Features;
 
 public sealed record CreatePersonCommand : IRequest<Guid>
 {

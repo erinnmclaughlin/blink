@@ -1,5 +1,4 @@
-﻿using Blink.Web.Features.People;
-using Dapper;
+﻿using Dapper;
 using MediatR;
 using Npgsql;
 

@@ -1,6 +1,6 @@
 using Blink.Web.Components;
 using Blink.Web.Configuration;
-using Blink.Web.Features.People;
+using Blink.Web.Mentions.Features;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
