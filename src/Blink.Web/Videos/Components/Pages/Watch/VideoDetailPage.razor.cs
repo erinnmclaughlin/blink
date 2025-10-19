@@ -1,8 +1,9 @@
 using Blink.Storage;
+using Blink.Web.Videos.Pages.Watch;
 using MediatR;
 using Microsoft.AspNetCore.Components;
 
-namespace Blink.Web.Videos.Pages.Watch;
+namespace Blink.Web.Videos.Components.Pages.Watch;
 
 public sealed partial class VideoDetailPage
 {

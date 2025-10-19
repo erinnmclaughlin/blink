@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.FeatureManagement;
 
-namespace Blink.Web.Videos.Pages.Upload;
+namespace Blink.Web.Videos.Components.Pages.Upload;
 
 public sealed partial class UploadPage
 {

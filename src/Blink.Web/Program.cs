@@ -1,6 +1,6 @@
 using Blink.Web;
+using Blink.Web.Authentication;
 using Blink.Web.Components;
-using Blink.Web.Configuration;
 using Blink.Web.Mentions.Features;
 using MassTransit;
 using Microsoft.AspNetCore.Authentication;
