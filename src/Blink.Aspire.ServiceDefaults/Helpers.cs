@@ -1,6 +1,7 @@
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 
-namespace Blink;
+// ReSharper disable once CheckNamespace
+namespace Microsoft.Extensions.Hosting;
 
 public static class Helpers
 {

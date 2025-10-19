@@ -1,18 +1,20 @@
-﻿using Dapper;
-using System.Data;
+﻿using System.Data;
+using Dapper;
+using Microsoft.Extensions.Hosting;
 
-namespace Blink.Web.Configuration;
+// ReSharper disable once CheckNamespace
+namespace Microsoft.Extensions.DependencyInjection;
 
 public static class DatabaseConfiguration
 {
-    public static void AddAndConfigureDatabase(this WebApplicationBuilder builder)
+    public static void AddBlinkDatabase<T>(this T builder) where T : IHostApplicationBuilder
     {
-        builder.AddNpgsqlDataSource(ServiceNames.BlinkDatabase);
+        builder.AddNpgsqlDataSource("blink-db");
         DefaultTypeMap.MatchNamesWithUnderscores = true;
         SqlMapper.AddTypeHandler(new DateOnlyTypeHandler());
     }
 
-    public sealed class DateOnlyTypeHandler : SqlMapper.TypeHandler<DateOnly>
+    private sealed class DateOnlyTypeHandler : SqlMapper.TypeHandler<DateOnly>
     {
         public override DateOnly Parse(object value)
         {

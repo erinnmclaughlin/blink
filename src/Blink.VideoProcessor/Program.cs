@@ -1,10 +1,11 @@
 using Blink.VideoProcessor;
+using MassTransit;
 
 var builder = Host.CreateApplicationBuilder(args);
 
 builder.AddServiceDefaults();
 builder.AddBlinkStorage();
-builder.AddAndConfigureMessaging();
+builder.AddBlinkMessaging(o => o.AddConsumersFromNamespaceContaining<BlinkVideoProcessor>());
 
 builder.Services.AddTransient<IThumbnailGenerator, ThumbnailGenerator>();
 builder.Services.AddTransient<IVideoMetadataExtractor, FFprobeMetadataExtractor>();

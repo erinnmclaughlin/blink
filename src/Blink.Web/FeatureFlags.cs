@@ -1,4 +1,4 @@
-namespace Blink.Web.Client;
+﻿namespace Blink.Web;
 
 public static class FeatureFlags
 {

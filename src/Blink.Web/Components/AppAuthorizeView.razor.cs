@@ -1,7 +1,7 @@
+﻿using System.Security.Claims;
 using Microsoft.AspNetCore.Components;
-using System.Security.Claims;
 
-namespace Blink.Web.Client.Components;
+namespace Blink.Web.Components;
 
 public sealed partial class AppAuthorizeView
 {

@@ -1,5 +1,4 @@
-﻿using Blink;
-using Blink.Storage;
+﻿using Blink.Storage;
 using Microsoft.Extensions.Hosting;
 
 // ReSharper disable once CheckNamespace
@@ -9,7 +8,7 @@ public static class DependencyInjectionExtensions
 {
     public static void AddBlinkStorage(this IHostApplicationBuilder builder)
     {
-        builder.AddAzureBlobServiceClient(ServiceNames.AzureBlobStorage);
+        builder.AddAzureBlobServiceClient("blobs");
         builder.Services.AddScoped<IVideoStorageClient, VideoStorageClient>();
     }
 }

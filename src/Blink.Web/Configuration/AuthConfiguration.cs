@@ -10,7 +10,7 @@ namespace Blink.Web.Configuration;
 
 public static class AuthConfiguration
 {
-    public static void AddAndConfigureAuth(this WebApplicationBuilder builder)
+    public static void AddBlinkAuthorization(this WebApplicationBuilder builder)
     {
         builder.Services
             .AddCascadingAuthenticationState()
@@ -43,8 +43,8 @@ public static class AuthConfiguration
                     options.Scope.Add("offline_access");
 
                     // TODO: Can we use service discovery here? Seems to break WASM render mode.
-                    var keycloakBase = builder.Configuration.GetHttpsEndpoint(ServiceNames.Keycloak) ??
-                                       builder.Configuration.GetHttpEndpoint(ServiceNames.Keycloak);
+                    var keycloakBase = builder.Configuration.GetHttpsEndpoint("keycloak") ??
+                                       builder.Configuration.GetHttpEndpoint("keycloak");
                     if (!string.IsNullOrWhiteSpace(keycloakBase))
                     {
                         options.Authority = $"{keycloakBase}/realms/blink";

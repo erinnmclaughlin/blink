@@ -16,7 +16,7 @@ public static class MassTransitConfiguration
 
             busConfigurator.UsingRabbitMq((context, configurator) =>
             {
-                configurator.Host(builder.Configuration.GetConnectionString(ServiceNames.Messaging));
+                configurator.Host(builder.Configuration.GetConnectionString("blink-messaging"));
 
                 configurator.ConfigureEndpoints(context);
             });

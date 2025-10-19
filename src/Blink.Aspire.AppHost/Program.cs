@@ -1,4 +1,3 @@
-using Blink;
 using Blink.AppHost;
 
 var builder = DistributedApplication.CreateBuilder(args);
@@ -9,16 +8,16 @@ var keycloak = builder.AddAndConfigureKeycloak(postgres);
 
 var storage = builder.AddAndConfigureAzureStorage();
 
-var messaging = builder.AddRabbitMQ(ServiceNames.Messaging).WithLifetime(ContainerLifetime.Persistent);
+var messaging = builder.AddRabbitMQ("blink-messaging").WithLifetime(ContainerLifetime.Persistent);
 
-var blinkDatabase = postgres.Server.AddDatabase(ServiceNames.BlinkDatabase);
+var blinkDatabase = postgres.Server.AddDatabase("blink-db");
 
 var databaseMigrator = builder
-    .AddProject<Projects.Blink_DatabaseMigrator>(ServiceNames.BlinkDatabaseMigrator)
+    .AddProject<Projects.Blink_DatabaseMigrator>("blink-db-migrator")
     .WithAwaitedReference(blinkDatabase);
 
 var blinkWebApp = builder
-    .AddProject<Projects.Blink_Web>(ServiceNames.BlinkWebApp)
+    .AddProject<Projects.Blink_Web>("blink-webapp")
     .WithExternalHttpEndpoints()
     .WithAwaitedReference(blinkDatabase)
     .WithAwaitedReference(keycloak)
@@ -28,7 +27,8 @@ var blinkWebApp = builder
 if (OperatingSystem.IsWindows() || OperatingSystem.IsLinux())
 {
     builder
-        .AddDockerfile(ServiceNames.BlinkVideoProcessor, "../..", "src/Blink.VideoProcessor/Dockerfile")
+        .AddProject<Projects.Blink_VideoProcessor>("blink-video-processor")
+        //.AddDockerfile("blink-video-processor", "../..", "src/Blink.VideoProcessor/Dockerfile")
         .WithReference(messaging)
         .WithReference(storage.Blobs)
         .WaitFor(messaging)

@@ -8,14 +8,12 @@
   </PropertyGroup>
   
   <ItemGroup>
-    <PackageReference Include="Aspire.Npgsql" Version="9.5.1" />
-    <PackageReference Include="Dapper" Version="2.1.66" />
     <PackageReference Include="FluentMigrator" Version="7.1.0" />
     <PackageReference Include="FluentMigrator.Runner.Postgres" Version="7.1.0" />
   </ItemGroup>
   
   <ItemGroup>
     <ProjectReference Include="..\Blink.Aspire.ServiceDefaults\Blink.Aspire.ServiceDefaults.csproj" />
-    <ProjectReference Include="..\Blink.ServiceNames\Blink.ServiceNames.csproj" />
+    <ProjectReference Include="..\Blink.Database\Blink.Database.csproj" />
   </ItemGroup>
 </Project>
