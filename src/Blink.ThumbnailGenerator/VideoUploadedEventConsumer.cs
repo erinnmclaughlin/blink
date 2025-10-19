@@ -2,17 +2,17 @@ using Blink.Messaging;
 using Blink.Storage;
 using MassTransit;
 
-namespace Blink.VideoProcessor.Consumers;
+namespace Blink.ThumbnailGenerator;
 
-public sealed class VideoThumbnailGenerator : IConsumer<VideoUploadedEvent>
+public sealed class VideoUploadedEventConsumer : IConsumer<VideoUploadedEvent>
 {
-    private readonly ILogger<VideoThumbnailGenerator> _logger;
+    private readonly ILogger<VideoUploadedEventConsumer> _logger;
     private readonly IPublishEndpoint _publishEndpoint;
     private readonly IThumbnailGenerator _thumbnailGenerator;
     private readonly IVideoStorageClient _videoStorageClient;
 
-    public VideoThumbnailGenerator(
-        ILogger<VideoThumbnailGenerator> logger,
+    public VideoUploadedEventConsumer(
+        ILogger<VideoUploadedEventConsumer> logger,
         IPublishEndpoint publishEndpoint,
         IThumbnailGenerator thumbnailGenerator,
         IVideoStorageClient videoStorageClient)

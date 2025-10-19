@@ -1,6 +1,6 @@
 using System.Diagnostics;
 
-namespace Blink.VideoProcessor;
+namespace Blink.ThumbnailGenerator;
 
 /// <summary>
 /// Service for generating video thumbnails

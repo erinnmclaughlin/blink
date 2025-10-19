@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <UserSecretsId>dotnet-Blink.ThumbnailGenerator-6ad7f887-5f52-4fa0-8146-c942150380a6</UserSecretsId>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Blink.Messaging\Blink.Messaging.csproj" />
+      <ProjectReference Include="..\Blink.Storage\Blink.Storage.csproj" />
+    </ItemGroup>
+
+</Project>

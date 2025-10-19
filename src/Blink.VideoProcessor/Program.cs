@@ -7,7 +7,6 @@ builder.AddServiceDefaults();
 builder.AddBlinkStorage();
 builder.AddBlinkMessaging(o => o.AddConsumersFromNamespaceContaining<BlinkVideoProcessor>());
 
-builder.Services.AddTransient<IThumbnailGenerator, ThumbnailGenerator>();
 builder.Services.AddTransient<IVideoMetadataExtractor, FFprobeMetadataExtractor>();
 
 var host = builder.Build();

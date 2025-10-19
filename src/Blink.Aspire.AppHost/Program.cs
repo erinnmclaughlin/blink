@@ -24,6 +24,11 @@ var blinkWebApp = builder
     .WithAwaitedReference(messaging)
     .WithAwaitedReference(storage.Blobs);
 
+builder
+    .AddProject<Projects.Blink_ThumbnailGenerator>("blink-thumbnail-generator")
+    .WithAwaitedReference(messaging)
+    .WithAwaitedReference(storage.Blobs);
+
 if (OperatingSystem.IsWindows() || OperatingSystem.IsLinux())
 {
     builder
