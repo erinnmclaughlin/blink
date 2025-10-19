@@ -10,4 +10,8 @@
     <PackageReference Include="Aspire.Azure.Storage.Blobs" Version="9.5.1" />
   </ItemGroup>
   
+  <ItemGroup>
+    <ProjectReference Include="..\Blink.Aspire.ServiceDefaults\Blink.Aspire.ServiceDefaults.csproj" />
+  </ItemGroup>
+  
 </Project>

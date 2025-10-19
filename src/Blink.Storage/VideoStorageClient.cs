@@ -10,9 +10,7 @@ public interface IVideoStorageClient
     Task<bool> DeleteAsync(string blobName, CancellationToken cancellationToken = default);
     Task<Stream> DownloadAsync(string blobName, CancellationToken cancellationToken = default);
     Task<string> GetUrlAsync(string blobName, CancellationToken cancellationToken = default);
-    Task<List<VideoInfo>> ListAsync(CancellationToken cancellationToken = default);
     Task<(Guid VideoId, string BlobName, long FileSize)> UploadAsync(Stream videoStream, string fileName, CancellationToken cancellationToken = default);
-    Task<bool> UpdateTitleAsync(string blobName, string title, CancellationToken cancellationToken = default);
     Task<string> UploadThumbnailAsync(Stream thumbnailStream, string videoBlobName, CancellationToken cancellationToken = default);
     Task<string?> GetThumbnailUrlAsync(string thumbnailBlobName, CancellationToken cancellationToken = default);
 }
@@ -20,13 +18,19 @@ public interface IVideoStorageClient
 public class VideoStorageClient : IVideoStorageClient
 {
     private readonly BlobServiceClient _blobServiceClient;
+    private readonly IDateProvider _dateProvider;
+    private readonly IGuidGenerator _guidGenerator;
     private readonly ILogger<VideoStorageClient> _logger;
 
     public VideoStorageClient(
         BlobServiceClient blobServiceClient,
+        IDateProvider dateProvider,
+        IGuidGenerator guidGenerator,
         ILogger<VideoStorageClient> logger)
     {
         _blobServiceClient = blobServiceClient;
+        _dateProvider = dateProvider;
+        _guidGenerator = guidGenerator;
         _logger = logger;
     }
 
@@ -96,8 +100,8 @@ public class VideoStorageClient : IVideoStorageClient
                     BlobContainerName = "videos",
                     BlobName = blobName,
                     Resource = "b", // b for blob
-                    StartsOn = DateTimeOffset.UtcNow.AddMinutes(-5), // Allow for clock skew
-                    ExpiresOn = DateTimeOffset.UtcNow.AddHours(1)
+                    StartsOn = _dateProvider.UtcNow.AddMinutes(-5), // Allow for clock skew
+                    ExpiresOn = _dateProvider.UtcNow.AddHours(1)
                 };
 
                 sasBuilder.SetPermissions(BlobSasPermissions.Read);
@@ -111,8 +115,8 @@ public class VideoStorageClient : IVideoStorageClient
                 // User delegation SAS (Azure production with managed identity)
                 _logger.LogInformation("Generating user delegation SAS token for blob: {BlobName}", blobName);
                 
-                var startsOn = DateTimeOffset.UtcNow.AddMinutes(-5);
-                var expiresOn = DateTimeOffset.UtcNow.AddHours(1);
+                var startsOn = _dateProvider.UtcNow.AddMinutes(-5);
+                var expiresOn = _dateProvider.UtcNow.AddHours(1);
                 
                 // Get a user delegation key
                 var userDelegationKey = await _blobServiceClient.GetUserDelegationKeyAsync(startsOn, expiresOn, cancellationToken);
@@ -144,66 +148,14 @@ public class VideoStorageClient : IVideoStorageClient
         }
     }
 
-    public async Task<List<VideoInfo>> ListAsync(CancellationToken cancellationToken = default)
-    {
-        try
-        {
-            var containerClient = _blobServiceClient.GetBlobContainerClient("videos");
-
-            // Check if container exists
-            if (!await containerClient.ExistsAsync(cancellationToken))
-            {
-                _logger.LogInformation("Videos container does not exist yet");
-                return [];
-            }
-
-            var videos = new List<VideoInfo>();
-
-            await foreach (var blobItem in containerClient.GetBlobsAsync(traits: BlobTraits.Metadata, cancellationToken: cancellationToken))
-            {
-                // Extract original filename from blob name (format: guid_filename)
-                var fileName = blobItem.Name;
-                var underscoreIndex = fileName.IndexOf('_');
-                if (underscoreIndex > 0 && underscoreIndex < fileName.Length - 1)
-                {
-                    fileName = fileName[(underscoreIndex + 1)..];
-                }
-
-                // Get title from metadata, or use filename as fallback
-                string? title = null;
-                if (blobItem.Metadata != null && blobItem.Metadata.TryGetValue("title", out var metadataTitle))
-                {
-                    title = metadataTitle;
-                }
-
-                videos.Add(new VideoInfo
-                {
-                    BlobName = blobItem.Name,
-                    FileName = fileName,
-                    SizeInBytes = blobItem.Properties.ContentLength ?? 0,
-                    LastModified = blobItem.Properties.LastModified,
-                    ContentType = blobItem.Properties.ContentType ?? "video/mp4"
-               });
-            }
-
-            _logger.LogInformation("Retrieved {Count} videos from blob storage", videos.Count);
-            return videos;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error listing videos");
-            throw;
-        }
-    }
-
     public async Task<(Guid VideoId, string BlobName, long FileSize)> UploadAsync(Stream videoStream, string fileName, CancellationToken cancellationToken = default)
     {
-        var videoId = Guid.CreateVersion7();
+        var videoId = _guidGenerator.NewGuid();
         var blobName = $"{videoId}_{fileName}";
 
         try
         {
-            var blobClient = await GetBlobClientAsync(blobName, cancellationToken);
+            var blobClient = await GetOrCreateBlobClient(blobName, cancellationToken);
 
             // Configure chunked upload for large files to prevent timeouts
             var uploadOptions = new BlobUploadOptions 
@@ -249,7 +201,7 @@ public class VideoStorageClient : IVideoStorageClient
     /// <summary>
     /// Gets a blob client and ensures the container exists (for write operations)
     /// </summary>
-    private async Task<BlobClient> GetBlobClientAsync(string blobName, CancellationToken cancellationToken)
+    private async Task<BlobClient> GetOrCreateBlobClient(string blobName, CancellationToken cancellationToken)
     {
         var containerClient = _blobServiceClient.GetBlobContainerClient("videos");
         
@@ -276,39 +228,6 @@ public class VideoStorageClient : IVideoStorageClient
         return containerClient.GetBlobClient(blobName);
     }
 
-    public async Task<bool> UpdateTitleAsync(string blobName, string title, CancellationToken cancellationToken = default)
-    {
-        try
-        {
-            var blobClient = GetBlobClient(blobName);
-
-            // Check if blob exists
-            if (!await blobClient.ExistsAsync(cancellationToken))
-            {
-                _logger.LogWarning("Video not found for title update: {BlobName}", blobName);
-                return false;
-            }
-
-            // Get current metadata
-            var properties = await blobClient.GetPropertiesAsync(cancellationToken: cancellationToken);
-            var metadata = properties.Value.Metadata;
-
-            // Update or add title metadata
-            metadata["title"] = title;
-
-            // Set the updated metadata
-            await blobClient.SetMetadataAsync(metadata, cancellationToken: cancellationToken);
-
-            _logger.LogInformation("Video title updated successfully: {BlobName}, Title: {Title}", blobName, title);
-            return true;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error updating video title: {BlobName}", blobName);
-            throw;
-        }
-    }
-
     public async Task<string> UploadThumbnailAsync(Stream thumbnailStream, string videoBlobName, CancellationToken cancellationToken = default)
     {
         // Create thumbnail blob name based on video blob name
@@ -316,7 +235,7 @@ public class VideoStorageClient : IVideoStorageClient
 
         try
         {
-            var blobClient = await GetBlobClientAsync(thumbnailBlobName, cancellationToken);
+            var blobClient = await GetOrCreateBlobClient(thumbnailBlobName, cancellationToken);
 
             var uploadOptions = new BlobUploadOptions 
             { 
