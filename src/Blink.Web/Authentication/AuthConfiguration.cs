@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Components.Authorization;
@@ -49,7 +50,14 @@ public static class AuthConfiguration
                     }
                 });
     }
-}
 
-// This is a server-side AuthenticationStateProvider that revalidates the security stamp for the connected user
-// every 15 minutes an interactive circuit is connected.
+    public static void MapLoginLogoutEndpoints(this WebApplication app)
+    {
+        app.MapGet("/login", () => Results
+                .Challenge(new AuthenticationProperties { RedirectUri = "/" }, [OpenIdConnectDefaults.AuthenticationScheme]))
+            .AllowAnonymous();
+
+        app.MapPost("/logout", () => Results.SignOut(new AuthenticationProperties { RedirectUri = "/" }, [CookieAuthenticationDefaults.AuthenticationScheme, OpenIdConnectDefaults.AuthenticationScheme]))
+            .RequireAuthorization();
+    }
+}
