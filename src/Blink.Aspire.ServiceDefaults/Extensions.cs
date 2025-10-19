@@ -1,3 +1,4 @@
+using Blink;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.DependencyInjection;
@@ -18,6 +19,9 @@ public static class Extensions
 {
     public static TBuilder AddServiceDefaults<TBuilder>(this TBuilder builder) where TBuilder : IHostApplicationBuilder
     {
+        builder.Services.AddSingleton<IDateProvider, DateProvider>();
+        builder.Services.AddSingleton<IGuidGenerator, GuidGenerator>();
+        
         builder.ConfigureOpenTelemetry();
 
         builder.AddDefaultHealthChecks();

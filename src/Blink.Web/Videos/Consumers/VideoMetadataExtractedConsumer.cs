@@ -5,18 +5,15 @@ using Npgsql;
 
 namespace Blink.Web.Videos.Consumers;
 
-public sealed class VideoMetadataExtractedConsumer : IConsumer<VideoMetadataExtracted>, IDisposable
+public sealed class VideoMetadataExtractedConsumer : IConsumer<VideoMetadataExtracted>
 {
-    private readonly NpgsqlConnection _connection;
+    private readonly NpgsqlDataSource _dataSource;
+    private readonly IDateProvider _dateProvider;
 
-    public VideoMetadataExtractedConsumer(NpgsqlDataSource dataSource)
+    public VideoMetadataExtractedConsumer(NpgsqlDataSource dataSource, IDateProvider dateProvider)
     {
-        _connection = dataSource.CreateConnection();
-    }
-
-    public void Dispose()
-    {
-        _connection.Dispose();
+        _dataSource = dataSource;
+        _dateProvider = dateProvider;
     }
 
     public async Task Consume(ConsumeContext<VideoMetadataExtracted> context)
@@ -30,14 +27,14 @@ public sealed class VideoMetadataExtractedConsumer : IConsumer<VideoMetadataExtr
             WHERE blob_name = @BlobName
             """;
 
-        await _connection.OpenAsync(context.CancellationToken);
-        await _connection.ExecuteAsync(sql, new
+        await using var connection = await _dataSource.OpenConnectionAsync(context.CancellationToken);
+        await connection.ExecuteAsync(sql, new
         {
             BlobName = context.Message.VideoBlobName,
             Width = context.Message.Metadata.Width,
             Height = context.Message.Metadata.Height,
             DurationInSeconds = context.Message.Metadata.DurationInSeconds,
-            UpdatedAt = DateTimeOffset.UtcNow
+            UpdatedAt = _dateProvider.UtcNow
         });
     }
 }

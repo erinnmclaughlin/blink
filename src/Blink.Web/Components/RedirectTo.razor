@@ -2,8 +2,11 @@
 
 @code {
 
+    [Parameter] 
+    public string Href { get; set; } = "";
+
     protected override void OnInitialized()
     {
-        NavigationManager.NavigateTo("login");
+        NavigationManager.NavigateTo(Href);
     }
 }

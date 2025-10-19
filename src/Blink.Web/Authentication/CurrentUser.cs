@@ -1,29 +1,8 @@
 ﻿using System.Security.Claims;
-using Microsoft.AspNetCore.Components;
 
-namespace Blink.Web.Components;
+namespace Blink.Web.Authentication;
 
-public sealed partial class AppAuthorizeView
-{
-    [Parameter]
-    public RenderFragment<CurrentUser>? ChildContent { get; set; }
-
-    [Parameter]
-    public RenderFragment<CurrentUser>? Authorized { get; set; }
-
-    [Parameter]
-    public RenderFragment? NotAuthorized { get; set; }
-
-    protected override void OnParametersSet()
-    {
-        if (ChildContent is not null && (Authorized is not null || NotAuthorized is not null))
-        {
-            throw new InvalidOperationException($"Cannot set both {nameof(ChildContent)} and {nameof(Authorized)}/{nameof(NotAuthorized)}.");
-        }
-    }
-}
-
-public sealed record CurrentUser
+public sealed record CurrentUser : ICurrentUser
 {
     public required string Id { get; init; }
     public required string DisplayName { get; init; }
@@ -31,6 +10,10 @@ public sealed record CurrentUser
     public required string LastName { get; init; }
     public required string UserName { get; init; }
     public required string Email { get; init; }
+
+    private CurrentUser()
+    {
+    }
 
     public static CurrentUser FromClaims(IList<Claim> claims)
     {

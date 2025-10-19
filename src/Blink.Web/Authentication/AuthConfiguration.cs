@@ -13,7 +13,9 @@ public static class AuthConfiguration
         builder.Services
             .AddCascadingAuthenticationState()
             .AddHttpContextAccessor()
+            .AddScoped<ICurrentUser>(sp => CurrentUser.FromClaims(sp.GetRequiredService<IHttpContextAccessor>().HttpContext!.User.Claims.ToList()))
             .AddScoped<AuthenticationStateProvider, RevalidatingAuthenticationStateProvider>()
+            .Configure<AuthenticationOptions>(builder.Configuration.GetSection("Authentication"))
             .AddAuthorization()
             .AddAuthentication(options =>
             {

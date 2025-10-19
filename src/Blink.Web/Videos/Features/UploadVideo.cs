@@ -1,7 +1,7 @@
-﻿using System.Security.Claims;
-using System.Text.Json;
+﻿using System.Text.Json;
 using Blink.Messaging;
 using Blink.Storage;
+using Blink.Web.Authentication;
 using Blink.Web.Components.Shared;
 using Dapper;
 using MassTransit;
@@ -27,19 +27,22 @@ public static class UploadVideo
 
     public sealed class CommandHandler : IRequestHandler<Command, Guid>
     {
+        private readonly ICurrentUser _currentUser;
         private readonly NpgsqlDataSource _dataSource;
-        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IDateProvider _dateProvider;
         private readonly IPublishEndpoint _publishEndpoint;
         private readonly IVideoStorageClient _videoStorage;
 
         public CommandHandler(
+            ICurrentUser currentUser,
             NpgsqlDataSource dataSource, 
-            IHttpContextAccessor httpContextAccessor, 
+            IDateProvider dateProvider,
             IPublishEndpoint publishEndpoint, 
             IVideoStorageClient videoStorage)
         {
+            _currentUser = currentUser;
             _dataSource = dataSource;
-            _httpContextAccessor = httpContextAccessor;
+            _dateProvider = dateProvider;
             _publishEndpoint = publishEndpoint;
             _videoStorage = videoStorage;
         }
@@ -51,7 +54,7 @@ public static class UploadVideo
             
             // TODO: Don't wait for upload to complete
             // Save video to db
-            var now = DateTimeOffset.UtcNow;
+            var now = _dateProvider.UtcNow;
             await SaveVideo(videoId, request, blobName, fileSize, now, cancellationToken);
 
             await _publishEndpoint.Publish(new VideoUploadedEvent
@@ -60,7 +63,7 @@ public static class UploadVideo
                 BlobName = blobName,
                 Title = request.Title,
                 Description = request.Description,
-                OwnerId = GetCurrentUserId(),
+                OwnerId = _currentUser.Id,
                 FileName = request.VideoFile.Name,
                 ContentType = request.VideoFile.GetContentType(),
                 SizeInBytes = fileSize,
@@ -158,27 +161,10 @@ public static class UploadVideo
                 file_name = file.Name,
                 content_type = file.GetContentType(),
                 size_in_bytes = fileSize,
-                owner_id = GetCurrentUserId(),
+                owner_id = _currentUser.Id,
                 uploaded_at = uploadedAt,
                 updated_at = uploadedAt
             });
-        }
-        
-        private string GetCurrentUserId()
-        {
-            var user = _httpContextAccessor.HttpContext?.User;
-        
-            if (user?.Identity?.IsAuthenticated != true)
-            {
-                throw new UnauthorizedAccessException("User is not authenticated");
-            }
-
-            // Try to get the user ID from the 'sub' claim (standard OIDC claim)
-            var userIdClaim = user.FindFirst(ClaimTypes.NameIdentifier)
-                              ?? user.FindFirst("sub")
-                              ?? throw new InvalidOperationException("User ID not found in claims");
-
-            return userIdClaim.Value;
         }
     }
     

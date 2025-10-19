@@ -1,4 +1,4 @@
-﻿namespace Blink.Web.Services;
+﻿namespace Blink;
 
 public interface IDateProvider
 {

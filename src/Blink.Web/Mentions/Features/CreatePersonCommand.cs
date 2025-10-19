@@ -1,4 +1,4 @@
-using System.Security.Claims;
+using Blink.Web.Authentication;
 using Dapper;
 using MediatR;
 using Npgsql;
@@ -13,20 +13,27 @@ public sealed record CreatePersonCommand : IRequest<Guid>
 
 internal sealed class CreatePersonCommandHandler : IRequestHandler<CreatePersonCommand, Guid>
 {
+    private readonly ICurrentUser _currentUser;
     private readonly NpgsqlDataSource _dataSource;
-    private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly IDateProvider _dateProvider;
+    private readonly IGuidGenerator _guidGenerator;
 
-    public CreatePersonCommandHandler(NpgsqlDataSource dataSource, IHttpContextAccessor httpContextAccessor)
+    public CreatePersonCommandHandler(
+        ICurrentUser currentUser,
+        NpgsqlDataSource dataSource, 
+        IDateProvider dateProvider,
+        IGuidGenerator guidGenerator)
     {
+        _currentUser = currentUser;
         _dataSource = dataSource;
-        _httpContextAccessor = httpContextAccessor;
+        _dateProvider = dateProvider;
+        _guidGenerator = guidGenerator;
     }
 
     public async Task<Guid> Handle(CreatePersonCommand request, CancellationToken cancellationToken)
     {
-        var personId = Guid.NewGuid();
-        var now = DateTimeOffset.UtcNow;
-        var currentUserId = GetCurrentUserId();
+        var personId = _guidGenerator.NewGuid();
+        var now = _dateProvider.UtcNow;
 
         await using var connection = await _dataSource.OpenConnectionAsync(cancellationToken);
 
@@ -43,28 +50,11 @@ internal sealed class CreatePersonCommandHandler : IRequestHandler<CreatePersonC
             id = personId,
             name = request.Name,
             linked_user_id = request.LinkedUserId,
-            created_by = currentUserId,
+            created_by = _currentUser.Id,
             created_at = now,
             updated_at = now
         });
 
         return personId;
     }
-
-    private string GetCurrentUserId()
-    {
-        var user = _httpContextAccessor.HttpContext?.User;
-        
-        if (user?.Identity?.IsAuthenticated != true)
-        {
-            throw new UnauthorizedAccessException("User is not authenticated");
-        }
-
-        var userIdClaim = user.FindFirst(ClaimTypes.NameIdentifier)
-                         ?? user.FindFirst("sub")
-                         ?? throw new InvalidOperationException("User ID not found in claims");
-
-        return userIdClaim.Value;
-    }
 }
-
