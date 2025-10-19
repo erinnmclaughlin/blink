@@ -8,6 +8,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\Blink.Aspire.ServiceDefaults\Blink.Aspire.ServiceDefaults.csproj" />
       <ProjectReference Include="..\Blink.Messaging\Blink.Messaging.csproj" />
       <ProjectReference Include="..\Blink.Storage\Blink.Storage.csproj" />
     </ItemGroup>

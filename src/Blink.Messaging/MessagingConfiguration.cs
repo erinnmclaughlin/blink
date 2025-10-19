@@ -7,20 +7,20 @@ namespace Microsoft.Extensions.DependencyInjection;
 
 public static class MessagingConfiguration
 {
-    public static void AddBlinkMessaging<T>(this T builder, Action<IBusRegistrationConfigurator>? configure = null) where T : IHostApplicationBuilder
+    public static void AddBlinkMessaging(this IHostApplicationBuilder builder, Action<IBusRegistrationConfigurator>? configure = null)
     {
-        builder.Services.AddMassTransit(busConfigurator =>
+        builder.Services.AddMassTransit(o =>
         {
-            busConfigurator.SetKebabCaseEndpointNameFormatter();
-
-            busConfigurator.UsingRabbitMq((context, configurator) =>
+            o.SetEndpointNameFormatter(new KebabCaseEndpointNameFormatter(includeNamespace: true));
+            
+            o.UsingRabbitMq((context, configurator) =>
             {
                 configurator.Host(builder.Configuration.GetConnectionString("blink-messaging"));
 
                 configurator.ConfigureEndpoints(context);
             });
             
-            configure?.Invoke(busConfigurator);
+            configure?.Invoke(o);
         });
     }
 }

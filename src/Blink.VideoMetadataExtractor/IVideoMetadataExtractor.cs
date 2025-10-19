@@ -2,7 +2,7 @@ using Blink.Messaging;
 using System.Diagnostics;
 using System.Text.Json;
 
-namespace Blink.VideoProcessor;
+namespace Blink.VideoMetadataExtractor;
 
 /// <summary>
 /// Service for extracting metadata from video files

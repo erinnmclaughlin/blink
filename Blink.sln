@@ -23,7 +23,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IntegrationTests", "tests\I
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Blink.Messaging", "src\Blink.Messaging\Blink.Messaging.csproj", "{7D5DD16F-CEDA-4B72-8325-218DEE0AEB71}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Blink.VideoProcessor", "src\Blink.VideoProcessor\Blink.VideoProcessor.csproj", "{A7E26988-2AC8-94B9-FFF6-D796DD833CEC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Blink.VideoMetadataExtractor", "src\Blink.VideoMetadataExtractor\Blink.VideoMetadataExtractor.csproj", "{A7E26988-2AC8-94B9-FFF6-D796DD833CEC}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Blink.Storage", "src\Blink.Storage\Blink.Storage.csproj", "{1C678AA1-C1FA-4A8E-8235-50DD0E53B55A}"
 EndProject

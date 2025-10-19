@@ -1,11 +1,10 @@
-using Blink.VideoProcessor;
-using MassTransit;
+using Blink.VideoMetadataExtractor;
 
 var builder = Host.CreateApplicationBuilder(args);
 
 builder.AddServiceDefaults();
 builder.AddBlinkStorage();
-builder.AddBlinkMessaging(o => o.AddConsumersFromNamespaceContaining<BlinkVideoProcessor>());
+builder.AddBlinkMessaging(x => x.AddConsumer<VideoUploadedEventConsumer>());
 
 builder.Services.AddTransient<IVideoMetadataExtractor, FFprobeMetadataExtractor>();
 

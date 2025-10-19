@@ -15,7 +15,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Blink.DatabaseMigrator\Blink.DatabaseMigrator.csproj" />
     <ProjectReference Include="..\Blink.ThumbnailGenerator\Blink.ThumbnailGenerator.csproj" />
-    <ProjectReference Include="..\Blink.VideoProcessor\Blink.VideoProcessor.csproj" />
+    <ProjectReference Include="..\Blink.VideoMetadataExtractor\Blink.VideoMetadataExtractor.csproj" />
     <ProjectReference Include="..\Blink.Web\Blink.Web.csproj" />
   </ItemGroup>
 

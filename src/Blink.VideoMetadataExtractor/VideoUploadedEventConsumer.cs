@@ -2,17 +2,17 @@
 using Blink.Storage;
 using MassTransit;
 
-namespace Blink.VideoProcessor.Consumers;
+namespace Blink.VideoMetadataExtractor;
 
-public sealed class VideoMetadataProcessor : IConsumer<VideoUploadedEvent>
+public sealed class VideoUploadedEventConsumer : IConsumer<VideoUploadedEvent>
 {
-    private readonly ILogger<VideoMetadataProcessor> _logger;
+    private readonly ILogger<VideoUploadedEventConsumer> _logger;
     private readonly IPublishEndpoint _publishEndpoint;
     private readonly IVideoMetadataExtractor _videoMetadataExtractor;
     private readonly IVideoStorageClient _videoStorageClient;
 
-    public VideoMetadataProcessor(
-        ILogger<VideoMetadataProcessor> logger,
+    public VideoUploadedEventConsumer(
+        ILogger<VideoUploadedEventConsumer> logger,
         IPublishEndpoint publishEndpoint,
         IVideoMetadataExtractor videoMetadataExtractor,
         IVideoStorageClient videoStorageClient)

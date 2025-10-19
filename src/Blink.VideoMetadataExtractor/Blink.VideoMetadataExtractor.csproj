@@ -8,12 +8,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Aspire.Azure.Storage.Blobs" Version="9.5.1" />
-    <PackageReference Include="MassTransit" Version="8.5.4" />
-    <PackageReference Include="MassTransit.RabbitMQ" Version="8.5.4" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\Blink.Messaging\Blink.Messaging.csproj" />
     <ProjectReference Include="..\Blink.Storage\Blink.Storage.csproj" />
     <ProjectReference Include="..\Blink.Aspire.ServiceDefaults\Blink.Aspire.ServiceDefaults.csproj" />

@@ -32,8 +32,8 @@ builder
 if (OperatingSystem.IsWindows() || OperatingSystem.IsLinux())
 {
     builder
-        .AddProject<Projects.Blink_VideoProcessor>("blink-video-processor")
-        //.AddDockerfile("blink-video-processor", "../..", "src/Blink.VideoProcessor/Dockerfile")
+        .AddProject<Projects.Blink_VideoMetadataExtractor>("blink-video-metadata-extractor")
+        //.AddDockerfile("blink-video-processor", "../..", "src/Blink.VideoMetadataExtractor/Dockerfile")
         .WithReference(messaging)
         .WithReference(storage.Blobs)
         .WaitFor(messaging)
