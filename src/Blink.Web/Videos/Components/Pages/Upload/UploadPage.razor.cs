@@ -1,7 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 using Blink.Storage;
-using Blink.Web.Components.Shared;
 using Blink.Web.FeatureManagement;
+using Blink.Web.Mentions;
+using Blink.Web.Mentions.Components;
 using Blink.Web.Mentions.Features;
 using Blink.Web.Videos.Features;
 using MediatR;

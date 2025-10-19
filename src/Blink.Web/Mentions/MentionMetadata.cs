@@ -1,4 +1,4 @@
-﻿namespace Blink.Web.Components.Shared;
+﻿namespace Blink.Web.Mentions;
 
 public sealed record MentionMetadata
 {

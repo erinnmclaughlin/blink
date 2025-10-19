@@ -2,7 +2,7 @@
 using Blink.Messaging;
 using Blink.Storage;
 using Blink.Web.Authentication;
-using Blink.Web.Components.Shared;
+using Blink.Web.Mentions;
 using Dapper;
 using MassTransit;
 using MediatR;

@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 
-namespace Blink.Web.Components.Shared;
+namespace Blink.Web.Mentions.Components;
 
 public sealed partial class MentionTextarea : IAsyncDisposable
 {
@@ -41,7 +41,7 @@ public sealed partial class MentionTextarea : IAsyncDisposable
     {
         if (firstRender)
         {
-            _tributeModule = await _js.InvokeAsync<IJSObjectReference>("import", "./Components/Shared/MentionTextarea.razor.js");
+            _tributeModule = await _js.InvokeAsync<IJSObjectReference>("import", "./Mentions/Components/MentionTextarea.razor.js");
             await _tributeModule.InvokeVoidAsync("initializeTribute", _elementId, _dotNetRef, MentionItems);
         }
     }

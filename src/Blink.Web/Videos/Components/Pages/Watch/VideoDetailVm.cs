@@ -1,4 +1,4 @@
-﻿using Blink.Web.Components.Shared;
+﻿using Blink.Web.Mentions;
 
 namespace Blink.Web.Videos.Pages.Watch;
 

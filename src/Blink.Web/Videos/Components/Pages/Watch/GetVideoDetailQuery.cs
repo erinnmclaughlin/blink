@@ -1,5 +1,5 @@
 ﻿using System.Text.Json;
-using Blink.Web.Components.Shared;
+using Blink.Web.Mentions;
 using Dapper;
 using MediatR;
 using Npgsql;
