@@ -9,6 +9,7 @@ builder.Services
     .AddRazorComponents()
     .AddInteractiveServerComponents();
 
+builder.AddServiceDefaults();
 builder.AddBlinkAuthorization();
 builder.AddBlinkDatabase();
 builder.AddBlinkFeatureManagement();

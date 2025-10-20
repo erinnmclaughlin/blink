@@ -26,7 +26,6 @@
     <PackageReference Include="Aspire.Hosting.Keycloak" Version="9.5.1-preview.1.25502.11" />
     <PackageReference Include="Aspire.Hosting.PostgreSQL" Version="9.5.1" />
     <PackageReference Include="Aspire.Hosting.RabbitMQ" Version="9.5.1" />
-    <PackageReference Include="CommunityToolkit.Aspire.Hosting.PapercutSmtp" Version="9.8.0" />
   </ItemGroup>
 
 </Project>
