@@ -5,6 +5,11 @@ using Npgsql;
 
 namespace Blink.Web.Videos.Consumers;
 
+/// <summary>
+/// Video metadata (e.g., aspect ratio, duration, etc.) is extracted by a separate service after a video is uploaded.
+/// After the metadata is extracted, a <see cref="VideoMetadataExtracted"/> event is published.
+/// This consumer receives that event and stores the extracted metadata in the database.
+/// </summary>
 public sealed class VideoMetadataExtractedConsumer : IConsumer<VideoMetadataExtracted>
 {
     private readonly NpgsqlDataSource _dataSource;

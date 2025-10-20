@@ -1,5 +1,5 @@
 using Blink.Storage;
-using Blink.Web.Videos.Pages.Watch;
+using Blink.Web.Videos.Requests;
 using MediatR;
 using Microsoft.AspNetCore.Components;
 
@@ -7,7 +7,7 @@ namespace Blink.Web.Videos.Components.Pages.Watch;
 
 public sealed partial class VideoDetailPage
 {
-    private VideoDetailVm? Video { get; set; }
+    private GetVideoDetails.Video? Video { get; set; }
     private string? ThumbnailUrl { get; set; }
     private string? WatchUrl { get; set; }
 
@@ -22,7 +22,7 @@ public sealed partial class VideoDetailPage
 
     protected override async Task OnInitializedAsync()
     {
-        Video = await Sender.Send(new GetVideoDetailQuery(VideoId));
+        Video = await Sender.Send(new GetVideoDetails.Query(VideoId));
 
         if (Video is not null)
         {
