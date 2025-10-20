@@ -2,7 +2,7 @@
 using MediatR;
 using Npgsql;
 
-namespace Blink.Web.Videos.Features;
+namespace Blink.Web.Videos.Requests;
 
 public static class GetRecentUploads
 {

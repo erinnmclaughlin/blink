@@ -2,7 +2,7 @@ using Dapper;
 using MediatR;
 using Npgsql;
 
-namespace Blink.Web.Users.Features;
+namespace Blink.Web.Users.Requests;
 
 public static class GetUsers
 {

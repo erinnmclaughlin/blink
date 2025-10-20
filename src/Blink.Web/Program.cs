@@ -1,7 +1,7 @@
 using Blink.Web;
 using Blink.Web.Authentication;
 using Blink.Web.Components;
-using Blink.Web.Mentions.Features;
+using Blink.Web.Mentions.Requests;
 
 var builder = WebApplication.CreateBuilder(args);
 

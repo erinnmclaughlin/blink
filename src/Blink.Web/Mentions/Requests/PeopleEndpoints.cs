@@ -1,6 +1,6 @@
 using MediatR;
 
-namespace Blink.Web.Mentions.Features;
+namespace Blink.Web.Mentions.Requests;
 
 public static class PeopleEndpoints
 {

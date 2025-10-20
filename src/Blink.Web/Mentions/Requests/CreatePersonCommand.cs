@@ -3,7 +3,7 @@ using Dapper;
 using MediatR;
 using Npgsql;
 
-namespace Blink.Web.Mentions.Features;
+namespace Blink.Web.Mentions.Requests;
 
 public sealed record CreatePersonCommand : IRequest<Guid>
 {

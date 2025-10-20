@@ -9,7 +9,7 @@ using MediatR;
 using Microsoft.AspNetCore.Components.Forms;
 using Npgsql;
 
-namespace Blink.Web.Videos.Features;
+namespace Blink.Web.Videos.Requests;
 
 public static class UploadVideo
 {
