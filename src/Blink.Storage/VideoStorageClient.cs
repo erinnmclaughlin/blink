@@ -1,6 +1,7 @@
 ﻿using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using Azure.Storage.Sas;
+using Blink.Videos;
 using Microsoft.Extensions.Logging;
 
 namespace Blink.Storage;
@@ -10,7 +11,7 @@ public interface IVideoStorageClient
     Task<bool> DeleteAsync(string blobName, CancellationToken cancellationToken = default);
     Task<Stream> DownloadAsync(string blobName, CancellationToken cancellationToken = default);
     Task<string> GetUrlAsync(string blobName, CancellationToken cancellationToken = default);
-    Task<(Guid VideoId, string BlobName, long FileSize)> UploadAsync(Stream videoStream, string fileName, CancellationToken cancellationToken = default);
+    Task UploadAsync(Stream videoStream, BlinkFileInfo file, CancellationToken cancellationToken = default);
     Task<string> UploadThumbnailAsync(Stream thumbnailStream, string videoBlobName, CancellationToken cancellationToken = default);
     Task<string?> GetThumbnailUrlAsync(string thumbnailBlobName, CancellationToken cancellationToken = default);
 }
@@ -19,18 +20,15 @@ public class VideoStorageClient : IVideoStorageClient
 {
     private readonly BlobServiceClient _blobServiceClient;
     private readonly IDateProvider _dateProvider;
-    private readonly IGuidGenerator _guidGenerator;
     private readonly ILogger<VideoStorageClient> _logger;
 
     public VideoStorageClient(
         BlobServiceClient blobServiceClient,
         IDateProvider dateProvider,
-        IGuidGenerator guidGenerator,
         ILogger<VideoStorageClient> logger)
     {
         _blobServiceClient = blobServiceClient;
         _dateProvider = dateProvider;
-        _guidGenerator = guidGenerator;
         _logger = logger;
     }
 
@@ -148,19 +146,16 @@ public class VideoStorageClient : IVideoStorageClient
         }
     }
 
-    public async Task<(Guid VideoId, string BlobName, long FileSize)> UploadAsync(Stream videoStream, string fileName, CancellationToken cancellationToken = default)
+    public async Task UploadAsync(Stream videoStream, BlinkFileInfo file, CancellationToken cancellationToken = default)
     {
-        var videoId = _guidGenerator.NewGuid();
-        var blobName = $"{videoId}_{fileName}";
-
         try
         {
-            var blobClient = await GetOrCreateBlobClient(blobName, cancellationToken);
+            var blobClient = await GetOrCreateBlobClient(file.BlobName, cancellationToken);
 
             // Configure chunked upload for large files to prevent timeouts
             var uploadOptions = new BlobUploadOptions 
             { 
-                HttpHeaders = new BlobHttpHeaders { ContentType = GetContentType(fileName) },
+                HttpHeaders = new BlobHttpHeaders { ContentType = file.ContentType },
                 TransferOptions = new Azure.Storage.StorageTransferOptions
                 {
                     // Upload in 4MB chunks to improve reliability and prevent timeouts
@@ -175,16 +170,11 @@ public class VideoStorageClient : IVideoStorageClient
                 uploadOptions,
                 cancellationToken);
 
-            // Get the actual uploaded size from the response
-            var properties = await blobClient.GetPropertiesAsync(cancellationToken: cancellationToken);
-            var fileSize = properties.Value.ContentLength;
-
-            _logger.LogInformation("Video uploaded successfully: {BlobName}, Size: {FileSize} bytes", blobName, fileSize);
-            return (videoId, blobName, fileSize);
+            _logger.LogInformation("Video uploaded successfully: {BlobName}", file.BlobName);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error uploading video: {FileName}", fileName);
+            _logger.LogError(ex, "Error uploading video: {BlobName}", file.BlobName);
             throw;
         }
     }
@@ -330,18 +320,5 @@ public class VideoStorageClient : IVideoStorageClient
             _logger.LogError(ex, "Error generating thumbnail URL: {ThumbnailBlobName}", thumbnailBlobName);
             return null;
         }
-    }
-
-    private static string GetContentType(string fileName)
-    {
-        var extension = Path.GetExtension(fileName).ToLowerInvariant();
-        return extension switch
-        {
-            ".mp4" => "video/mp4",
-            ".webm" => "video/webm",
-            ".avi" => "video/x-msvideo",
-            ".wmv" => "video/x-ms-wmv",
-            _ => "application/octet-stream"
-        };
     }
 }

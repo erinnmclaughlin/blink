@@ -1,6 +1,6 @@
-using Blink.Messaging;
 using System.Diagnostics;
 using System.Text.Json;
+using Blink.Videos;
 
 namespace Blink.VideoMetadataExtractor;
 
@@ -15,7 +15,7 @@ public interface IVideoMetadataExtractor
     /// <param name="videoStream">The video stream to extract metadata from</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Video metadata including dimensions</returns>
-    Task<VideoMetadata?> ExtractMetadataAsync(Stream videoStream, CancellationToken cancellationToken = default);
+    Task<BlinkVideoMetaData?> ExtractMetadataAsync(Stream videoStream, CancellationToken cancellationToken = default);
 }
 
 /// <summary>
@@ -30,7 +30,7 @@ public sealed class FFprobeMetadataExtractor : IVideoMetadataExtractor
         _logger = logger;
     }
 
-    public async Task<VideoMetadata?> ExtractMetadataAsync(Stream videoStream, CancellationToken cancellationToken = default)
+    public async Task<BlinkVideoMetaData?> ExtractMetadataAsync(Stream videoStream, CancellationToken cancellationToken = default)
     {
         var tempPath = Path.Combine(Path.GetTempPath(), $"video-metadata-{Guid.NewGuid():N}.bin");
 
@@ -102,8 +102,8 @@ public sealed class FFprobeMetadataExtractor : IVideoMetadataExtractor
                 return null;
             }
 
-            int width = widthProp.GetInt32();
-            int height = heightProp.GetInt32();
+            var width = widthProp.GetInt32();
+            var height = heightProp.GetInt32();
 
             // Extract duration from format
             double duration = 0;
@@ -120,14 +120,12 @@ public sealed class FFprobeMetadataExtractor : IVideoMetadataExtractor
                 }
             }
 
-            _logger.LogInformation("Extracted video metadata: {Width}x{Height}, Duration: {Duration}s", 
-                width, height, duration);
+            _logger.LogInformation("Extracted video metadata: {Width}x{Height}, Duration: {Duration}s", width, height, duration);
 
-            return new VideoMetadata
+            return new BlinkVideoMetaData
             {
-                Width = width,
-                Height = height,
-                DurationInSeconds = duration
+                AspectRatio = BlinkVideoAspectRatio.Create(width, height),
+                Duration = TimeSpan.FromSeconds(duration)
             };
         }
         catch (Exception ex)

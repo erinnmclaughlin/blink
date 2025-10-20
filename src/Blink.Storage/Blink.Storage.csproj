@@ -12,6 +12,7 @@
   
   <ItemGroup>
     <ProjectReference Include="..\Blink.Aspire.ServiceDefaults\Blink.Aspire.ServiceDefaults.csproj" />
+    <ProjectReference Include="..\Blink.Videos\Blink.Videos.csproj" />
   </ItemGroup>
   
 </Project>

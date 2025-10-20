@@ -152,8 +152,8 @@ public sealed partial class UploadPage
                 VideoFile = SelectedFile,
                 Title = Model.Title ?? SelectedFile.Name,
                 Description = Model.Description,
-                DescriptionMentions = descriptionMentions,
-                VideoDate = Model.VideoDate
+                //DescriptionMentions = descriptionMentions,
+                VideoDate = Model.VideoDate.HasValue ? DateOnly.FromDateTime(Model.VideoDate.Value) : null
             }, CancellationToken.None);
 
             // Stop progress simulation

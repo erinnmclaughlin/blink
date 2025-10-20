@@ -1,36 +1,21 @@
-﻿using Blink.Messaging;
-using Dapper;
+﻿using Blink.Database;
+using Blink.Messaging;
 using MassTransit;
-using Npgsql;
 
 namespace Blink.Web.Videos.Consumers;
 
 public sealed class VideoThumbnailGeneratedConsumer : IConsumer<VideoThumbnailGenerated>
 {
-    private readonly NpgsqlDataSource _dataSource;
-    private readonly IDateProvider _dateProvider;
+    private readonly IBlinkUnitOfWork _unitOfWork;
 
-    public VideoThumbnailGeneratedConsumer(NpgsqlDataSource dataSource, IDateProvider dateProvider)
+    public VideoThumbnailGeneratedConsumer(IBlinkUnitOfWork unitOfWork)
     {
-        _dataSource = dataSource;
-        _dateProvider = dateProvider;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task Consume(ConsumeContext<VideoThumbnailGenerated> context)
     {
-        const string sql = """
-            UPDATE videos
-            SET thumbnail_blob_name = @ThumbnailBlobName,
-                updated_at = @UpdatedAt
-            WHERE blob_name = @BlobName
-            """;
-
-        await using var connection = await _dataSource.OpenConnectionAsync(context.CancellationToken);
-        await connection.ExecuteAsync(sql, new
-        {
-            BlobName = context.Message.VideoBlobName,
-            ThumbnailBlobName = context.Message.ThumbnailBlobName,
-            UpdatedAt = _dateProvider.UtcNow
-        });
+        _unitOfWork.Videos.UpdateThumbnail(context.Message.VideoId, context.Message.ThumbnailBlobName);
+        await _unitOfWork.SaveChangesAsync(context.CancellationToken);
     }
 }

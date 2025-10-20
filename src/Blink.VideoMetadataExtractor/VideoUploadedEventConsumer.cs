@@ -1,5 +1,6 @@
 ﻿using Blink.Messaging;
 using Blink.Storage;
+using Blink.Videos;
 using MassTransit;
 
 namespace Blink.VideoMetadataExtractor;
@@ -25,34 +26,34 @@ public sealed class VideoUploadedEventConsumer : IConsumer<VideoUploadedEvent>
 
     public async Task Consume(ConsumeContext<VideoUploadedEvent> context)
     {
-        var videoBlobName = context.Message.BlobName;
+        var video = context.Message.Video;
 
-        _logger.LogInformation("Extracting metadata for video: {VideoBlobName}", videoBlobName);
+        _logger.LogInformation("Extracting metadata for video: {VideoBlobName}", video.File.BlobName);
 
-        var metadata = await ExtractMetadataAsync(videoBlobName);
+        var metadata = await ExtractMetadataAsync(video.File.BlobName);
 
         if (metadata is not null)
         {
             await _publishEndpoint.Publish(new VideoMetadataExtracted
             {
-                VideoBlobName = videoBlobName,
+                VideoId = video.Id,
                 Metadata = metadata
             });
         }
     }
 
-    private async Task<VideoMetadata?> ExtractMetadataAsync(string blobName)
+    private async Task<BlinkVideoMetaData?> ExtractMetadataAsync(string blobName)
     {
+        _logger.LogInformation("Extracting metadata from uploaded video: {BlobName}", blobName);
+        
         try
         {
-            _logger.LogInformation("Extracting metadata from uploaded video: {BlobName}", blobName);
-            using var videoStream = await _videoStorageClient.DownloadAsync(blobName);
+            await using var videoStream = await _videoStorageClient.DownloadAsync(blobName);
             var metadata = await _videoMetadataExtractor.ExtractMetadataAsync(videoStream);
 
             if (metadata != null)
             {
-                _logger.LogInformation("Video metadata extracted: {Width}x{Height}, Duration: {Duration}s for {BlobName}",
-                    metadata.Width, metadata.Height, metadata.DurationInSeconds, blobName);
+                _logger.LogInformation("Video metadata extracted from {BlobName}", blobName);
             }
             else
             {

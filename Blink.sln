@@ -35,6 +35,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Blink.Web", "src\Blink.Web\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Blink.ThumbnailGenerator", "src\Blink.ThumbnailGenerator\Blink.ThumbnailGenerator.csproj", "{F0E6A6BB-0B67-469F-8964-2FD5282579AC}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Blink.Videos", "src\Blink.Videos\Blink.Videos.csproj", "{09775C54-8B10-4AD7-8B60-D5DE89B63086}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -165,6 +167,18 @@ Global
 		{F0E6A6BB-0B67-469F-8964-2FD5282579AC}.Release|x64.Build.0 = Release|Any CPU
 		{F0E6A6BB-0B67-469F-8964-2FD5282579AC}.Release|x86.ActiveCfg = Release|Any CPU
 		{F0E6A6BB-0B67-469F-8964-2FD5282579AC}.Release|x86.Build.0 = Release|Any CPU
+		{09775C54-8B10-4AD7-8B60-D5DE89B63086}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{09775C54-8B10-4AD7-8B60-D5DE89B63086}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{09775C54-8B10-4AD7-8B60-D5DE89B63086}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{09775C54-8B10-4AD7-8B60-D5DE89B63086}.Debug|x64.Build.0 = Debug|Any CPU
+		{09775C54-8B10-4AD7-8B60-D5DE89B63086}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{09775C54-8B10-4AD7-8B60-D5DE89B63086}.Debug|x86.Build.0 = Debug|Any CPU
+		{09775C54-8B10-4AD7-8B60-D5DE89B63086}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{09775C54-8B10-4AD7-8B60-D5DE89B63086}.Release|Any CPU.Build.0 = Release|Any CPU
+		{09775C54-8B10-4AD7-8B60-D5DE89B63086}.Release|x64.ActiveCfg = Release|Any CPU
+		{09775C54-8B10-4AD7-8B60-D5DE89B63086}.Release|x64.Build.0 = Release|Any CPU
+		{09775C54-8B10-4AD7-8B60-D5DE89B63086}.Release|x86.ActiveCfg = Release|Any CPU
+		{09775C54-8B10-4AD7-8B60-D5DE89B63086}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -180,6 +194,7 @@ Global
 		{7A53F704-3DEC-4F9F-8ACE-9A025EF88F74} = {A7C59F7E-8D6E-423C-896F-F39DB9CC25AA}
 		{6CF50922-3E85-4B76-B8E2-F0EA4FC6176E} = {A7C59F7E-8D6E-423C-896F-F39DB9CC25AA}
 		{F0E6A6BB-0B67-469F-8964-2FD5282579AC} = {A7C59F7E-8D6E-423C-896F-F39DB9CC25AA}
+		{09775C54-8B10-4AD7-8B60-D5DE89B63086} = {A7C59F7E-8D6E-423C-896F-F39DB9CC25AA}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7B2AAEE5-D361-4985-9019-907C59C8BAD8}

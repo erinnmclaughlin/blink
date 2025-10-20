@@ -7,14 +7,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="Aspire.Npgsql" Version="9.5.1" />
-      <PackageReference Include="Dapper" Version="2.1.66" />
-      <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.0-rc.2.25502.107" />
-    </ItemGroup>
-
-    <ItemGroup>
       <ProjectReference Include="..\Blink.Aspire.ServiceDefaults\Blink.Aspire.ServiceDefaults.csproj" />
-      <ProjectReference Include="..\Blink.Videos\Blink.Videos.csproj" />
     </ItemGroup>
 
 </Project>

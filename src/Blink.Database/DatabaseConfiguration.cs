@@ -1,5 +1,8 @@
 ﻿using System.Data;
+using Blink.Database;
+using Blink.Videos;
 using Dapper;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 
 // ReSharper disable once CheckNamespace
@@ -12,6 +15,10 @@ public static class DatabaseConfiguration
         builder.AddNpgsqlDataSource("blink-db");
         DefaultTypeMap.MatchNamesWithUnderscores = true;
         SqlMapper.AddTypeHandler(new DateOnlyTypeHandler());
+        
+        builder.AddBlinkVideosCore();
+        builder.Services.TryAddSingleton<IBlinkUnitOfWorkFactory, BlinkUnitOfWorkFactory>();
+        builder.Services.TryAddTransient<IBlinkUnitOfWork>(sp => sp.GetRequiredService<IBlinkUnitOfWorkFactory>().CreateUnitOfWork());
     }
 
     private sealed class DateOnlyTypeHandler : SqlMapper.TypeHandler<DateOnly>

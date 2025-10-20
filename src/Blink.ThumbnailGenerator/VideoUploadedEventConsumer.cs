@@ -25,29 +25,29 @@ public sealed class VideoUploadedEventConsumer : IConsumer<VideoUploadedEvent>
 
     public async Task Consume(ConsumeContext<VideoUploadedEvent> context)
     {
-        var videoBlobName = context.Message.BlobName;
+        var blobName = context.Message.Video.File.BlobName;
 
-        _logger.LogInformation("Processing thumbnail generation for video: {VideoBlobName}", videoBlobName);
+        _logger.LogInformation("Processing thumbnail generation for video: {VideoBlobName}", blobName);
 
         // Download the video
-        _logger.LogInformation("Downloading video for thumbnail generation: {VideoBlobName}", videoBlobName);
-        using var videoStream = await _videoStorageClient.DownloadAsync(videoBlobName);
+        _logger.LogInformation("Downloading video for thumbnail generation: {VideoBlobName}", blobName);
+        using var videoStream = await _videoStorageClient.DownloadAsync(blobName);
 
         // Generate thumbnail
-        _logger.LogInformation("Generating thumbnail for video: {VideoBlobName}", videoBlobName);
+        _logger.LogInformation("Generating thumbnail for video: {VideoBlobName}", blobName);
         using var thumbnailStream = await _thumbnailGenerator.GenerateThumbnailAsync(videoStream);
 
         // Upload thumbnail
-        _logger.LogInformation("Uploading thumbnail for video: {VideoBlobName}", videoBlobName);
-        var thumbnailBlobName = await _videoStorageClient.UploadThumbnailAsync(thumbnailStream, videoBlobName);
+        _logger.LogInformation("Uploading thumbnail for video: {VideoBlobName}", blobName);
+        var thumbnailBlobName = await _videoStorageClient.UploadThumbnailAsync(thumbnailStream, blobName);
 
         // Notify that thumbnail has been generated
         await _publishEndpoint.Publish(new VideoThumbnailGenerated
         {
-            ThumbnailBlobName = thumbnailBlobName,
-            VideoBlobName = videoBlobName
+            VideoId = context.Message.Video.Id,
+            ThumbnailBlobName = thumbnailBlobName
         });
 
-        _logger.LogInformation("Successfully generated thumbnail for video: {VideoBlobName}, Thumbnail: {ThumbnailBlobName}", videoBlobName, thumbnailBlobName);
+        _logger.LogInformation("Successfully generated thumbnail for video: {VideoBlobName}, Thumbnail: {ThumbnailBlobName}", blobName, thumbnailBlobName);
     }
 }
