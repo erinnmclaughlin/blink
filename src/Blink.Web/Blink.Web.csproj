@@ -22,5 +22,9 @@
     <ProjectReference Include="..\Blink.Messaging\Blink.Messaging.csproj" />
     <ProjectReference Include="..\Blink.Storage\Blink.Storage.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <_ContentIncludedByDefault Remove="Videos\Components\Pages\Watch\Components\CommentSection.razor" />
+  </ItemGroup>
   
 </Project>

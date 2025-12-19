@@ -9,7 +9,6 @@ public static class FeatureFlags
     public const string GlobalSearch = nameof(GlobalSearch);
     public const string RecentUploads = nameof(RecentUploads);
     public const string SharedWithMe = nameof(SharedWithMe);
-    public const string VideoComments = nameof(VideoComments);
     public const string VideoDownloads = nameof(VideoDownloads);
     public const string VideoSharing = nameof(VideoSharing);
     public const string VideoUploads = nameof(VideoUploads);

@@ -1,8 +1,6 @@
-﻿using System.Text.Json;
-using Blink.Messaging;
+﻿using Blink.Messaging;
 using Blink.Storage;
 using Blink.Web.Authentication;
-using Blink.Web.Mentions;
 using Dapper;
 using MassTransit;
 using MediatR;
@@ -21,7 +19,6 @@ public static class UploadVideo
 
         public string Title { get; init; } = "[No Title]";
         public string? Description { get; init; }
-        public List<MentionMetadata>? DescriptionMentions { get; init; }
         public DateTime? VideoDate { get; init; }
     }
 
@@ -87,11 +84,6 @@ public static class UploadVideo
             DateTimeOffset uploadedAt,
             CancellationToken cancellationToken)
         {
-            // Serialize mention metadata to JSON
-            var descriptionMentionsJson = request.DescriptionMentions != null && request.DescriptionMentions.Count > 0
-                ? JsonSerializer.Serialize(request.DescriptionMentions)
-                : null;
-
             return Save(
                 videoId,
                 request.VideoFile,
@@ -99,7 +91,6 @@ public static class UploadVideo
                 blobName,
                 request.Title,
                 request.Description,
-                descriptionMentionsJson,
                 request.VideoDate,
                 uploadedAt,
                 cancellationToken
@@ -113,7 +104,6 @@ public static class UploadVideo
             string blobName,
             string title, 
             string? description, 
-            string? descriptionMentionsJson,
             DateTime? videoDate, 
             DateTimeOffset uploadedAt,
             CancellationToken cancellationToken)
@@ -126,7 +116,6 @@ public static class UploadVideo
                     blob_name, 
                     title, 
                     description, 
-                    description_mentions, 
                     video_date, 
                     file_name, 
                     content_type, 
@@ -139,7 +128,6 @@ public static class UploadVideo
                     @blob_name, 
                     @title,
                     @description,
-                    @description_mentions::jsonb, 
                     @video_date,
                     @file_name, 
                     @content_type, 
@@ -156,7 +144,6 @@ public static class UploadVideo
                 blob_name = blobName,
                 title = title,
                 description = description,
-                description_mentions = descriptionMentionsJson,
                 video_date = videoDate,
                 file_name = file.Name,
                 content_type = file.GetContentType(),

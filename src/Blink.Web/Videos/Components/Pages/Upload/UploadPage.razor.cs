@@ -1,9 +1,5 @@
 using System.ComponentModel.DataAnnotations;
-using Blink.Storage;
 using Blink.Web.FeatureManagement;
-using Blink.Web.Mentions;
-using Blink.Web.Mentions.Components;
-using Blink.Web.Mentions.Requests;
 using Blink.Web.Videos.Requests;
 using MediatR;
 using Microsoft.AspNetCore.Components;
@@ -14,45 +10,29 @@ namespace Blink.Web.Videos.Components.Pages.Upload;
 
 public sealed partial class UploadPage
 {
+    private readonly IFeatureManager _featureManager;
+    private readonly NavigationManager _navigationManager;
+    private readonly ISender _sender;
+    
     private UploadVideoModel Model { get; set; } = new();
     private IBrowserFile? SelectedFile { get; set; }
     private bool IsUploading { get; set; }
     private int UploadProgress { get; set; }
     private string? ErrorMessage { get; set; }
-    private const string DescriptionPlaceholder = "Add a description... (Type @ to mention people)";
-    private List<MentionMetadata> descriptionMentions = new();
-    private List<MentionTextarea.MentionItem> mentionablePeople = new();
 
-    [Inject]
-    private IFeatureManager FeatureManager { get; set; } = default!;
-
-    [Inject]
-    private IVideoStorageClient VideoStorageClient { get; set; } = default!;
-
-    [Inject]
-    private ISender Sender { get; set; } = default!;
-
-    [Inject]
-    private NavigationManager NavigationManager { get; set; } = default!;
-
-    [Inject]
-    private ILogger<UploadPage> Logger { get; set; } = default!;
-
+    public UploadPage(IFeatureManager featureManager, NavigationManager navigationManager, ISender sender)
+    {
+        _featureManager = featureManager;
+        _navigationManager = navigationManager;
+        _sender = sender;
+    }
+    
     protected override async Task OnInitializedAsync()
     {
-        if (!await FeatureManager.IsEnabledAsync(FeatureFlags.VideoUploads))
+        if (!await _featureManager.IsEnabledAsync(FeatureFlags.VideoUploads))
         {
-            NavigationManager.NavigateTo("/");
+            _navigationManager.NavigateTo("/");
         }
-
-        // Load mentionable people from database
-        var people = await Sender.Send(new GetPeopleQuery());
-        mentionablePeople = people.Select(p => new MentionTextarea.MentionItem
-        {
-            Id = p.Id,
-            Name = p.Name,
-            Subtitle = p.Subtitle
-        }).ToList();
     }
 
     private void HandleFileSelected(InputFileChangeEventArgs e)
@@ -60,7 +40,7 @@ public sealed partial class UploadPage
         SelectedFile = e.File;
         ErrorMessage = null;
 
-        // Auto-populate title from filename if not already set
+        // Populate title from filename if not already set
         if (string.IsNullOrWhiteSpace(Model.Title) && SelectedFile != null)
         {
             Model.Title = Path.GetFileNameWithoutExtension(SelectedFile.Name);
@@ -71,46 +51,6 @@ public sealed partial class UploadPage
     {
         SelectedFile = null;
         Model.File = null;
-    }
-
-    private void OnDescriptionChanged(string? newValue)
-    {
-        Model.Description = newValue;
-    }
-
-    private void OnDescriptionMentionsChanged(List<MentionMetadata> mentions)
-    {
-        descriptionMentions = mentions;
-    }
-
-    private async Task CreateNewPeopleAndUpdateMentions()
-    {
-        // Find all mentions that need new people created
-        var newPeople = descriptionMentions
-            .Where(m => m.IsNewPerson)
-            .ToList();
-
-        if (newPeople.Count == 0)
-        {
-            return;
-        }
-
-        // Create all new people in the database
-        foreach (var mention in newPeople)
-        {
-            var command = new CreatePersonCommand
-            {
-                Name = mention.Name
-            };
-
-            var personId = await Sender.Send(command);
-            
-            // Update the mention ID from temporary to real
-            mention.Id = personId.ToString();
-            mention.IsNewPerson = false;
-        }
-        
-        Logger.LogInformation("All new people created successfully");
     }
 
     private async Task HandleSubmit()
@@ -147,12 +87,11 @@ public sealed partial class UploadPage
             }, progressCts.Token);
 
             // Upload
-            var videoId = await Sender.Send(new UploadVideo.Command
+            var videoId = await _sender.Send(new UploadVideo.Command
             {
                 VideoFile = SelectedFile,
                 Title = Model.Title ?? SelectedFile.Name,
                 Description = Model.Description,
-                DescriptionMentions = descriptionMentions,
                 VideoDate = Model.VideoDate
             }, CancellationToken.None);
 
@@ -161,16 +100,13 @@ public sealed partial class UploadPage
             UploadProgress = 95;
             await InvokeAsync(StateHasChanged);
 
-            // Create any new people mentioned
-            await CreateNewPeopleAndUpdateMentions();
-
             // Complete
             UploadProgress = 100;
             await InvokeAsync(StateHasChanged);
             
             IsUploading = false;
             
-            NavigationManager.NavigateTo($"videos/{videoId}");
+            _navigationManager.NavigateTo($"videos/{videoId}");
         }
         catch (Exception ex)
         {

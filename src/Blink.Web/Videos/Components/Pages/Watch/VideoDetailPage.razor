@@ -1,5 +1,4 @@
 @page "/videos/{videoId:guid}"
-@using Blink.Web.Videos.Components.Pages.Watch.Components
 @attribute [Authorize]
 @attribute [StreamRendering]
 
@@ -66,7 +65,7 @@ else
             }
             else
             {
-                <MentionText Text="@Video.Description" Mentions="@Video.DescriptionMentions" />
+                <p>@Video.Description</p>
             }
 
             <div class="flex flex-wrap gap-3 mt-10">
@@ -93,7 +92,5 @@ else
             </div>
         </div>
         
-        <!-- Comments Section -->
-        <CommentSection />
     </div>
 }
