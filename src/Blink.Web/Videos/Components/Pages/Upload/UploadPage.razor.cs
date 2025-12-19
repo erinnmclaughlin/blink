@@ -15,7 +15,6 @@ public sealed partial class UploadPage
     private readonly ISender _sender;
     
     private UploadVideoModel Model { get; set; } = new();
-    private IBrowserFile? SelectedFile { get; set; }
     private bool IsUploading { get; set; }
     private int UploadProgress { get; set; }
     private string? ErrorMessage { get; set; }
@@ -37,19 +36,18 @@ public sealed partial class UploadPage
 
     private void HandleFileSelected(InputFileChangeEventArgs e)
     {
-        SelectedFile = e.File;
+        Model.File = e.File;
         ErrorMessage = null;
 
         // Populate title from filename if not already set
-        if (string.IsNullOrWhiteSpace(Model.Title) && SelectedFile != null)
+        if (string.IsNullOrWhiteSpace(Model.Title) && Model.File != null)
         {
-            Model.Title = Path.GetFileNameWithoutExtension(SelectedFile.Name);
+            Model.Title = Path.GetFileNameWithoutExtension(Model.File.Name);
         }
     }
 
     private void ClearFile()
     {
-        SelectedFile = null;
         Model.File = null;
     }
 
@@ -60,7 +58,7 @@ public sealed partial class UploadPage
             return;
         }
         
-        if (SelectedFile == null)
+        if (Model.File == null)
         {
             ErrorMessage = "Please select a video file to upload.";
             return;
@@ -89,8 +87,8 @@ public sealed partial class UploadPage
             // Upload
             var videoId = await _sender.Send(new UploadVideo.Command
             {
-                VideoFile = SelectedFile,
-                Title = Model.Title ?? SelectedFile.Name,
+                VideoFile = Model.File,
+                Title = Model.Title ?? Model.File.Name,
                 Description = Model.Description,
                 VideoDate = Model.VideoDate
             }, CancellationToken.None);
