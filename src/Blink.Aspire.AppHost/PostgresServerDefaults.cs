@@ -19,6 +19,7 @@ public static class PostgresServerDefaults
             {
                 // x.WithHostPort(58488);
                 x.WithDataVolume();
+                x.WithPgWeb();
             });
         }
 
